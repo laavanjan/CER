@@ -22,7 +22,15 @@ export default function RootLayout({
                 <a href="/" className="text-xl font-bold text-gray-900">
                   ethiksa-cer
                 </a>
-                <span className="text-sm text-gray-500">AIGAP · Code Ethics Reviewer</span>
+                <span className="text-sm text-gray-500 hidden sm:inline">AIGAP · Code Ethics Reviewer</span>
+                <nav className="flex items-center gap-4 ml-auto text-sm font-medium">
+                  <a href="/intake" className="text-gray-600 hover:text-indigo-600 transition-colors">
+                    New Review
+                  </a>
+                  <a href="/controls" className="text-gray-600 hover:text-indigo-600 transition-colors">
+                    Controls
+                  </a>
+                </nav>
               </div>
             </nav>
             <div className="max-w-7xl mx-auto px-6 py-8">{children}</div>
