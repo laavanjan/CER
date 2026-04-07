@@ -117,8 +117,9 @@ def run(
             {
                 "control_id": r.control_id,
                 "outcome": r.outcome,
-                "doc_classification": ann_map.get(r.control_id, None) and
-                    ann_map[r.control_id].doc_classification,
+                "doc_classification": ann_map[r.control_id].doc_classification
+                    if r.control_id in ann_map
+                    else None,
             }
             for r in evidence_results
         ],

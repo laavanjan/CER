@@ -76,9 +76,7 @@ def run(
     # Downstream stages read these flags to adjust control filtering.
     profile.uses_genai = profile.uses_genai or gen_triggered
     # Store detection flags as extra fields (pipeline convention)
-    object.__setattr__(profile, "gen_triggered", gen_triggered) if hasattr(
-        profile, "__dataclass_fields__"
-    ) else setattr(profile, "gen_triggered", gen_triggered)
+    profile.gen_triggered = gen_triggered
     profile.rel_triggered = rel_triggered
 
     return profile
