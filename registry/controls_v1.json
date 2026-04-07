@@ -1,0 +1,52 @@
+[
+  {
+    "id": "GOV-01",
+    "pillar": "Governance",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["governance_scanner"],
+    "pass_criteria": "An AI governance policy document exists and is referenced from the repository root.",
+    "partial_criteria": "A governance policy exists but is incomplete or not linked from the repository root.",
+    "missing_criteria": "No governance policy document found in the repository."
+  },
+  {
+    "id": "DOC-01",
+    "pillar": "Documentation",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["docs_scanner"],
+    "pass_criteria": "A model card or system card is present with all mandatory fields (purpose, limitations, intended use).",
+    "partial_criteria": "A model card is present but missing one or more mandatory fields.",
+    "missing_criteria": "No model card or system card found in the repository."
+  },
+  {
+    "id": "PRV-01",
+    "pillar": "Privacy",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["privacy_scanner"],
+    "pass_criteria": "A privacy impact assessment (PIA) document is present and references data processing activities.",
+    "partial_criteria": "A PIA document exists but does not reference all data processing activities.",
+    "missing_criteria": "No privacy impact assessment found in the repository."
+  },
+  {
+    "id": "GOV-02",
+    "pillar": "Governance",
+    "tier": 2,
+    "auto": false,
+    "plugins": ["governance_scanner"],
+    "pass_criteria": "Roles and responsibilities for AI oversight are clearly defined and documented.",
+    "partial_criteria": "Some roles are defined but oversight responsibilities are incomplete.",
+    "missing_criteria": "No documentation of AI oversight roles and responsibilities found."
+  },
+  {
+    "id": "DOC-02",
+    "pillar": "Documentation",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["docs_scanner"],
+    "pass_criteria": "An architecture decision record (ADR) or equivalent technical documentation describes AI component design choices.",
+    "partial_criteria": "Technical documentation exists but does not cover key AI design decisions.",
+    "missing_criteria": "No architectural documentation for AI components found."
+  }
+]
