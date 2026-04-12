@@ -69,7 +69,7 @@ class GovernanceScanner(BasePlugin):
 
         if control_id == "GOV-02":
             # Extra check: look for roles/responsibilities keywords
-            for entry in self.filter_manifest(manifest, "**/*.md"):
+            for entry in self.filter_manifest(manifest, "*.md"):
                 content = self.read_text(repo_root, entry.path) or ""
                 roles_found = [k for k in _ROLES_KEYWORDS if k.lower() in content.lower()]
                 if roles_found and entry.path not in evidence:
