@@ -296,6 +296,15 @@ export default function ControlsPage() {
   const [editTarget, setEditTarget] = useState<ControlRead | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
+  const { data: registryInfo } = useQuery({
+    queryKey: ["registry-info"],
+    queryFn: () => apiClient.getRegistryInfo(),
+    staleTime: Infinity, // registry metadata never changes at runtime
+  });
+
+  const registryFile    = registryInfo?.file    ?? "—";
+  const registryVersion = registryInfo?.version ?? "—";
+
   const { data: controls = [], isLoading, isError } = useQuery({
     queryKey: ["controls"],
     queryFn: () => apiClient.listControls(),
@@ -391,7 +400,7 @@ export default function ControlsPage() {
                     {uniquePillars.length} pillars
                   </span>
                   <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-indigo-200 text-[11px] font-mono px-2.5 py-1 rounded-full">
-                     registry/controls_v2.json
+                    {registryFile}
                   </span>
                 </div>
               </div>
@@ -493,25 +502,25 @@ export default function ControlsPage() {
       ) : isError ? (
         <div className="py-12 text-center text-red-600 font-medium">Failed to load controls.</div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-clip">
-          <div className="overflow-x-auto">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+          <div>
             <table className="w-full text-sm">
-              <thead className="sticky top-0 z-10">
-                <tr className="bg-gray-50 border-b border-gray-200">
+              <thead className="sticky top-14 z-20">
+                <tr className="bg-gray-50 border-b-2 border-indigo-100 shadow-sm">
                   {([ ["id", "ID"], ["pillar", "Pillar"], ["tier", "Tier"], ["auto", "Auto"] ] as [SortKey, string][]).map(([k, label]) => (
                     <th
                       key={k}
                       onClick={() => toggleSort(k)}
-                      className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none whitespace-nowrap"
+                      className="bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-indigo-50 hover:text-indigo-700 transition-colors select-none whitespace-nowrap"
                     >
                       <span className="inline-flex items-center gap-1">
                         {label} <SortIcon k={k} />
                       </span>
                     </th>
                   ))}
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap w-48">Plugins</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pass Criteria</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap">Actions</th>
+                  <th className="bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap w-48">Plugins</th>
+                  <th className="bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pass Criteria</th>
+                  <th className="bg-gray-50 px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -602,7 +611,7 @@ export default function ControlsPage() {
               <span className="font-semibold text-gray-600">{controls.length}</span>
               {" "}controls
             </span>
-            <span className="font-mono">registry/controls_v2.json · v2</span>
+            <span className="font-mono">{registryFile} · {registryVersion}</span>
           </div>
         </div>
       )}

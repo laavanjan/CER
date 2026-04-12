@@ -1,11 +1,34 @@
 """Controls router — CRUD endpoints for the ethics control registry."""
 
+import os
+
 from fastapi import APIRouter, HTTPException, status
 
 from app import registry_loader
+from app.core.config import settings
 from app.schemas.control import ControlRead, ControlWrite
 
 router = APIRouter()
+
+
+@router.get("/info")
+def registry_info() -> dict:
+    """Return metadata about the active registry file.
+
+    Reads REGISTRY_PATH from settings (set via backend/.env) and returns
+    the filename and derived version string so the frontend can display
+    them without a separate env variable.
+
+    Example response:
+        { "file": "controls_v2.json", "version": "v2", "path": "../registry/controls_v2.json" }
+    """
+    basename = os.path.basename(settings.registry_path)          # "controls_v2.json"
+    version  = basename.replace("controls_", "").replace(".json", "")  # "v2"
+    return {
+        "file":    basename,
+        "version": version,
+        "path":    settings.registry_path,
+    }
 
 
 def _to_read(raw: dict) -> ControlRead:
