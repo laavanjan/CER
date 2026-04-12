@@ -112,20 +112,60 @@ ethiksa-cer/
 
 ---
 
-## Pipeline stages being built
+## Pipeline stages — implementation status
 
-Progress toward **S1 → S7** as the first milestone:
+**Milestone 1 (S1 → S7)** ✅ complete  
+**Milestone 2 (S8 → S11)** ✅ complete  
+**S5 plugin suite (31 plugins / 78 controls)** ✅ complete
 
 - [x] Repo scaffolded
-- [ ] S1 — Project intake & version verification
-- [ ] S2 — Repository reader & manifest builder
-- [ ] S3 — AI type detection (gen_triggered / rel_triggered)
-- [ ] S4 — Control filter & applicability engine
-- [ ] S5 — Plugin runner & 31 scanner plugins
-- [ ] S6 — GEN/REL overlay tagger
-- [ ] S7 — Evidence mapper (RawFindings → PASS/PARTIAL/MISSING)
+- [x] S1 — Project intake & version verification
+- [x] S2 — Repository reader & manifest builder
+- [x] S3 — AI type detection (gen_triggered / rel_triggered)
+- [x] S4 — Control filter & applicability engine
+- [x] S5 — Plugin runner & 31 scanner plugins (all pillars covered)
+- [x] S6 — GEN/REL overlay tagger
+- [x] S7 — Evidence mapper (RawFindings → PASS/PARTIAL/MISSING)
+- [x] S8 — Honesty check (declared profile vs detected signals)
+- [x] S9 — LLM explanations (Claude API, temp=0)
+- [x] S10 — Output assembler (6 audience packages)
+- [x] S11 — Audit log (append-only WORM store)
 
-S8 → S11 to follow in the next milestone.
+### S5 plugin suite (31 plugins)
+
+| Plugin | Controls | Pillar |
+|--------|----------|--------|
+| `governance_scanner` | GOV-01, GOV-02 | P1 Governance |
+| `risk_assessment_scanner` | GOV-03, GOV-04 | P1 Governance |
+| `accountability_scanner` | GOV-05, GOV-06, GOV-07 | P1 Governance |
+| `audit_governance_scanner` | GOV-08, GOV-09, GOV-10 | P1 Governance |
+| `explainability_scanner` | TRN-01, TRN-02 | P2 Transparency |
+| `disclosure_scanner` | TRN-03, TRN-04, TRN-05 | P2 Transparency |
+| `audit_trail_scanner` | TRN-06, TRN-07, TRN-08 | P2 Transparency |
+| `bias_scanner` | FAR-01, FAR-02 | P3 Fairness |
+| `fairness_metrics_scanner` | FAR-03, FAR-04, FAR-05 | P3 Fairness |
+| `discrimination_scanner` | FAR-06, FAR-07 | P3 Fairness |
+| `privacy_scanner` | PRV-01 | P4 Privacy |
+| `consent_scanner` | PRV-02, PRV-03 | P4 Privacy |
+| `retention_scanner` | PRV-04, PRV-05 | P4 Privacy |
+| `pii_code_scanner` | PRV-06, PRV-07, PRV-08 | P4 Privacy |
+| `threat_model_scanner` | SEC-01, SEC-02 | P5 Security |
+| `dependency_scanner` | SEC-03, SEC-04 | P5 Security |
+| `access_control_scanner` | SEC-05, SEC-06, SEC-07, SEC-08 | P5 Security |
+| `human_override_scanner` | OVR-01, OVR-02 | P6 Oversight |
+| `escalation_scanner` | OVR-03, OVR-04 | P6 Oversight |
+| `monitoring_scanner` | OVR-05, OVR-06, OVR-07 | P6 Oversight |
+| `safe_failure_scanner` | SAF-01, SAF-02, SAF-03 | P7 Safety |
+| `safety_testing_scanner` | SAF-04, SAF-05, SAF-06 | P7 Safety |
+| `environmental_scanner` | ENV-01, ENV-02, ENV-03 | P8 Environmental |
+| `docs_scanner` | DOC-01, DOC-02 | P9 Documentation |
+| `version_manifest_scanner` | DOC-03, DOC-04 | P9 Documentation |
+| `audit_log_scanner` | DOC-05, DOC-06 | P9 Documentation |
+| `dependency_doc_scanner` | DOC-07, DOC-08 | P9 Documentation |
+| `wcag_scanner` | ACC-01, ACC-02, ACC-03, ACC-04 | P10 Accessibility |
+| `inclusion_scanner` | ACC-05, ACC-06, ACC-07 | P10 Accessibility |
+| `data_provenance_scanner` | DQ-01, DQ-02, DQ-03 | P11 Data Quality |
+| `drift_scanner` | DQ-04, DQ-05, DQ-06 | P11 Data Quality |
 
 ---
 
