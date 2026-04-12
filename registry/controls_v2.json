@@ -1,0 +1,1041 @@
+[
+  {
+    "id": "GOV-01",
+    "pillar": "Governance & Accountability",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "governance_scanner",
+      "ci_security_scanner",
+      "docs_scanner"
+    ],
+    "pass_criteria": "Named accountable role documented AND enforced via CODEOWNERS or CI gate.",
+    "partial_criteria": "Ownership declared in docs but not enforced in workflow, or CODEOWNERS present but undocumented.",
+    "missing_criteria": "No ownership artefacts found-no CODEOWNERS, no governance doc, no approval gate."
+  },
+  {
+    "id": "GOV-02",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "docs_scanner"
+    ],
+    "pass_criteria": "Purpose, intended users, and non-use boundary all documented LLM confirms all three present.",
+    "partial_criteria": "Purpose documented but intended users or non-use boundary absent or vague.",
+    "missing_criteria": "No system description or purpose documentation found."
+  },
+  {
+    "id": "GOV-03",
+    "pillar": "Governance & Accountability",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the stakeholder impact assessment document for this system? Expected: E4 Technical doc."
+  },
+  {
+    "id": "GOV-04",
+    "pillar": "Governance & Accountability",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the initial project risk assessment document? Expected: E4 Technical doc."
+  },
+  {
+    "id": "GOV-05",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "governance_scanner",
+      "oversight_code_scanner"
+    ],
+    "pass_criteria": "Oversight doc present with clearly defined roles AND corresponding enforcement code detected.",
+    "partial_criteria": "Oversight doc present but roles incomplete, or code enforcement detected without documentation.",
+    "missing_criteria": "No oversight documentation and no oversight code patterns found."
+  },
+  {
+    "id": "GOV-06",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "governance_scanner"
+    ],
+    "pass_criteria": "Incident response doc present with escalation chain AND severity definitions; LLM confirms completeness.",
+    "partial_criteria": "Runbook or escalation doc exists but is missing severity levels, owners, or timelines.",
+    "missing_criteria": "No incident response artefacts found."
+  },
+  {
+    "id": "GOV-07",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "governance_scanner",
+      "ci_security_scanner"
+    ],
+    "pass_criteria": "Monitoring schedule doc with defined cadence AND monitoring workflow config both present.",
+    "partial_criteria": "Monitoring doc present but cadence undefined, or workflow config without documentation.",
+    "missing_criteria": "No monitoring schedule, cadence definition, or monitoring workflow found."
+  },
+  {
+    "id": "GOV-08",
+    "pillar": "Governance & Accountability",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the change management or version governance policy? Expected: E3 Policy/SOP."
+  },
+  {
+    "id": "GOV-09",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "governance_scanner"
+    ],
+    "pass_criteria": "Re-evaluation trigger policy file present covering model/data/deployment/incident triggers; LLM confirms all four categories present.",
+    "partial_criteria": "Policy file present but covers fewer than all four trigger categories, or monitoring YAML has re-eval step but no formal policy.",
+    "missing_criteria": "No re-evaluation trigger policy or artefacts found."
+  },
+  {
+    "id": "GOV-10",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "docs_scanner"
+    ],
+    "pass_criteria": "Regulatory mapping doc present LLM confirms it identifies applicable obligations AND maps each to a design response.",
+    "partial_criteria": "Regulatory doc present but obligations listed without design mapping, or mapping partial.",
+    "missing_criteria": "No regulatory compliance mapping or reference found."
+  },
+  {
+    "id": "RISK-01",
+    "pillar": "Risk Management & Impact Assessment",
+    "tier": 2,
+    "auto": false,
+    "plugins": [
+      "risk_document_scanner",
+      "docs_scanner"
+    ],
+    "pass_criteria": "Document present, LLM confirms domain, stakeholder list, scale, and operating environment all addressed.",
+    "partial_criteria": "Document present but one or more of domain/stakeholder/scale/environment missing or vague.",
+    "missing_criteria": "No system context or risk documentation found."
+  },
+  {
+    "id": "RISK-02",
+    "pillar": "Risk Management & Impact Assessment",
+    "tier": 2,
+    "auto": false,
+    "plugins": [
+      "risk_document_scanner",
+      "docs_scanner"
+    ],
+    "pass_criteria": "Risk classification doc present, LLM confirms classification tier stated AND rationale justified.",
+    "partial_criteria": "Classification document present but rationale absent or superficial.",
+    "missing_criteria": "No risk classification documentation found."
+  },
+  {
+    "id": "RISK-03",
+    "pillar": "Risk Management & Impact Assessment",
+    "tier": 2,
+    "auto": false,
+    "plugins": [
+      "risk_document_scanner",
+      "docs_scanner"
+    ],
+    "pass_criteria": "Ethical impact assessment doc present; LLM confirms impacts identified, prioritised, and mitigation noted.",
+    "partial_criteria": "Assessment doc present but impacts listed without prioritisation or mitigation response.",
+    "missing_criteria": "No ethical impact assessment found."
+  },
+  {
+    "id": "RISK-04",
+    "pillar": "Risk Management & Impact Assessment",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "risk_document_scanner",
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the residual risk acceptance record signed by the accountable owner? Expected: E1 Attestation."
+  },
+  {
+    "id": "RISK-05",
+    "pillar": "Risk Management & Impact Assessment",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "risk_document_scanner",
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the maintained project risk register? Expected: E8 Operational proof."
+  },
+  {
+    "id": "RISK-06",
+    "pillar": "Risk Management & Impact Assessment",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "risk_document_scanner",
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the formal definition of reassessment triggers? Expected: E3 Policy/SOP."
+  },
+  {
+    "id": "HUMO-01",
+    "pillar": "Human Oversight & Recourse",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "oversight_code_scanner"
+    ],
+    "pass_criteria": "Oversight role doc present with named roles, competence requirements, and assignment mechanism LLM confirms completeness.",
+    "partial_criteria": "Role doc present but competence requirements or assignment mechanism absent.",
+    "missing_criteria": "No oversight role documentation found."
+  },
+  {
+    "id": "HUMO-02",
+    "pillar": "Human Oversight & Recourse",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "oversight_code_scanner",
+      "authz_scanner"
+    ],
+    "pass_criteria": "Intervention code present AND enforced on critical decision paths with bypass route.",
+    "partial_criteria": "Intervention code present but not enforced on all critical paths, or override route exists without logging.",
+    "missing_criteria": "No intervention mechanism, override endpoint, or manual review queue found."
+  },
+  {
+    "id": "HUMO-03",
+    "pillar": "Human Oversight & Recourse",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "oversight_code_scanner",
+      "recourse_fairness_scanner"
+    ],
+    "pass_criteria": "Recourse endpoint or recourse UI path detected AND recourse process documentation present.",
+    "partial_criteria": "Recourse endpoint present but undocumented, or recourse doc present but no code path.",
+    "missing_criteria": "No recourse endpoint, appeals handler, or recourse documentation found."
+  },
+  {
+    "id": "HUMO-04",
+    "pillar": "Human Oversight & Recourse",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "fallback_scanner",
+      "oversight_code_scanner"
+    ],
+    "pass_criteria": "Fallback chain with timeout, retry, and abstention threshold all present and linked.",
+    "partial_criteria": "Some fallback components present (e.g. timeout) but chain incomplete or abstention threshold absent.",
+    "missing_criteria": "No fallback logic, timeout, or abstention mechanism found."
+  },
+  {
+    "id": "HUMO-05",
+    "pillar": "Human Oversight & Recourse",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the support SLA or dispute-resolution timeline document? Expected: E3 Policy/SOP."
+  },
+  {
+    "id": "HUMO-06",
+    "pillar": "Human Oversight & Recourse",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "authz_scanner",
+      "oversight_code_scanner"
+    ],
+    "pass_criteria": "HITL gate code present on all high-risk paths, documented in design documentation.",
+    "partial_criteria": "HITL gate code present on some but not all identified high-risk decision endpoints or gate present without documentation.",
+    "missing_criteria": "No HITL gate or human approval mechanism found on high-risk endpoints."
+  },
+  {
+    "id": "HUMO-07",
+    "pillar": "Human Oversight & Recourse",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "authz_scanner",
+      "oversight_code_scanner"
+    ],
+    "pass_criteria": "All consequential decision endpoints have human review gate; no autonomous final-decision path detected.",
+    "partial_criteria": "Human review gate present on most consequential paths but one or more endpoints unguarded.",
+    "missing_criteria": "Consequential decision endpoints exist with no human review gate - fully autonomous paths detected."
+  },
+  {
+    "id": "PRIV-01",
+    "pillar": "Data Governance & Privacy",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "privacy_log_scanner",
+      "pii_classifier"
+    ],
+    "pass_criteria": "No unnecessary PII in logs; schema minimisation evident; redaction/filtering applied at collection point.",
+    "partial_criteria": "Some PII controls present but gaps in log redaction or schema minimisation - some fields over-collected.",
+    "missing_criteria": "PII exposed in logs or schemas with no minimisation or redaction controls."
+  },
+  {
+    "id": "PRIV-02",
+    "pillar": "Data Governance & Privacy",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "docs_scanner"
+    ],
+    "pass_criteria": "Lawful basis doc or consent management config present LLM confirms basis type stated and scope defined.",
+    "partial_criteria": "Partial or ambiguous lawful basis reference found; basis type not clearly stated or scope incomplete.",
+    "missing_criteria": "No lawful basis documentation or consent management configuration found."
+  },
+  {
+    "id": "PRIV-03",
+    "pillar": "Data Governance & Privacy",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "disclosure_scanner",
+      "docs_scanner"
+    ],
+    "pass_criteria": "User-facing AI disclosure and data use notice both present in UI and documentation.",
+    "partial_criteria": "Disclosure present in docs but not in UI, or UI notice present but AI involvement not explicitly stated.",
+    "missing_criteria": "No user-facing data notice or AI involvement disclosure found."
+  },
+  {
+    "id": "PRIV-04",
+    "pillar": "Data Governance & Privacy",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "retention_scanner"
+    ],
+    "pass_criteria": "Retention TTL config AND deletion endpoint or job both present; retention policy document found.",
+    "partial_criteria": "Retention TTL or deletion job present but not both; or policy document absent.",
+    "missing_criteria": "No retention config, deletion mechanism, or lifecycle policy found."
+  },
+  {
+    "id": "PRIV-05",
+    "pillar": "Data Governance & Privacy",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "access_control_scanner"
+    ],
+    "pass_criteria": "RBAC or equivalent access control applied on all data/model/prompt endpoints with least-privilege scope.",
+    "partial_criteria": "Access control present but not applied consistently - some endpoints unprotected or over-privileged.",
+    "missing_criteria": "No access control patterns, RBAC, or least-privilege configuration found."
+  },
+  {
+    "id": "PRIV-06",
+    "pillar": "Data Governance & Privacy",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "docs_scanner",
+      "dependency_scanner"
+    ],
+    "pass_criteria": "Data provenance doc present, LLM confirms origin, licence type, and usage restrictions all stated.",
+    "partial_criteria": "Provenance doc present but licence or usage restrictions absent or unclear.",
+    "missing_criteria": "No data provenance documentation, licence file, or data rights record found."
+  },
+  {
+    "id": "PRIV-07",
+    "pillar": "Data Governance & Privacy",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the cross-border data transfer assessment (if applicable)? Expected: E9 Third-party doc."
+  },
+  {
+    "id": "PRIV-08",
+    "pillar": "Data Governance & Privacy",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "docs_scanner"
+    ],
+    "pass_criteria": "De-identification evaluation report present; LLM confirms methodology, validation approach, and claimed guarantee stated.",
+    "partial_criteria": "Deidentification-artefact found but validation methodology or result absent.",
+    "missing_criteria": "No de-identification evaluation, anonymisation report, or privacy-preserving technique artefact found."
+  },
+  {
+    "id": "PRIV-09",
+    "pillar": "Data Governance & Privacy",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "synthetic_data_scanner"
+    ],
+    "pass_criteria": "Synthetic data config AND provenance doc AND bias amplification assessment all present, LLM confirms limitations disclosed.",
+    "partial_criteria": "Synthetic data config present but provenance or bias assessment absent.",
+    "missing_criteria": "Synthetic data use detected (GAN/VAE imports) but no governance artefacts found."
+  },
+  {
+    "id": "FAIR-01",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "fairness_artifact_scanner"
+    ],
+    "pass_criteria": "Fairness evaluation notebook or script present with protected groups named AND subgroup metrics computed.",
+    "partial_criteria": "Protected groups identified but subgroup metrics absent, or evaluation incomplete.",
+    "missing_criteria": "No fairness evaluation artefacts, protected group definitions, or subgroup analysis found."
+  },
+  {
+    "id": "FAIR-02",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "fairness_artifact_scanner"
+    ],
+    "pass_criteria": "Bias testing plan doc with target groups, metrics, and thresholds all present; LLM confirms all three components.",
+    "partial_criteria": "Testing plan present but thresholds undefined or target groups incomplete.",
+    "missing_criteria": "No bias testing plan, strategy, or threshold configuration found."
+  },
+  {
+    "id": "FAIR-03",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "fairness_artifact_scanner"
+    ],
+    "pass_criteria": "Executed bias test result file present with metric values, interpretation, and outcome documented.",
+    "partial_criteria": "Test result file present but interpretation or outcome absent; results shown without conclusion.",
+    "missing_criteria": "No executed bias test results or fairness evaluation report found."
+  },
+  {
+    "id": "FAIR-04",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "recourse_fairness_scanner"
+    ],
+    "pass_criteria": "Mitigation library import AND mitigation experiment notebook or script with documented tradeoff handling.",
+    "partial_criteria": "Mitigation library imported but no experiment notebook or tradeoff documentation.",
+    "missing_criteria": "No bias mitigation code, library, or documentation found."
+  },
+  {
+    "id": "FAIR-05",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "recourse_fairness_scanner"
+    ],
+    "pass_criteria": "Threshold config file present with specific parity metric, group breakdown, and numeric threshold defined.",
+    "partial_criteria": "Threshold config present but numeric thresholds absent or metric type unspecified.",
+    "missing_criteria": "No parity threshold configuration or performance fairness target documentation found."
+  },
+  {
+    "id": "FAIR-06",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "recourse_fairness_scanner"
+    ],
+    "pass_criteria": "Fairness monitoring script AND scheduled execution (cron or CI/CD) AND subgroup breakdown all present.",
+    "partial_criteria": "Monitoring script present but not scheduled, or scheduled without subgroup breakdown.",
+    "missing_criteria": "No fairness monitoring script, scheduled evaluation, or drift detection configuration found."
+  },
+  {
+    "id": "FAIR-07",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "recourse_fairness_scanner"
+    ],
+    "pass_criteria": "Appeals endpoint or handler present AND recourse process documented with timeline and outcome.",
+    "partial_criteria": "Appeals endpoint present but undocumented, or recourse documentation present without code path.",
+    "missing_criteria": "No appeals endpoint, recourse handler, or fairness-related dispute documentation found."
+  },
+  {
+    "id": "TRAN-01",
+    "pillar": "Transparency & Explainability",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "disclosure_scanner",
+      "moderation_scanner"
+    ],
+    "pass_criteria": "AI disclosure string present in UI code AND disclosure documentation consistent with implemented text.",
+    "partial_criteria": "Disclosure present in documentation but absent in UI code, or UI text present but inconsistent with design spec.",
+    "missing_criteria": "No AI disclosure text in UI or documentation found."
+  },
+  {
+    "id": "TRAN-02",
+    "pillar": "Transparency & Explainability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "docs_scanner"
+    ],
+    "pass_criteria": "System limitations doc present, LLM confirms failure modes, uncertainty conditions, and user communication text all present.",
+    "partial_criteria": "Limitations doc present but failure modes or uncertainty conditions absent or vague.",
+    "missing_criteria": "No system limitations documentation or user-facing failure mode communication found."
+  },
+  {
+    "id": "TRAN-03",
+    "pillar": "Transparency & Explainability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "docs_scanner",
+      "grounding_scanner"
+    ],
+    "pass_criteria": "Explainability approach documented AND either explanation endpoint or explanation library import present, LLM confirms appropriateness justified.",
+    "partial_criteria": "Explainability library imported but no documentation, or doc present with no implementation signal.",
+    "missing_criteria": "No explainability documentation, explanation endpoint, or explanation library found."
+  },
+  {
+    "id": "TRAN-04",
+    "pillar": "Transparency & Explainability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "docs_scanner"
+    ],
+    "pass_criteria": "All four documentation components (model card, system desc, assumptions, intended/prohibited use) present, LLM confirms completeness.",
+    "partial_criteria": "Two or three documentation components present but one or more absent.",
+    "missing_criteria": "Documentation set absent or only README-level description found."
+  },
+  {
+    "id": "TRAN-05",
+    "pillar": "Transparency & Explainability",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "traceability_scanner"
+    ],
+    "pass_criteria": "Trace ID injection present at interaction entry point AND audit log writes confirmed on decision paths.",
+    "partial_criteria": "Audit logging present but trace IDs absent, or logging incomplete (outputs logged but inputs not).",
+    "missing_criteria": "No interaction logging, trace ID injection, or audit middleware found."
+  },
+  {
+    "id": "TRAN-06",
+    "pillar": "Transparency & Explainability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "traceability_scanner"
+    ],
+    "pass_criteria": "Decision log schema with rationale field present; LLM confirms rationale is reconstructable (not just outcome logged).",
+    "partial_criteria": "Decision log present but rationale field absent or free-text only (not reconstructable).",
+    "missing_criteria": "No decision log, rationale record, or reconstructable decision capture found."
+  },
+  {
+    "id": "TRAN-07",
+    "pillar": "Transparency & Explainability",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "disclosure_scanner"
+    ],
+    "pass_criteria": "AI identity truthfulness handler or sincerity condition present, no deny-pattern in prompts or code.",
+    "partial_criteria": "No explicit truthfulness handler but no denial anti-pattern detected-identity disclosure ambiguous.",
+    "missing_criteria": "deny_ai_identity or pretend_human pattern detected in prompt code, no truthfulness handler."
+  },
+  {
+    "id": "TRAN-08",
+    "pillar": "Transparency & Explainability",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "content_provenance_scanner"
+    ],
+    "pass_criteria": "Provenance marking library or watermarking config present AND provenance metadata applied to output generation path.",
+    "partial_criteria": "Provenance library imported but not applied on output path, or marking applied but not to all disseminated content.",
+    "missing_criteria": "No content provenance marking, watermarking, or AI-origin metadata found (when GEN flag is active)."
+  },
+  {
+    "id": "SAFE-01",
+    "pillar": "Safety, Robustness & Reliability",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "docs_scanner",
+      "robustness_test_scanner"
+    ],
+    "pass_criteria": "Safety requirements doc present AND input validation/guard code present on all external-facing endpoints.",
+    "partial_criteria": "Safety doc present but validation code missing on some endpoints, or validation code present without documented safety requirements.",
+    "missing_criteria": "No safety requirements documentation or input validation/guard patterns found."
+  },
+  {
+    "id": "SAFE-02",
+    "pillar": "Safety, Robustness & Reliability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "robustness_test_scanner"
+    ],
+    "pass_criteria": "Edge-case test files present with meaningful scenario coverage; adversarial or abuse cases included.",
+    "partial_criteria": "Some test files present but edge-case coverage limited to happy-path variants; adversarial cases absent.",
+    "missing_criteria": "No edge-case, stress, or adversarial test files found."
+  },
+  {
+    "id": "SAFE-03",
+    "pillar": "Safety, Robustness & Reliability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "robustness_test_scanner"
+    ],
+    "pass_criteria": "Distribution-shift evaluation script present with OOD test cases and documented robustness results.",
+    "partial_criteria": "Robustness eval script present but OOD scenarios absent or results undocumented.",
+    "missing_criteria": "No distribution-shift evaluation, OOD test, or robustness assessment artefact found."
+  },
+  {
+    "id": "SAFE-04",
+    "pillar": "Safety, Robustness & Reliability",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "fallback_scanner"
+    ],
+    "pass_criteria": "Complete fallback chain: timeout + retry + fallback + abstention threshold all present and linked in critical paths.",
+    "partial_criteria": "Some fallback components present but chain incomplete e.g. timeout without fallback, or fallback without abstention.",
+    "missing_criteria": "No fallback logic, timeout, retry mechanism, or abstention configuration found."
+  },
+  {
+    "id": "SAFE-05",
+    "pillar": "Safety, Robustness & Reliability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "robustness_test_scanner"
+    ],
+    "pass_criteria": "Redteam-report artefact present with documented attack scenarios, findings, and remediation responses.",
+    "partial_criteria": "Redteam-artefact present but findings undocumented or remediation absent.",
+    "missing_criteria": "No red-team report, adversarial probing script, or attack simulation artefact found."
+  },
+  {
+    "id": "SAFE-06",
+    "pillar": "Safety, Robustness & Reliability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "docs_scanner"
+    ],
+    "pass_criteria": "Postdeployment-harm monitoring config present with defined harm signals AND alerting thresholds AND response trigger defined.",
+    "partial_criteria": "Monitoring config present but harm signals undefined, or thresholds set without response trigger.",
+    "missing_criteria": "No post-deployment harm monitoring configuration, alerting threshold, or harm signal definition found."
+  },
+  {
+    "id": "SEC-01",
+    "pillar": "Security, Misuse Prevention & Resilience",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "secrets_scanner",
+      "authz_scanner"
+    ],
+    "pass_criteria": "No hardcoded secrets; auth middleware on all sensitive routes; threat model document present.",
+    "partial_criteria": "Minor secret exposure (non-production only) or auth gaps on non-critical routes; threat model present.",
+    "missing_criteria": "Hardcoded secrets found in production code; auth middleware absent on sensitive routes; no threat model."
+  },
+  {
+    "id": "SEC-02",
+    "pillar": "Security, Misuse Prevention & Resilience",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "prompt_injection_scanner",
+      "input_validation_scanner"
+    ],
+    "pass_criteria": "Prompt injection defences AND exfiltration guards AND input schema validation all present in LLM/agent code.",
+    "partial_criteria": "Input validation present but prompt injection defence or exfiltration guard absent; or defences present without tests.",
+    "missing_criteria": "No prompt injection defence, input sanitisation, or exfiltration guard found in LLM-facing code."
+  },
+  {
+    "id": "SEC-03",
+    "pillar": "Security, Misuse Prevention & Resilience",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "dependency_scanner",
+      "sbom_scanner",
+      "ci_security_scanner"
+    ],
+    "pass_criteria": "Pinned lockfile AND SBOM artefact AND CI secrets scan AND PR review gate all present.",
+    "partial_criteria": "Two or three SDLC artefacts present but one absent (e.g SBOM missing, or CI secrets scan absent).",
+    "missing_criteria": "No lockfile pinning, no SBOM, no CI secrets scan, and no code review gate found."
+  },
+  {
+    "id": "SEC-04",
+    "pillar": "Security, Misuse Prevention & Resilience",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "rate_limit_scanner"
+    ],
+    "pass_criteria": "Rate limiting middleware AND abuse reporting endpoint both present and configured.",
+    "partial_criteria": "Rate limiting present but no abuse reporting endpoint, or reporting endpoint without rate limiting.",
+    "missing_criteria": "No rate limiting middleware, throttle config, or abuse reporting mechanism found."
+  },
+  {
+    "id": "SEC-05",
+    "pillar": "Security, Misuse Prevention & Resilience",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "ci_security_scanner"
+    ],
+    "pass_criteria": "Vulnerability management policy AND automated dependency update config AND CVE disclosure process all present.",
+    "partial_criteria": "Security policy or SECURITY.md present but automated patching or CVE process absent.",
+    "missing_criteria": "No vulnerability management policy, patching schedule, or disclosure process found."
+  },
+  {
+    "id": "SEC-06",
+    "pillar": "Security, Misuse Prevention & Resilience",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "pre_trained_model_scanner",
+      "dependency_scanner"
+    ],
+    "pass_criteria": "Pretrained-model provenance doc present with licence, known limitations, safety testing record, and fitness-for-purpose assessment.",
+    "partial_criteria": "Model provenance doc present but licence or safety testing record absent; or model card URL referenced but not assessed.",
+    "missing_criteria": "Third-party model use detected but no provenance, licence, or safety assessment found."
+  },
+  {
+    "id": "SEC-07",
+    "pillar": "Security, Misuse Prevention & Resilience",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "inference_privacy_scanner"
+    ],
+    "pass_criteria": "Membership inference assessment AND model inversion analysis both present with documented risk level and mitigation.",
+    "partial_criteria": "One of the two assessments present but the other absent; or assessment present without mitigation documentation.",
+    "missing_criteria": "Training data sensitivity flagged but no inference privacy assessment found (Industrial level)."
+  },
+  {
+    "id": "DOC-01",
+    "pillar": "Documentation, Traceability & Auditability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "docs_scanner"
+    ],
+    "pass_criteria": "All five components (purpose, intended users, scope, assumptions, limitations) present LLM confirms completeness.",
+    "partial_criteria": "Three or four components present but one or two absent.",
+    "missing_criteria": "Only README-level description or no system description documentation found."
+  },
+  {
+    "id": "DOC-02",
+    "pillar": "Documentation, Traceability & Auditability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "doc_completeness_scanner"
+    ],
+    "pass_criteria": "Dataset documentation present LLM confirms provenance, licence, collection context, and constraints all addressed.",
+    "partial_criteria": "Dataset doc present but licence or collection context absent or multiple datasets with only some documented.",
+    "missing_criteria": "No dataset documentation, datasheet, or data licence records found."
+  },
+  {
+    "id": "DOC-03",
+    "pillar": "Documentation, Traceability & Auditability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "doc_completeness_scanner"
+    ],
+    "pass_criteria": "Model card present: LLM confirms intended use, forbidden use, and evaluation approach all addressed.",
+    "partial_criteria": "Model card present but forbidden use or evaluation approach absent.",
+    "missing_criteria": "No model card, model documentation, or model description file found."
+  },
+  {
+    "id": "DOC-04",
+    "pillar": "Documentation, Traceability & Auditability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "traceability_scanner"
+    ],
+    "pass_criteria": "Decision log schema with linked input, output and trace ID fields; LLM confirms reconstruction is possible from stored record.",
+    "partial_criteria": "Decision log present but input linkage or trace ID absent partial reconstruction only.",
+    "missing_criteria": "No decision log, trace ID, or reconstructable decision record found."
+  },
+  {
+    "id": "DOC-05",
+    "pillar": "Documentation, Traceability & Auditability",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "traceability_scanner",
+      "dependency_scanner"
+    ],
+    "pass_criteria": "Version pins present for all four components (data, model, prompt, code) AND version linkage manifest or CHANGELOG confirms traceability.",
+    "partial_criteria": "Some version pins present but one or more components unversioned; or pins present without cross-component linkage.",
+    "missing_criteria": "No version pinning, version manifest, or cross-component version linkage found."
+  },
+  {
+    "id": "DOC-06",
+    "pillar": "Documentation, Traceability & Auditability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "doc_completeness_scanner"
+    ],
+    "pass_criteria": "Evidence retention policy present LLM confirms retention scope, duration, and access controls all defined.",
+    "partial_criteria": "Retention policy present but duration or access controls absent.",
+    "missing_criteria": "No evidence retention policy, retention schedule, or audit artefact retention definition found."
+  },
+  {
+    "id": "DOC-07",
+    "pillar": "Documentation, Traceability & Auditability",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "doc_completeness_scanner"
+    ],
+    "pass_criteria": "Append-only or WORM log config present AND integrity check mechanism (hash or tamper detection) also present.",
+    "partial_criteria": "Append-only log config present but integrity check absent, or integrity check without immutable storage.",
+    "missing_criteria": "No append-only logging, WORM storage, or audit log integrity control found."
+  },
+  {
+    "id": "DOC-08",
+    "pillar": "Documentation, Traceability & Auditability",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "doc_completeness_scanner",
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the certification-trace design specification? Expected: E4 Technical doc."
+  },
+  {
+    "id": "ACC-01",
+    "pillar": "Accessibility, Inclusion & Human Factors",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "ui_accessibility_scanner"
+    ],
+    "pass_criteria": "Accessibility requirements doc present LLM confirms language, disability, device, and usability assumptions all addressed.",
+    "partial_criteria": "Requirements doc present but one or two accessibility dimensions absent (e.g. language covered, disability not).",
+    "missing_criteria": "No accessibility requirements document, WCAG config, or accessibility planning artefact found."
+  },
+  {
+    "id": "ACC-02",
+    "pillar": "Accessibility, Inclusion & Human Factors",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the inclusive design testing evidence (participant or proxy testing record)? Expected: E5 Test report."
+  },
+  {
+    "id": "ACC-03",
+    "pillar": "Accessibility, Inclusion & Human Factors",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "ui_accessibility_scanner"
+    ],
+    "pass_criteria": "Human-factors hazard doc present LLM confirms over-trust, automation bias, and workflow misuse all addressed.",
+    "partial_criteria": "Hazard doc present but one category absent or UI warning strings present without hazard documentation.",
+    "missing_criteria": "No human-factors hazard documentation or over-trust/automation-bias mitigation design found."
+  },
+  {
+    "id": "ACC-04",
+    "pillar": "Accessibility, Inclusion & Human Factors",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the user comprehension validation evidence? Expected: E5 Test report."
+  },
+  {
+    "id": "ACC-05",
+    "pillar": "Accessibility, Inclusion & Human Factors",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "ui_accessibility_scanner",
+      "recourse_fairness_scanner"
+    ],
+    "pass_criteria": "Vulnerable user protection doc AND code enforcement (age verification, content restriction) both present; consistent with declared intake population.",
+    "partial_criteria": "Protection doc present but code enforcement absent or code controls present without documentation.",
+    "missing_criteria": "Vulnerable user population declared in intake but no protection documentation or code controls found."
+  },
+  {
+    "id": "ACC-06",
+    "pillar": "Accessibility, Inclusion & Human Factors",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "recourse_fairness_scanner"
+    ],
+    "pass_criteria": "Human alternative route present in code AND documented as mandatory for consequential outcomes.",
+    "partial_criteria": "Human alternative UI label present but no enforcement code, or code route present without documentation.",
+    "missing_criteria": "No human alternative path, escalate-to-human endpoint, or non-AI option route found."
+  },
+  {
+    "id": "ACC-07",
+    "pillar": "Accessibility, Inclusion & Human Factors",
+    "tier": 1,
+    "auto": true,
+    "plugins": [
+      "ui_accessibility_scanner",
+      "disclosure_scanner"
+    ],
+    "pass_criteria": "No coercive consent, no pre-ticked opt-in, no misleading disclosure detected UI disclosure reviewed and clean.",
+    "partial_criteria": "Minor dark pattern risks detected (e.g. ambiguous disclosure text) but no coercive consent patterns.",
+    "missing_criteria": "Coercive consent pattern, confusing disclosure, or manipulative UI flow detected."
+  },
+  {
+    "id": "ACC-08",
+    "pillar": "Accessibility, Inclusion & Human Factors",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "recourse_fairness_scanner"
+    ],
+    "pass_criteria": "Support channel doc AND accessible contact endpoint both present LLM confirms accessibility of channel itself addressed.",
+    "partial_criteria": "Support doc present but no accessible endpoint; or endpoint present without accessibility consideration.",
+    "missing_criteria": "No support channel documentation, grievance procedure, or accessible contact mechanism found."
+  },
+  {
+    "id": "SOC-01",
+    "pillar": "Societal & Environmental Well-being",
+    "tier": 2,
+    "auto": false,
+    "plugins": [
+      "docs_scanner"
+    ],
+    "pass_criteria": "Societal benefit statement present; LLM confirms benefit type, beneficiary group, and recognition criteria all stated.",
+    "partial_criteria": "Benefit statement present but beneficiary group or recognition criteria absent or vague.",
+    "missing_criteria": "No societal benefit statement, impact narrative, or benefit documentation found."
+  },
+  {
+    "id": "SOC-02",
+    "pillar": "Societal & Environmental Well-being",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "societal_impact_scanner",
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the societal harm assessment for this system? Expected: E1 Attestation or E4 Technical doc."
+  },
+  {
+    "id": "SOC-03",
+    "pillar": "Societal & Environmental Well-being",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "societal_impact_scanner"
+    ],
+    "pass_criteria": "Carbon tracking import AND compute budget config AND environmental impact documentation all present.",
+    "partial_criteria": "Carbon tracking library imported but no budget config or impact doc or doc present without tracking implementation.",
+    "missing_criteria": "No carbon tracking, compute budget, environmental impact estimation, or energy profiling found."
+  },
+  {
+    "id": "SOC-04",
+    "pillar": "Societal & Environmental Well-being",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the cultural and contextual appropriateness review document? Expected: E1 Attestation."
+  },
+  {
+    "id": "SOC-05",
+    "pillar": "Societal & Environmental Well-being",
+    "tier": 3,
+    "auto": false,
+    "plugins": [
+      "Supplement"
+    ],
+    "pass_criteria": "N/A - T3 Metadata Supplement Required.",
+    "partial_criteria": "Status upgrades to partial if file found at declared path.",
+    "missing_criteria": "Where is the workforce and labor impact assessment? Expected: E1 Attestation."
+  },
+  {
+    "id": "SOC-06",
+    "pillar": "Societal & Environmental Well-being",
+    "tier": 2,
+    "auto": false,
+    "plugins": [
+      "societal_impact_scanner"
+    ],
+    "pass_criteria": "Dual-use assessment doc present, LLM confirms repurposing scenarios and risk level documented.",
+    "partial_criteria": "Misuse notes present but structured assessment absent, or assessment present without scenario coverage.",
+    "missing_criteria": "No dual-use assessment, misuse analysis, or harm potential documentation found."
+  },
+  {
+    "id": "SOC-07",
+    "pillar": "Societal & Environmental Well-being",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "societal_impact_scanner"
+    ],
+    "pass_criteria": "Harm reporting endpoint AND public disclosure documentation both present.",
+    "partial_criteria": "Harm reporting endpoint present but not documented; or disclosure doc present without functional endpoint.",
+    "missing_criteria": "No harm reporting endpoint, public disclosure, or responsible disclosure mechanism found."
+  },
+  {
+    "id": "SOC-08",
+    "pillar": "Societal & Environmental Well-being",
+    "tier": 2,
+    "auto": true,
+    "plugins": [
+      "societal_impact_scanner"
+    ],
+    "pass_criteria": "Equity of access assessment doc present; LLM confirms cost, language, literacy, and infrastructure barriers all considered.",
+    "partial_criteria": "Assessment doc present but fewer than all four barrier types addressed.",
+    "missing_criteria": "No equity of access assessment, access barrier analysis, or digital divide consideration found."
+  }
+]

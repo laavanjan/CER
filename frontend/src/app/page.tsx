@@ -16,7 +16,7 @@ export default function HomePage() {
           className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
         >
           Start Review →
-        </Link>
+        </Link> 
       </div>
     </div>
   );

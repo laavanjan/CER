@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import projects, reports, scans
+from app.api.v1 import controls, projects, reports, scans
 from app.core.config import settings
 
 # Instantiate the FastAPI application with metadata
@@ -26,6 +26,7 @@ app.add_middleware(
 app.include_router(projects.router, prefix="/api/v1/projects", tags=["projects"])
 app.include_router(scans.router, prefix="/api/v1/scans", tags=["scans"])
 app.include_router(reports.router, prefix="/api/v1/reports", tags=["reports"])
+app.include_router(controls.router, prefix="/api/v1/controls", tags=["controls"])
 
 
 @app.get("/healthz", tags=["health"])
