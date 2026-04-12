@@ -358,67 +358,103 @@ export default function ControlsPage() {
   const openEdit = (c: ControlRead) => { setEditTarget(c); setModalMode("edit"); };
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
-            Controls Registry
-          </h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {controls.length} controls across {uniquePillars.length} pillars
-          </p>
-        </div>
-        <button
-          onClick={openCreate}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-sm font-semibold rounded-xl shadow-md hover:shadow-lg transition-all"
-        >
-          <Plus size={16} />
-          Add Control
-        </button>
-      </div>
-
-      {/* Pillar stat pills */}
-      <div className="flex flex-wrap gap-2">
-        {uniquePillars.map((pillar) => {
-          const s = PILLAR_STYLES[pillar] ?? DEFAULT_PILLAR_STYLE;
-          const count = controls.filter((c) => c.pillar === pillar).length;
-          return (
+    <div className="space-y-5">
+      {/* ── Registry banner card ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        {/* Header strip */}
+        <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-700 px-6 py-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-indigo-200 text-xs font-mono uppercase tracking-widest mb-1">
+                AIGAP · registry/controls_v1.json
+              </p>
+              <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                Control Registry
+              </h1>
+              <p className="text-indigo-200 text-sm mt-0.5">
+                {controls.length} controls &nbsp;·&nbsp; {uniquePillars.length} pillars
+              </p>
+            </div>
             <button
-              key={pillar}
-              onClick={() => setPillarFilter(pillarFilter === pillar ? "All" : pillar)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all ${s.bg} ${s.text} ${s.border} ${pillarFilter === pillar ? "ring-2 ring-offset-1 ring-current opacity-100" : "opacity-70 hover:opacity-100"}`}
+              onClick={openCreate}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-700 text-sm font-semibold rounded-xl shadow hover:shadow-md hover:bg-indigo-50 transition-all self-start sm:self-auto"
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-              {pillar}
-              <span className="font-bold">{count}</span>
+              <Plus size={16} />
+              Add Control
             </button>
-          );
-        })}
-        {pillarFilter !== "All" && (
-          <button
-            onClick={() => setPillarFilter("All")}
-            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium text-gray-600 bg-gray-100 border border-gray-200 hover:bg-gray-200 transition-colors"
-          >
-            <X size={11} /> Clear filter
-          </button>
-        )}
+          </div>
+        </div>
+
+        {/* ── Pillar tab bar ── */}
+        <div className="border-b border-gray-100">
+          <div className="flex overflow-x-auto scrollbar-none">
+            {/* "All" tab */}
+            <button
+              onClick={() => setPillarFilter("All")}
+              className={`flex-shrink-0 inline-flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                pillarFilter === "All"
+                  ? "border-indigo-600 text-indigo-700 bg-indigo-50/60"
+                  : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50"
+              }`}
+            >
+              All pillars
+              <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md ${
+                pillarFilter === "All" ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-500"
+              }`}>
+                {controls.length}
+              </span>
+            </button>
+
+            {/* Per-pillar tabs */}
+            {uniquePillars.map((pillar) => {
+              const s = PILLAR_STYLES[pillar] ?? DEFAULT_PILLAR_STYLE;
+              const count = controls.filter((c) => c.pillar === pillar).length;
+              const isActive = pillarFilter === pillar;
+              return (
+                <button
+                  key={pillar}
+                  onClick={() => setPillarFilter(isActive ? "All" : pillar)}
+                  className={`flex-shrink-0 inline-flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                    isActive
+                      ? "border-indigo-600 text-indigo-700 bg-indigo-50/60"
+                      : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${s.dot}`} />
+                  {pillar}
+                  <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md ${
+                    isActive ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-500"
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      {/* Search bar */}
-      <div className="relative max-w-sm">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search controls…"
-          className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        />
-        {search && (
-          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-            <X size={13} />
-          </button>
+      {/* ── Search bar ── */}
+      <div className="flex items-center gap-3">
+        <div className="relative max-w-sm w-full">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by ID, pillar, or criteria…"
+            className="w-full pl-9 pr-9 py-2 text-sm border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <X size={13} />
+            </button>
+          )}
+        </div>
+        {(search || pillarFilter !== "All") && (
+          <span className="text-sm text-gray-500 whitespace-nowrap">
+            {visible.length} result{visible.length !== 1 ? "s" : ""}
+          </span>
         )}
       </div>
 
@@ -436,52 +472,52 @@ export default function ControlsPage() {
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white">
+                <tr className="bg-gray-50 border-b border-gray-200">
                   {([ ["id", "ID"], ["pillar", "Pillar"], ["tier", "Tier"], ["auto", "Auto"] ] as [SortKey, string][]).map(([k, label]) => (
                     <th
                       key={k}
                       onClick={() => toggleSort(k)}
-                      className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-white/10 transition-colors select-none whitespace-nowrap"
+                      className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none whitespace-nowrap"
                     >
                       <span className="inline-flex items-center gap-1">
                         {label} <SortIcon k={k} />
                       </span>
                     </th>
                   ))}
-                  <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider">Plugins</th>
-                  <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider">Pass criteria</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-right">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Plugins</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider min-w-[340px]">Pass Criteria</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-50">
                 {visible.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-gray-400">
-                      No controls match your filter.
+                    <td colSpan={7} className="px-6 py-16 text-center">
+                      <p className="text-gray-400 text-sm">No controls match your filter.</p>
                     </td>
                   </tr>
                 ) : (
-                  visible.map((c, idx) => (
+                  visible.map((c) => (
                     <tr
                       key={c.id}
-                      className={`border-b border-gray-50 hover:bg-indigo-50/40 transition-colors ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"}`}
+                      className="hover:bg-indigo-50/30 transition-colors group"
                     >
                       {/* ID */}
-                      <td className="px-4 py-3 font-mono font-bold text-indigo-700 whitespace-nowrap">
+                      <td className="px-4 py-3.5 font-mono font-bold text-indigo-700 whitespace-nowrap">
                         {c.id}
                       </td>
                       {/* Pillar */}
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <PillarBadge pillar={c.pillar} />
                       </td>
                       {/* Tier */}
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <TierBadge tier={c.tier} />
                       </td>
                       {/* Auto */}
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         {c.auto ? (
                           <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Yes
@@ -493,26 +529,28 @@ export default function ControlsPage() {
                         )}
                       </td>
                       {/* Plugins */}
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3.5">
                         <div className="flex flex-wrap gap-1">
-                          {c.plugins.map((p) => (
-                            <span key={p} className="text-xs font-mono bg-slate-100 text-slate-700 border border-slate-200 px-1.5 py-0.5 rounded">
+                          {c.plugins.length > 0 ? c.plugins.map((p) => (
+                            <span key={p} className="text-xs font-mono bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded">
                               {p}
                             </span>
-                          ))}
+                          )) : (
+                            <span className="text-xs text-gray-400 italic">—</span>
+                          )}
                         </div>
                       </td>
-                      {/* Pass criteria */}
-                      <td className="px-4 py-3 max-w-xs">
-                        <p className="text-xs text-gray-600 line-clamp-2">{c.pass_criteria}</p>
+                      {/* Pass criteria — wider */}
+                      <td className="px-4 py-3.5 min-w-[340px]">
+                        <p className="text-xs text-gray-700 leading-relaxed line-clamp-3">{c.pass_criteria}</p>
                       </td>
-                      {/* Actions */}
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-2">
+                      {/* Actions — fade in on row hover */}
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => openEdit(c)}
                             title="Edit"
-                            className="p-1.5 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+                            className="p-1.5 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors"
                           >
                             <Pencil size={14} />
                           </button>
@@ -534,8 +572,14 @@ export default function ControlsPage() {
 
           {/* Footer */}
           <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-400 flex items-center justify-between">
-            <span>Showing {visible.length} of {controls.length} controls</span>
-            <span className="font-mono">registry/controls_v1.json</span>
+            <span>
+              Showing{" "}
+              <span className="font-semibold text-gray-600">{visible.length}</span>
+              {" "}of{" "}
+              <span className="font-semibold text-gray-600">{controls.length}</span>
+              {" "}controls
+            </span>
+            <span className="font-mono">registry/controls_v1.json · v1</span>
           </div>
         </div>
       )}
