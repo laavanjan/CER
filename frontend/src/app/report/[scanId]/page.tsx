@@ -56,7 +56,7 @@ function FindingCard({ finding }: { finding: ControlResultRead }) {
             </div>
           )}
 
-          {finding.evidence && (finding.evidence as { paths?: string[] }).paths?.length > 0 && (
+          {finding.evidence && ((finding.evidence as { paths?: string[] }).paths?.length ?? 0) > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
                 Evidence Paths
