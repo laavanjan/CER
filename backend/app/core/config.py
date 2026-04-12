@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
 
     # Registry
-    registry_path: str = "/registry/controls_v1.json"
-    registry_version: str = "v1"
+    registry_path: str = "/registry/controls_v2.json"
+    registry_version: str = "v2"
 
     # CORS — comma-separated list
     cors_origins: list[str] = ["http://localhost:3000"]
