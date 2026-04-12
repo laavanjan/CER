@@ -1,6 +1,6 @@
-"""Registry loader — reads and caches controls_v1.json at startup.
+"""Registry loader — reads and caches the controls registry JSON at startup.
 
-The registry is the source of truth for all 78 controls (5 in this scaffold).
+The registry is the source of truth for all controls.
 It is loaded once and cached in memory for the lifetime of the process.
 """
 

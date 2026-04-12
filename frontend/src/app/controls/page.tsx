@@ -391,7 +391,7 @@ export default function ControlsPage() {
                     {uniquePillars.length} pillars
                   </span>
                   <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-indigo-200 text-[11px] font-mono px-2.5 py-1 rounded-full">
-                    registry/controls_v1.json
+                     registry/controls_v2.json
                   </span>
                 </div>
               </div>
@@ -493,10 +493,10 @@ export default function ControlsPage() {
       ) : isError ? (
         <div className="py-12 text-center text-red-600 font-medium">Failed to load controls.</div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-clip">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
+              <thead className="sticky top-0 z-10">
                 <tr className="bg-gray-50 border-b border-gray-200">
                   {([ ["id", "ID"], ["pillar", "Pillar"], ["tier", "Tier"], ["auto", "Auto"] ] as [SortKey, string][]).map(([k, label]) => (
                     <th
@@ -602,7 +602,7 @@ export default function ControlsPage() {
               <span className="font-semibold text-gray-600">{controls.length}</span>
               {" "}controls
             </span>
-            <span className="font-mono">registry/controls_v1.json · v1</span>
+            <span className="font-mono">registry/controls_v2.json · v2</span>
           </div>
         </div>
       )}
