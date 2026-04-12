@@ -1,123 +1,100 @@
-"""Registry loader — reads and caches the controls registry JSON at startup.
+"""Registry loader — queries the controls table in PostgreSQL.
 
-The registry is the source of truth for all controls.
-It is loaded once and cached in memory for the lifetime of the process.
+All public functions accept a SQLAlchemy ``Session`` as their first argument so
+callers (API routes, pipeline tasks) can share the same database transaction.
+
+The helper ``_to_dict`` converts an ORM row back to the plain dict that the rest
+of the codebase (pipeline stages, schemas) already understands.
 """
 
-import json
-import threading
 from typing import Any
 
-from app.core.config import settings
+from sqlalchemy.orm import Session
 
-_cache: list[dict[str, Any]] | None = None
-_lock = threading.Lock()
+from app.models.control import Control
 
-
-def load(registry_path: str | None = None) -> list[dict[str, Any]]:
-    """Load (or return cached) registry controls.
-
-    Parameters
-    ----------
-    registry_path: Override the default path from settings (useful in tests).
-
-    Returns
-    -------
-    List of control dicts loaded from controls_v1.json.
-    """
-    global _cache
-    path = registry_path or settings.registry_path
-
-    with _lock:
-        if _cache is None:
-            with open(path, encoding="utf-8") as fh:
-                _cache = json.load(fh)
-    return _cache
+# ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
 
 
-def get_control(control_id: str, registry_path: str | None = None) -> dict[str, Any] | None:
-    """Return a single control dict by its ID, or None if not found."""
-    registry = load(registry_path)
-    for control in registry:
-        if control.get("id") == control_id:
-            return control
-    return None
+def _to_dict(row: Control) -> dict[str, Any]:
+    """Convert a Control ORM instance to the canonical control dict."""
+    return {
+        "id": row.control_id,
+        "pillar": row.pillar,
+        "tier": row.tier,
+        "auto": row.auto,
+        "plugins": row.plugins if row.plugins is not None else [],
+        "pass_criteria": row.pass_criteria,
+        "partial_criteria": row.partial_criteria,
+        "missing_criteria": row.missing_criteria,
+    }
 
 
-def save(controls: list[dict[str, Any]], registry_path: str | None = None) -> None:
-    """Persist the controls list to disk and refresh the in-memory cache.
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
 
-    Parameters
-    ----------
-    controls: Full list of control dicts to write.
-    registry_path: Override the default path from settings (useful in tests).
-    """
-    global _cache
-    path = registry_path or settings.registry_path
 
-    with _lock:
-        with open(path, "w", encoding="utf-8") as fh:
-            json.dump(controls, fh, indent=2, ensure_ascii=False)
-            fh.write("\n")
-        _cache = list(controls)
+def load(db: Session) -> list[dict[str, Any]]:
+    """Return all controls from the database, ordered by control_id."""
+    rows = db.query(Control).order_by(Control.control_id).all()
+    return [_to_dict(r) for r in rows]
+
+
+def get_control(control_id: str, db: Session) -> dict[str, Any] | None:
+    """Return a single control dict by its business ID, or None if not found."""
+    row = db.query(Control).filter(Control.control_id == control_id).first()
+    return _to_dict(row) if row else None
 
 
 def upsert_control(
     control_id: str,
     data: dict[str, Any],
-    registry_path: str | None = None,
+    db: Session,
 ) -> dict[str, Any]:
-    """Create or update a control by ID and persist the registry.
+    """Create or update a control by its business ID.
 
     Parameters
     ----------
-    control_id: The control's unique identifier (e.g. "GOV-01").
-    data: Fields to set on the control (must not include "id").
-    registry_path: Override path (tests).
+    control_id: Business identifier, e.g. "GOV-01".
+    data:       Fields to set (must not include ``"id"``).
+    db:         Active SQLAlchemy session (caller is responsible for commit).
 
     Returns
     -------
     The updated or newly created control dict.
     """
-    registry = list(load(registry_path))
-    record = {"id": control_id, **data}
+    import uuid as _uuid
 
-    for idx, control in enumerate(registry):
-        if control.get("id") == control_id:
-            registry[idx] = record
-            save(registry, registry_path)
-            return record
+    row = db.query(Control).filter(Control.control_id == control_id).first()
+    if row is None:
+        row = Control(id=_uuid.uuid4(), control_id=control_id)
+        db.add(row)
 
-    # Not found — append as new
-    registry.append(record)
-    save(registry, registry_path)
-    return record
+    row.pillar = data.get("pillar", "")
+    row.tier = int(data.get("tier", 1))
+    row.auto = bool(data.get("auto", False))
+    row.plugins = data.get("plugins", [])
+    row.pass_criteria = data.get("pass_criteria", "")
+    row.partial_criteria = data.get("partial_criteria", "")
+    row.missing_criteria = data.get("missing_criteria", "")
+
+    db.flush()
+    return _to_dict(row)
 
 
-def delete_control(control_id: str, registry_path: str | None = None) -> bool:
-    """Remove a control by ID and persist the registry.
-
-    Parameters
-    ----------
-    control_id: The control's unique identifier.
-    registry_path: Override path (tests).
+def delete_control(control_id: str, db: Session) -> bool:
+    """Remove a control by its business ID.
 
     Returns
     -------
-    True if the control was found and removed, False if it did not exist.
+    True if the control was found and deleted, False if it did not exist.
     """
-    registry = list(load(registry_path))
-    new_registry = [c for c in registry if c.get("id") != control_id]
-
-    if len(new_registry) == len(registry):
+    row = db.query(Control).filter(Control.control_id == control_id).first()
+    if row is None:
         return False
-
-    save(new_registry, registry_path)
+    db.delete(row)
+    db.flush()
     return True
-
-
-def clear_cache() -> None:
-    """Clear the in-memory cache (used in tests to reload a custom registry)."""
-    global _cache
-    with _lock:
-        _cache = None
