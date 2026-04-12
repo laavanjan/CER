@@ -1,0 +1,40 @@
+# ── Python ───────────────────────────────────────────────────────────────────
+**/__pycache__
+**/*.py[cod]
+**/*.pyo
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+backend/.venv
+backend/venv
+backend/.env
+backend/.env.*
+
+# ── Node / Next.js ────────────────────────────────────────────────────────────
+frontend/node_modules
+frontend/.next
+frontend/out
+frontend/.env
+frontend/.env.*
+frontend/tsconfig.tsbuildinfo
+
+# ── Docker dev artefacts ──────────────────────────────────────────────────────
+docker/volumes
+**/*.log
+
+# ── Git / CI ──────────────────────────────────────────────────────────────────
+.git
+.github
+**/.gitignore
+**/.gitkeep
+
+# ── Editor & OS ───────────────────────────────────────────────────────────────
+.vscode
+.idea
+**/.DS_Store
+**/Thumbs.db
+
+# ── Docs (not needed in the image) ───────────────────────────────────────────
+*.md
+ARCHITECTURE.md
+LICENSE

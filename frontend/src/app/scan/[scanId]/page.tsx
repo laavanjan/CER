@@ -4,6 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api";
 
+// Required for Next.js static export — scan IDs are not known at build time.
+// The FastAPI SPA fallback serves index.html for unknown paths so the client-
+// side router handles the route dynamically.
+export function generateStaticParams() {
+  return [];
+}
+
 // Pipeline stage definitions in order S1–S11
 const STAGES = [
   { id: "S1_INTAKE", label: "S1 Intake", description: "Validate registry, accept repository" },

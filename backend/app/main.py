@@ -1,7 +1,11 @@
 """ethiksa-cer FastAPI application entry point."""
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api.v1 import controls, projects, reports, scans
 from app.core.config import settings
@@ -33,3 +37,39 @@ app.include_router(controls.router, prefix="/api/v1/controls", tags=["controls"]
 def healthcheck() -> dict:
     """Liveness probe used by Docker / k8s."""
     return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# Static frontend — served only when the Next.js export exists in the image.
+# In local development this directory is absent and the dev server runs on
+# its own port, so the block is intentionally skipped.
+# ---------------------------------------------------------------------------
+
+_FRONTEND_OUT = Path(__file__).parent.parent / "frontend_out"
+
+if _FRONTEND_OUT.exists():
+    # Serve Next.js static asset bundles from /_next/
+    _next_dir = _FRONTEND_OUT / "_next"
+    if _next_dir.exists():
+        app.mount("/_next", StaticFiles(directory=str(_next_dir)), name="next-assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str) -> FileResponse:
+        """Serve the Next.js static export with SPA fallback.
+
+        Resolution order:
+        1. Exact file match (e.g. favicon.ico, robots.txt)
+        2. Page with trailing-slash index.html (e.g. /intake/ → intake/index.html)
+        3. Root index.html — lets the Next.js client-side router take over for
+           dynamic routes such as /scan/<id> and /report/<id>.
+        """
+        candidates = [
+            _FRONTEND_OUT / full_path,
+            _FRONTEND_OUT / full_path / "index.html",
+            _FRONTEND_OUT / (full_path.rstrip("/") + ".html"),
+        ]
+        for candidate in candidates:
+            if candidate.is_file():
+                return FileResponse(str(candidate))
+        # SPA fallback — serve root shell and let the client router handle it
+        return FileResponse(str(_FRONTEND_OUT / "index.html"))

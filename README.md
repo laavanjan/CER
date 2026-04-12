@@ -184,6 +184,76 @@ The frontend is not included in Docker Compose — run it separately with `npm r
 
 ---
 
+## Hugging Face Spaces Deployment
+
+ethiksa-cer ships a root-level `Dockerfile` that builds the Next.js frontend as a
+static export and bundles it with the FastAPI backend + Celery worker into a single
+container. Everything is served from **port 7860** as required by HF Spaces Docker
+runtime.
+
+### Prerequisites
+
+You will need managed external services before deploying:
+
+| Service | Recommended providers |
+|---------|----------------------|
+| PostgreSQL | Neon, Supabase, Render, Railway |
+| Redis | Upstash, Redis Cloud |
+| S3-compatible storage | AWS S3, Cloudflare R2, Backblaze B2 |
+
+### Required Space secrets
+
+Set these in **Settings → Variables and secrets** of your HF Space:
+
+| Secret name | Description | Required |
+|-------------|-------------|----------|
+| `DATABASE_URL` | PostgreSQL connection string, e.g. `postgresql://user:pass@host:5432/dbname` | ✅ |
+| `REDIS_URL` | Redis connection string, e.g. `redis://user:pass@host:6379/0` | ✅ |
+| `S3_ENDPOINT_URL` | S3-compatible endpoint URL, e.g. `https://s3.amazonaws.com` | ✅ |
+| `S3_ACCESS_KEY` | S3 access key / key ID | ✅ |
+| `S3_SECRET_KEY` | S3 secret key | ✅ |
+| `S3_BUCKET` | Bucket name (default: `ethiksa-cer`) | optional |
+| `ANTHROPIC_API_KEY` | Anthropic API key for LLM annotations in S9 | optional |
+| `CORS_ORIGINS` | Comma-separated allowed origins (default: `["http://localhost:3000"]`) | optional |
+
+> If `ANTHROPIC_API_KEY` is omitted, the pipeline still runs — S9 produces stub
+> annotations instead of real LLM explanations.
+
+### Deployment steps
+
+1. Create a new **Docker** Space on [huggingface.co/new-space](https://huggingface.co/new-space).
+2. Set the SDK to **Docker**.
+3. Push this repository (or a fork) as the Space source — HF Spaces will use
+   the root-level `Dockerfile` automatically.
+4. Add all required secrets listed above under **Settings → Variables and secrets**.
+5. The Space will build and start. On first boot the entrypoint:
+   - runs `alembic upgrade head` to apply database migrations,
+   - runs `python -m scripts.seed_controls` to populate the controls table from
+     the bundled `registry/controls_v2.json` (idempotent — safe to re-run).
+6. Once the Space is **Running**, the UI is available at the Space URL and the
+   API docs at `<space-url>/docs`.
+
+### Local build verification
+
+```bash
+# Build the image locally (requires Docker)
+docker build -t ethiksa-cer:hf .
+
+# Run with external services already running
+docker run --rm -p 7860:7860 \
+  -e DATABASE_URL=postgresql://ethiksa:ethiksa@localhost:5432/ethiksa \
+  -e REDIS_URL=redis://localhost:6379/0 \
+  -e S3_ENDPOINT_URL=http://localhost:9000 \
+  -e S3_ACCESS_KEY=minioadmin \
+  -e S3_SECRET_KEY=minioadmin \
+  ethiksa-cer:hf
+```
+
+Open `http://localhost:7860` to verify the frontend is served and
+`http://localhost:7860/healthz` for the API health check.
+
+---
+
 ## Stopping / resetting
 
 ```bash
