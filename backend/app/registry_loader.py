@@ -7,6 +7,7 @@ The helper ``_to_dict`` converts an ORM row back to the plain dict that the rest
 of the codebase (pipeline stages, schemas) already understands.
 """
 
+import uuid
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -66,12 +67,9 @@ def upsert_control(
     -------
     The updated or newly created control dict.
     """
-    import uuid as _uuid
-
     row = db.query(Control).filter(Control.control_id == control_id).first()
     if row is None:
-        row = Control(id=_uuid.uuid4(), control_id=control_id)
-        db.add(row)
+        row = Control(id=uuid.uuid4(), control_id=control_id)
 
     row.pillar = data.get("pillar", "")
     row.tier = int(data.get("tier", 1))

@@ -63,8 +63,9 @@ def seed(registry_path: str | None = None) -> None:
 
         db.commit()
         print(f"Seed complete: {inserted} inserted, {skipped} skipped.")
-    except Exception:
+    except Exception as exc:
         db.rollback()
+        print(f"Seed failed: {exc}", file=sys.stderr)
         raise
     finally:
         db.close()
