@@ -26,7 +26,7 @@ def _to_dict(row: Control) -> dict[str, Any]:
         "pillar": row.pillar,
         "tier": row.tier,
         "auto": row.auto,
-        "plugins": row.plugins if row.plugins is not None else [],
+        "plugins": row.plugins,
         "pass_criteria": row.pass_criteria,
         "partial_criteria": row.partial_criteria,
         "missing_criteria": row.missing_criteria,
