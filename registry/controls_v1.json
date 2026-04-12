@@ -1,13 +1,573 @@
 [
   {
     "id": "GOV-01",
-    "pillar": "Governance",
+    "pillar": "Governance & Accountability",
     "tier": 1,
     "auto": true,
     "plugins": ["governance_scanner"],
     "pass_criteria": "An AI governance policy document exists and is referenced from the repository root.",
     "partial_criteria": "A governance policy exists but is incomplete or not linked from the repository root.",
     "missing_criteria": "No governance policy document found in the repository."
+  },
+  {
+    "id": "GOV-02",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": false,
+    "plugins": ["governance_scanner"],
+    "pass_criteria": "Roles and responsibilities for AI oversight are clearly defined and documented.",
+    "partial_criteria": "Some roles are defined but oversight responsibilities are incomplete.",
+    "missing_criteria": "No documentation of AI oversight roles and responsibilities found."
+  },
+  {
+    "id": "GOV-03",
+    "pillar": "Governance & Accountability",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["risk_assessment_scanner"],
+    "pass_criteria": "A documented AI risk assessment is present, identifying key risks and their mitigations.",
+    "partial_criteria": "A risk assessment exists but does not cover all identified AI-specific risks.",
+    "missing_criteria": "No AI risk assessment document found in the repository."
+  },
+  {
+    "id": "GOV-04",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["risk_assessment_scanner"],
+    "pass_criteria": "A risk register or risk tracking artefact is present and up to date.",
+    "partial_criteria": "A risk register exists but lacks status tracking or owner assignments.",
+    "missing_criteria": "No risk register found in the repository."
+  },
+  {
+    "id": "GOV-05",
+    "pillar": "Governance & Accountability",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["accountability_scanner"],
+    "pass_criteria": "An accountability framework document assigns clear ownership of AI decisions.",
+    "partial_criteria": "Accountability is partially documented but decision owners are not all named.",
+    "missing_criteria": "No accountability framework found in the repository."
+  },
+  {
+    "id": "GOV-06",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["accountability_scanner"],
+    "pass_criteria": "An incident response plan specific to AI failures is documented.",
+    "partial_criteria": "A generic incident response plan exists but does not address AI-specific failures.",
+    "missing_criteria": "No incident response documentation found in the repository."
+  },
+  {
+    "id": "GOV-07",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["accountability_scanner"],
+    "pass_criteria": "Approval and sign-off processes for AI system changes are documented.",
+    "partial_criteria": "Some change approval steps are documented but the process is incomplete.",
+    "missing_criteria": "No change approval or sign-off process documented."
+  },
+  {
+    "id": "GOV-08",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["audit_governance_scanner"],
+    "pass_criteria": "An internal audit schedule or evidence of periodic AI system reviews is present.",
+    "partial_criteria": "Audit activity is referenced but no schedule or cadence is specified.",
+    "missing_criteria": "No internal audit documentation found in the repository."
+  },
+  {
+    "id": "GOV-09",
+    "pillar": "Governance & Accountability",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["audit_governance_scanner"],
+    "pass_criteria": "Third-party supplier and subprocessor governance obligations are documented.",
+    "partial_criteria": "Third-party obligations are partially addressed but key requirements are missing.",
+    "missing_criteria": "No third-party governance documentation found."
+  },
+  {
+    "id": "GOV-10",
+    "pillar": "Governance & Accountability",
+    "tier": 3,
+    "auto": false,
+    "plugins": ["audit_governance_scanner"],
+    "pass_criteria": "A decommission or end-of-life plan for the AI system is documented.",
+    "partial_criteria": "Decommission considerations are mentioned but a formal plan is absent.",
+    "missing_criteria": "No decommission or end-of-life plan found."
+  },
+  {
+    "id": "TRN-01",
+    "pillar": "Transparency & Explainability",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["explainability_scanner"],
+    "pass_criteria": "An explainability approach is documented, describing how AI decisions can be explained.",
+    "partial_criteria": "Explainability is mentioned but the approach is not fully specified.",
+    "missing_criteria": "No explainability documentation found in the repository."
+  },
+  {
+    "id": "TRN-02",
+    "pillar": "Transparency & Explainability",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["explainability_scanner"],
+    "pass_criteria": "Model interpretability methods (e.g. SHAP, LIME, attention maps) are referenced or implemented.",
+    "partial_criteria": "Interpretability is referenced but no specific methods or tooling are documented.",
+    "missing_criteria": "No model interpretability approach found."
+  },
+  {
+    "id": "TRN-03",
+    "pillar": "Transparency & Explainability",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["disclosure_scanner"],
+    "pass_criteria": "AI disclosure notice is present, informing end users that they are interacting with an AI system.",
+    "partial_criteria": "AI disclosure exists but is incomplete or not prominently displayed.",
+    "missing_criteria": "No AI disclosure notice found in the repository."
+  },
+  {
+    "id": "TRN-04",
+    "pillar": "Transparency & Explainability",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["disclosure_scanner"],
+    "pass_criteria": "Output uncertainty or confidence levels are communicated to users in the system.",
+    "partial_criteria": "Uncertainty communication is partially implemented.",
+    "missing_criteria": "No output uncertainty communication documented or implemented."
+  },
+  {
+    "id": "TRN-05",
+    "pillar": "Transparency & Explainability",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["disclosure_scanner"],
+    "pass_criteria": "Decision logging is implemented, recording AI outputs and the inputs that drove them.",
+    "partial_criteria": "Some decision logging exists but coverage is incomplete.",
+    "missing_criteria": "No decision logging found in the repository."
+  },
+  {
+    "id": "TRN-06",
+    "pillar": "Transparency & Explainability",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["audit_trail_scanner"],
+    "pass_criteria": "Audit trail documentation describes what is logged, retention periods, and access controls.",
+    "partial_criteria": "Audit trail documentation exists but is missing retention or access control details.",
+    "missing_criteria": "No audit trail documentation found."
+  },
+  {
+    "id": "TRN-07",
+    "pillar": "Transparency & Explainability",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["audit_trail_scanner"],
+    "pass_criteria": "User notification mechanisms are implemented to inform users of AI system limitations.",
+    "partial_criteria": "Notification mechanisms exist but do not cover all key limitations.",
+    "missing_criteria": "No user notification mechanism documented."
+  },
+  {
+    "id": "TRN-08",
+    "pillar": "Transparency & Explainability",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["audit_trail_scanner"],
+    "pass_criteria": "Version transparency is implemented — the AI model version is reported alongside outputs.",
+    "partial_criteria": "Version information is available but not consistently surfaced to users.",
+    "missing_criteria": "No version transparency mechanism found."
+  },
+  {
+    "id": "FAR-01",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["bias_scanner"],
+    "pass_criteria": "Bias testing documentation or tooling is present, covering at least one protected characteristic.",
+    "partial_criteria": "Bias testing is referenced but methodology or results are not fully documented.",
+    "missing_criteria": "No bias testing documentation or tooling found."
+  },
+  {
+    "id": "FAR-02",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["bias_scanner"],
+    "pass_criteria": "Bias mitigation techniques are documented and applied to training or inference.",
+    "partial_criteria": "Bias mitigation is referenced but implementation details are incomplete.",
+    "missing_criteria": "No bias mitigation documentation found."
+  },
+  {
+    "id": "FAR-03",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["fairness_metrics_scanner"],
+    "pass_criteria": "Demographic parity or similar group fairness metric is measured and reported.",
+    "partial_criteria": "Fairness metrics are measured but results are not reported or documented.",
+    "missing_criteria": "No demographic parity or group fairness metric found."
+  },
+  {
+    "id": "FAR-04",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["fairness_metrics_scanner"],
+    "pass_criteria": "Equalized odds or equal opportunity metrics are present in the evaluation pipeline.",
+    "partial_criteria": "Some individual-fairness metric is present but equalized odds is not evaluated.",
+    "missing_criteria": "No equalized odds or individual-fairness metric found."
+  },
+  {
+    "id": "FAR-05",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["fairness_metrics_scanner"],
+    "pass_criteria": "A fairness evaluation report is present, summarising metrics across protected groups.",
+    "partial_criteria": "A fairness report exists but does not cover all protected groups.",
+    "missing_criteria": "No fairness evaluation report found."
+  },
+  {
+    "id": "FAR-06",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["discrimination_scanner"],
+    "pass_criteria": "An anti-discrimination policy for AI outputs is documented.",
+    "partial_criteria": "Non-discrimination principles are mentioned but a formal policy is absent.",
+    "missing_criteria": "No anti-discrimination policy found in the repository."
+  },
+  {
+    "id": "FAR-07",
+    "pillar": "Fairness & Non-Discrimination",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["discrimination_scanner"],
+    "pass_criteria": "Handling of protected attributes (race, gender, age, etc.) is documented in the data and model pipeline.",
+    "partial_criteria": "Protected attributes are mentioned but handling procedures are not fully specified.",
+    "missing_criteria": "No documentation on protected attribute handling found."
+  },
+  {
+    "id": "PRV-01",
+    "pillar": "Privacy & Data Protection",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["privacy_scanner"],
+    "pass_criteria": "A privacy impact assessment (PIA) document is present and references data processing activities.",
+    "partial_criteria": "A PIA document exists but does not reference all data processing activities.",
+    "missing_criteria": "No privacy impact assessment found in the repository."
+  },
+  {
+    "id": "PRV-02",
+    "pillar": "Privacy & Data Protection",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["consent_scanner"],
+    "pass_criteria": "A consent mechanism for data collection is documented and implemented.",
+    "partial_criteria": "Consent is mentioned but the mechanism or implementation is incomplete.",
+    "missing_criteria": "No consent mechanism documented."
+  },
+  {
+    "id": "PRV-03",
+    "pillar": "Privacy & Data Protection",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["consent_scanner"],
+    "pass_criteria": "Data minimisation principles are documented and applied — only necessary data is collected.",
+    "partial_criteria": "Data minimisation is referenced but not fully applied across all data flows.",
+    "missing_criteria": "No data minimisation documentation found."
+  },
+  {
+    "id": "PRV-04",
+    "pillar": "Privacy & Data Protection",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["retention_scanner"],
+    "pass_criteria": "A data retention policy with defined periods and deletion procedures is documented.",
+    "partial_criteria": "Retention periods are specified but deletion procedures are incomplete.",
+    "missing_criteria": "No data retention policy found in the repository."
+  },
+  {
+    "id": "PRV-05",
+    "pillar": "Privacy & Data Protection",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["retention_scanner"],
+    "pass_criteria": "Right-to-erasure (right to be forgotten) procedures are documented.",
+    "partial_criteria": "Right to erasure is acknowledged but procedures are not fully specified.",
+    "missing_criteria": "No right-to-erasure procedure documented."
+  },
+  {
+    "id": "PRV-06",
+    "pillar": "Privacy & Data Protection",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["pii_code_scanner"],
+    "pass_criteria": "PII masking or redaction is implemented in code — no raw PII logged or stored in plain text.",
+    "partial_criteria": "Some PII masking is present but not consistently applied across all logging paths.",
+    "missing_criteria": "No PII masking or redaction found in the codebase."
+  },
+  {
+    "id": "PRV-07",
+    "pillar": "Privacy & Data Protection",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["pii_code_scanner"],
+    "pass_criteria": "Data anonymisation or pseudonymisation techniques are documented and applied.",
+    "partial_criteria": "Anonymisation is referenced but implementation details are absent.",
+    "missing_criteria": "No anonymisation or pseudonymisation documentation found."
+  },
+  {
+    "id": "PRV-08",
+    "pillar": "Privacy & Data Protection",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["pii_code_scanner"],
+    "pass_criteria": "Third-party data sharing agreements and controls are documented.",
+    "partial_criteria": "Third-party data sharing is acknowledged but controls are not fully specified.",
+    "missing_criteria": "No third-party data sharing documentation found."
+  },
+  {
+    "id": "SEC-01",
+    "pillar": "Security & Robustness",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["threat_model_scanner"],
+    "pass_criteria": "A threat model for the AI system is documented, identifying attack vectors and mitigations.",
+    "partial_criteria": "A threat model exists but does not cover AI-specific vectors (e.g. prompt injection, data poisoning).",
+    "missing_criteria": "No threat model found in the repository."
+  },
+  {
+    "id": "SEC-02",
+    "pillar": "Security & Robustness",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["threat_model_scanner"],
+    "pass_criteria": "Adversarial robustness testing (e.g. adversarial examples, prompt injection tests) is documented.",
+    "partial_criteria": "Adversarial testing is referenced but results or methodology are not documented.",
+    "missing_criteria": "No adversarial robustness testing found."
+  },
+  {
+    "id": "SEC-03",
+    "pillar": "Security & Robustness",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["dependency_scanner"],
+    "pass_criteria": "Dependency management is in place — a lockfile or pinned dependency manifest is present.",
+    "partial_criteria": "Dependencies are partially pinned but a full lockfile is absent.",
+    "missing_criteria": "No dependency lockfile or pinned manifest found."
+  },
+  {
+    "id": "SEC-04",
+    "pillar": "Security & Robustness",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["dependency_scanner"],
+    "pass_criteria": "Automated vulnerability scanning of dependencies is configured (e.g. Dependabot, Snyk, pip-audit).",
+    "partial_criteria": "Vulnerability scanning tooling is referenced but not fully configured.",
+    "missing_criteria": "No dependency vulnerability scanning configured."
+  },
+  {
+    "id": "SEC-05",
+    "pillar": "Security & Robustness",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["access_control_scanner"],
+    "pass_criteria": "Access controls for AI model artefacts and training data are documented and enforced.",
+    "partial_criteria": "Access controls exist but coverage of all sensitive assets is incomplete.",
+    "missing_criteria": "No access control documentation found for AI artefacts."
+  },
+  {
+    "id": "SEC-06",
+    "pillar": "Security & Robustness",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["access_control_scanner"],
+    "pass_criteria": "Secrets management is in place — no credentials, API keys, or tokens are committed to the repository.",
+    "partial_criteria": "Most secrets are managed but at least one hardcoded credential was detected.",
+    "missing_criteria": "Hardcoded credentials or secrets found in the repository."
+  },
+  {
+    "id": "SEC-07",
+    "pillar": "Security & Robustness",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["access_control_scanner"],
+    "pass_criteria": "Input validation is implemented for all external inputs to the AI pipeline.",
+    "partial_criteria": "Input validation is partially implemented — not all entry points are covered.",
+    "missing_criteria": "No input validation found in the AI pipeline codebase."
+  },
+  {
+    "id": "SEC-08",
+    "pillar": "Security & Robustness",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["access_control_scanner"],
+    "pass_criteria": "Security testing (SAST, DAST, or penetration testing) evidence is documented.",
+    "partial_criteria": "Security testing is referenced but results or tooling configuration are absent.",
+    "missing_criteria": "No security testing documentation found."
+  },
+  {
+    "id": "OVR-01",
+    "pillar": "Human Oversight & Control",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["human_override_scanner"],
+    "pass_criteria": "A human override or intervention mechanism is documented and implementable for AI decisions.",
+    "partial_criteria": "Human override is referenced but implementation details are incomplete.",
+    "missing_criteria": "No human override mechanism documented."
+  },
+  {
+    "id": "OVR-02",
+    "pillar": "Human Oversight & Control",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["human_override_scanner"],
+    "pass_criteria": "A monitoring dashboard or equivalent real-time visibility tool for AI system behaviour is present.",
+    "partial_criteria": "Monitoring tooling exists but real-time AI behaviour visibility is limited.",
+    "missing_criteria": "No AI monitoring dashboard or visibility tool found."
+  },
+  {
+    "id": "OVR-03",
+    "pillar": "Human Oversight & Control",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["escalation_scanner"],
+    "pass_criteria": "Escalation procedures for anomalous AI behaviour are documented with defined thresholds.",
+    "partial_criteria": "Escalation is mentioned but thresholds or owners are not specified.",
+    "missing_criteria": "No escalation procedures documented."
+  },
+  {
+    "id": "OVR-04",
+    "pillar": "Human Oversight & Control",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["escalation_scanner"],
+    "pass_criteria": "Human-in-the-loop (HITL) checkpoints are defined and integrated into the AI workflow.",
+    "partial_criteria": "HITL is referenced but checkpoint definitions or integration are incomplete.",
+    "missing_criteria": "No human-in-the-loop mechanism documented."
+  },
+  {
+    "id": "OVR-05",
+    "pillar": "Human Oversight & Control",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["monitoring_scanner"],
+    "pass_criteria": "Performance monitoring configuration is present, tracking key AI quality metrics over time.",
+    "partial_criteria": "Performance monitoring exists but key AI-specific metrics are not tracked.",
+    "missing_criteria": "No performance monitoring configuration found."
+  },
+  {
+    "id": "OVR-06",
+    "pillar": "Human Oversight & Control",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["monitoring_scanner"],
+    "pass_criteria": "Alerting mechanisms are configured to notify human operators of AI system anomalies.",
+    "partial_criteria": "Alerting is configured but thresholds or notification channels are missing.",
+    "missing_criteria": "No alerting mechanism found for AI anomaly detection."
+  },
+  {
+    "id": "OVR-07",
+    "pillar": "Human Oversight & Control",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["monitoring_scanner"],
+    "pass_criteria": "A documented review cadence (e.g. quarterly) for AI system performance and behaviour is in place.",
+    "partial_criteria": "Reviews are mentioned but frequency or responsibility is not defined.",
+    "missing_criteria": "No documented AI review cadence found."
+  },
+  {
+    "id": "SAF-01",
+    "pillar": "Safety",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["safe_failure_scanner"],
+    "pass_criteria": "Safe failure modes are documented — the system falls back safely when errors or anomalies occur.",
+    "partial_criteria": "Fallback is partially documented but not all failure scenarios are covered.",
+    "missing_criteria": "No safe failure mode documentation found."
+  },
+  {
+    "id": "SAF-02",
+    "pillar": "Safety",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["safe_failure_scanner"],
+    "pass_criteria": "Fallback mechanisms (e.g. rule-based defaults, human handoff) are implemented for AI failures.",
+    "partial_criteria": "Fallback mechanisms are referenced but implementation is incomplete.",
+    "missing_criteria": "No fallback mechanism documented or implemented."
+  },
+  {
+    "id": "SAF-03",
+    "pillar": "Safety",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["safe_failure_scanner"],
+    "pass_criteria": "A hazard identification exercise has been conducted and its findings are documented.",
+    "partial_criteria": "Hazard identification is referenced but findings are not fully recorded.",
+    "missing_criteria": "No hazard identification documentation found."
+  },
+  {
+    "id": "SAF-04",
+    "pillar": "Safety",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["safety_testing_scanner"],
+    "pass_criteria": "Safety testing evidence is present, including test cases for unsafe output scenarios.",
+    "partial_criteria": "Safety testing is referenced but test coverage of unsafe scenarios is incomplete.",
+    "missing_criteria": "No safety testing evidence found in the repository."
+  },
+  {
+    "id": "SAF-05",
+    "pillar": "Safety",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["safety_testing_scanner"],
+    "pass_criteria": "Harm prevention controls (e.g. output filtering, content moderation) are documented.",
+    "partial_criteria": "Harm prevention is partially documented — not all output channels are covered.",
+    "missing_criteria": "No harm prevention controls documented."
+  },
+  {
+    "id": "SAF-06",
+    "pillar": "Safety",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["safety_testing_scanner"],
+    "pass_criteria": "Safety validation results are recorded and signed off before system deployment.",
+    "partial_criteria": "Safety validation results exist but are not formally signed off.",
+    "missing_criteria": "No safety validation documentation found."
+  },
+  {
+    "id": "ENV-01",
+    "pillar": "Environmental Impact",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["environmental_scanner"],
+    "pass_criteria": "Compute efficiency measures are documented — model size, hardware utilisation, or batching strategies described.",
+    "partial_criteria": "Compute efficiency is mentioned but no specific measures or metrics are documented.",
+    "missing_criteria": "No compute efficiency documentation found."
+  },
+  {
+    "id": "ENV-02",
+    "pillar": "Environmental Impact",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["environmental_scanner"],
+    "pass_criteria": "Carbon tracking or energy consumption measurement for training/inference is documented.",
+    "partial_criteria": "Carbon impact is acknowledged but no measurements or tracking tooling is referenced.",
+    "missing_criteria": "No carbon tracking or energy measurement documentation found."
+  },
+  {
+    "id": "ENV-03",
+    "pillar": "Environmental Impact",
+    "tier": 3,
+    "auto": false,
+    "plugins": ["environmental_scanner"],
+    "pass_criteria": "An energy consumption report for the AI system is produced and available in the repository.",
+    "partial_criteria": "Energy usage is estimated but a formal report has not been produced.",
+    "missing_criteria": "No energy consumption report found."
   },
   {
     "id": "DOC-01",
@@ -20,26 +580,6 @@
     "missing_criteria": "No model card or system card found in the repository."
   },
   {
-    "id": "PRV-01",
-    "pillar": "Privacy",
-    "tier": 2,
-    "auto": true,
-    "plugins": ["privacy_scanner"],
-    "pass_criteria": "A privacy impact assessment (PIA) document is present and references data processing activities.",
-    "partial_criteria": "A PIA document exists but does not reference all data processing activities.",
-    "missing_criteria": "No privacy impact assessment found in the repository."
-  },
-  {
-    "id": "GOV-02",
-    "pillar": "Governance",
-    "tier": 2,
-    "auto": false,
-    "plugins": ["governance_scanner"],
-    "pass_criteria": "Roles and responsibilities for AI oversight are clearly defined and documented.",
-    "partial_criteria": "Some roles are defined but oversight responsibilities are incomplete.",
-    "missing_criteria": "No documentation of AI oversight roles and responsibilities found."
-  },
-  {
     "id": "DOC-02",
     "pillar": "Documentation",
     "tier": 2,
@@ -48,5 +588,195 @@
     "pass_criteria": "An architecture decision record (ADR) or equivalent technical documentation describes AI component design choices.",
     "partial_criteria": "Technical documentation exists but does not cover key AI design decisions.",
     "missing_criteria": "No architectural documentation for AI components found."
+  },
+  {
+    "id": "DOC-03",
+    "pillar": "Documentation",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["version_manifest_scanner"],
+    "pass_criteria": "A version manifest listing model versions, dataset versions, and library versions is present.",
+    "partial_criteria": "A version manifest exists but is missing model or dataset version information.",
+    "missing_criteria": "No version manifest found in the repository."
+  },
+  {
+    "id": "DOC-04",
+    "pillar": "Documentation",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["version_manifest_scanner"],
+    "pass_criteria": "A changelog or release notes document tracks AI system changes over time.",
+    "partial_criteria": "A changelog exists but does not document AI model or behaviour changes.",
+    "missing_criteria": "No changelog or release notes found."
+  },
+  {
+    "id": "DOC-05",
+    "pillar": "Documentation",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["audit_log_scanner"],
+    "pass_criteria": "Audit log documentation describes what events are logged, retention periods, and access controls.",
+    "partial_criteria": "Audit logging is implemented but documentation is incomplete.",
+    "missing_criteria": "No audit log documentation found."
+  },
+  {
+    "id": "DOC-06",
+    "pillar": "Documentation",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["audit_log_scanner"],
+    "pass_criteria": "WORM (Write-Once-Read-Many) or append-only audit store compliance is documented.",
+    "partial_criteria": "Append-only logging is referenced but WORM compliance documentation is absent.",
+    "missing_criteria": "No WORM or append-only audit store documentation found."
+  },
+  {
+    "id": "DOC-07",
+    "pillar": "Documentation",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["dependency_doc_scanner"],
+    "pass_criteria": "All AI framework and library dependencies are documented with versions and licence information.",
+    "partial_criteria": "Dependencies are listed but version or licence information is incomplete.",
+    "missing_criteria": "No dependency documentation found."
+  },
+  {
+    "id": "DOC-08",
+    "pillar": "Documentation",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["dependency_doc_scanner"],
+    "pass_criteria": "Training data documentation (data card or dataset README) is present in the repository.",
+    "partial_criteria": "Training data is referenced but a formal data card is absent.",
+    "missing_criteria": "No training data documentation found."
+  },
+  {
+    "id": "ACC-01",
+    "pillar": "Accessibility & Inclusion",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["wcag_scanner"],
+    "pass_criteria": "WCAG 2.1 AA compliance is documented for all user-facing AI interfaces.",
+    "partial_criteria": "WCAG compliance is referenced but not all interface components are covered.",
+    "missing_criteria": "No WCAG compliance documentation found."
+  },
+  {
+    "id": "ACC-02",
+    "pillar": "Accessibility & Inclusion",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["wcag_scanner"],
+    "pass_criteria": "Alternative text (alt text) is provided for all AI-generated images and non-text content.",
+    "partial_criteria": "Alt text is partially implemented — some images lack descriptions.",
+    "missing_criteria": "No alt text implementation documented."
+  },
+  {
+    "id": "ACC-03",
+    "pillar": "Accessibility & Inclusion",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["wcag_scanner"],
+    "pass_criteria": "Keyboard navigation is fully supported in all user-facing AI components.",
+    "partial_criteria": "Keyboard navigation is partially implemented — some components are not keyboard-accessible.",
+    "missing_criteria": "No keyboard navigation support documented."
+  },
+  {
+    "id": "ACC-04",
+    "pillar": "Accessibility & Inclusion",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["wcag_scanner"],
+    "pass_criteria": "Colour contrast ratios meet WCAG 2.1 AA standards across all AI interface elements.",
+    "partial_criteria": "Colour contrast is partially compliant — some elements fall below required ratios.",
+    "missing_criteria": "No colour contrast compliance documentation found."
+  },
+  {
+    "id": "ACC-05",
+    "pillar": "Accessibility & Inclusion",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["inclusion_scanner"],
+    "pass_criteria": "Multi-language or localisation support is documented for user-facing AI outputs.",
+    "partial_criteria": "Language support is partially documented — not all target languages are covered.",
+    "missing_criteria": "No multi-language or localisation documentation found."
+  },
+  {
+    "id": "ACC-06",
+    "pillar": "Accessibility & Inclusion",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["inclusion_scanner"],
+    "pass_criteria": "Human-factors hazards (cognitive load, automation bias) are identified and mitigated in the UX design.",
+    "partial_criteria": "Human-factors hazards are acknowledged but mitigations are not fully specified.",
+    "missing_criteria": "No human-factors hazard documentation found."
+  },
+  {
+    "id": "ACC-07",
+    "pillar": "Accessibility & Inclusion",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["inclusion_scanner"],
+    "pass_criteria": "Accessibility testing evidence is present, including test results with assistive technologies.",
+    "partial_criteria": "Accessibility testing is referenced but results or scope are not documented.",
+    "missing_criteria": "No accessibility testing evidence found."
+  },
+  {
+    "id": "DQ-01",
+    "pillar": "Data Quality",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["data_provenance_scanner"],
+    "pass_criteria": "Data provenance documentation traces the origin and collection method of all training datasets.",
+    "partial_criteria": "Provenance is partially documented — some datasets lack origin information.",
+    "missing_criteria": "No data provenance documentation found."
+  },
+  {
+    "id": "DQ-02",
+    "pillar": "Data Quality",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["data_provenance_scanner"],
+    "pass_criteria": "Data lineage is tracked — transformations, preprocessing steps, and data flows are documented.",
+    "partial_criteria": "Some lineage information is present but transformations are not fully documented.",
+    "missing_criteria": "No data lineage documentation found."
+  },
+  {
+    "id": "DQ-03",
+    "pillar": "Data Quality",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["data_provenance_scanner"],
+    "pass_criteria": "Labelling quality documentation is present, including annotation guidelines and inter-annotator agreement.",
+    "partial_criteria": "Labelling is documented but annotation guidelines or agreement metrics are absent.",
+    "missing_criteria": "No labelling quality documentation found."
+  },
+  {
+    "id": "DQ-04",
+    "pillar": "Data Quality",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["drift_scanner"],
+    "pass_criteria": "Data drift detection is implemented and monitoring configuration is present.",
+    "partial_criteria": "Drift detection is referenced but monitoring configuration is not in place.",
+    "missing_criteria": "No data drift detection found."
+  },
+  {
+    "id": "DQ-05",
+    "pillar": "Data Quality",
+    "tier": 1,
+    "auto": true,
+    "plugins": ["drift_scanner"],
+    "pass_criteria": "Data validation checks (schema validation, range checks, completeness checks) are implemented.",
+    "partial_criteria": "Data validation is partially implemented — not all fields or datasets are covered.",
+    "missing_criteria": "No data validation checks found."
+  },
+  {
+    "id": "DQ-06",
+    "pillar": "Data Quality",
+    "tier": 2,
+    "auto": true,
+    "plugins": ["drift_scanner"],
+    "pass_criteria": "Data quality metrics (completeness, accuracy, consistency) are measured and reported.",
+    "partial_criteria": "Some data quality metrics are tracked but not all dimensions are covered.",
+    "missing_criteria": "No data quality metrics found."
   }
 ]
