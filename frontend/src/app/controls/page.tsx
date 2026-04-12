@@ -151,8 +151,7 @@ function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, existing
     if (mode !== "create") return;
     const generated = generateNextId(form.pillar, existingControls);
     if (generated) setControlId(generated);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.pillar, mode]);
+  }, [form.pillar, mode, existingControls]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
