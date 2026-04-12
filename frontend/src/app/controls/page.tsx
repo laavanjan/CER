@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient, type ControlRead, type ControlWrite } from "@/lib/api";
 import { Pencil, Trash2, Plus, X, Check, Search, ChevronUp, ChevronDown } from "lucide-react";
@@ -60,6 +60,60 @@ const PILLARS = [
 ];
 
 // ---------------------------------------------------------------------------
+// Pillar → control-ID prefix mapping
+// ---------------------------------------------------------------------------
+
+const PILLAR_PREFIX_MAP: Record<string, string> = {
+  Governance:        "GOV",
+  Transparency:      "TRAN",
+  Fairness:          "FAIR",
+  Privacy:           "PRIV",
+  Security:          "SEC",
+  "Human Oversight": "HUMO",
+  Safety:            "SAFE",
+  Documentation:     "DOC",
+  Accessibility:     "ACC",
+  Risk:              "RISK",
+  "Societal Impact": "SOC",
+  // Pillars present in the registry not covered above
+  Accountability:    "ACCT",
+  Explainability:    "EXPL",
+  Sustainability:    "SUST",
+};
+
+// ---------------------------------------------------------------------------
+// Auto-ID generator
+// ---------------------------------------------------------------------------
+
+/**
+ * Given a pillar name and the current list of controls, return the next
+ * control ID for that pillar, e.g. "GOV-07".
+ *
+ * Rules:
+ *  1. Look up the pillar's prefix in PILLAR_PREFIX_MAP.
+ *  2. Find all existing control IDs that start with "<prefix>-".
+ *  3. Parse the numeric suffix of each match.
+ *  4. Return "<prefix>-<max+1>" zero-padded to 2 digits.
+ *  5. If no matches exist, start at 01.
+ */
+function generateNextId(pillar: string, controls: ControlRead[]): string {
+  const prefix = PILLAR_PREFIX_MAP[pillar];
+  if (!prefix) return "";
+
+  const prefixDash = `${prefix}-`;
+  let max = 0;
+  for (const c of controls) {
+    if (c.id.startsWith(prefixDash)) {
+      const suffix = c.id.slice(prefixDash.length);
+      const n = parseInt(suffix, 10);
+      if (!isNaN(n) && n > max) max = n;
+    }
+  }
+  const next = (max + 1).toString().padStart(2, "0");
+  return `${prefix}-${next}`;
+}
+
+// ---------------------------------------------------------------------------
 // Empty form template
 // ---------------------------------------------------------------------------
 
@@ -81,15 +135,24 @@ interface ModalProps {
   initialId?: string;
   initialData?: ControlWrite;
   mode: "create" | "edit";
+  existingControls: ControlRead[];
   onSave: (id: string, data: ControlWrite) => void;
   onClose: () => void;
   isSaving: boolean;
 }
 
-function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, onSave, onClose, isSaving }: ModalProps) {
+function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, existingControls, onSave, onClose, isSaving }: ModalProps) {
   const [controlId, setControlId] = useState(initialId);
   const [form, setForm] = useState<ControlWrite>(initialData);
   const [pluginInput, setPluginInput] = useState(initialData.plugins.join(", "));
+
+  // Auto-generate the control ID whenever the pillar changes in create mode.
+  useEffect(() => {
+    if (mode !== "create") return;
+    const generated = generateNextId(form.pillar, existingControls);
+    if (generated) setControlId(generated);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.pillar, mode]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -630,6 +693,7 @@ export default function ControlsPage() {
             partial_criteria: editTarget.partial_criteria,
             missing_criteria: editTarget.missing_criteria,
           } : EMPTY_FORM}
+          existingControls={controls}
           onSave={(id, data) => saveMutation.mutate({ id, data, isNew: modalMode === "create" })}
           onClose={() => { setModalMode(null); setEditTarget(null); }}
           isSaving={saveMutation.isPending}
