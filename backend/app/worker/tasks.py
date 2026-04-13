@@ -8,6 +8,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
+from app import registry_loader
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.models.scan import Scan
@@ -100,7 +101,8 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         # S4 — Filter controls
         scan.status = "S4_FILTER"
         db.commit()
-        active_controls, t3_queue = s4_filter.run(profile, settings.registry_path)
+        all_controls = registry_loader.load(db)
+        active_controls, t3_queue = s4_filter.run(profile, all_controls)
         s11_audit.record(
             db, scan_uuid, "S4_FILTER",
             f"Filtered {len(active_controls)} active controls, {len(t3_queue)} T3 queued",
@@ -118,7 +120,7 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         # S6 — Tag
         scan.status = "S6_TAG"
         db.commit()
-        tagged_findings = s6_tag.run(raw_findings, settings.registry_path)
+        tagged_findings = s6_tag.run(raw_findings, all_controls)
         s11_audit.record(db, scan_uuid, "S6_TAG", "Overlay tags applied")
 
         # S7 — Evidence mapping (deterministic)

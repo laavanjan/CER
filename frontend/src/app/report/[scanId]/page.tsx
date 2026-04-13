@@ -5,6 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { apiClient, type ControlResultRead } from "@/lib/api";
 
+// Required for Next.js static export — scan IDs are not known at build time.
+// The FastAPI SPA fallback serves index.html for unknown paths so the client-
+// side router handles the route dynamically.
+export function generateStaticParams() {
+  return [];
+}
+
 const OUTCOME_STYLES: Record<string, string> = {
   PASS: "bg-green-100 text-green-800 border-green-200",
   PARTIAL: "bg-yellow-100 text-yellow-800 border-yellow-200",

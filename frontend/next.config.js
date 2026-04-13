@@ -1,14 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Allow requests to the backend API during development
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/api/:path*`,
-      },
-    ];
+  // Produce a static HTML export compatible with HF Spaces Docker runtime.
+  // The FastAPI backend serves the exported files and handles SPA fallback.
+  output: "export",
+
+  // Ensure each route gets an index.html file (e.g. /intake/index.html)
+  trailingSlash: true,
+
+  // Next.js image optimisation requires a running server — disable for static export.
+  images: {
+    unoptimized: true,
   },
+
+  // NOTE: rewrites() are not supported with output:'export'.
+  // In local development set NEXT_PUBLIC_API_URL=http://localhost:8000
+  // in frontend/.env.local so the dev server can reach the FastAPI backend.
 };
 
 module.exports = nextConfig;

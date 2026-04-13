@@ -3,12 +3,12 @@
 Responsibilities
 ----------------
 1. Accept the flat list of RawFindings from S5.
-2. Load the registry anchor map (pillar → GEN/REL overlay tags).
+2. Build the registry anchor map (pillar → GEN/REL overlay tags) from the
+   pre-loaded controls list passed by the caller.
 3. Annotate each finding with appropriate overlay tags.
 4. Return the tagged findings list.
 """
 
-import json
 from typing import Any
 
 from app.pipeline.models import RawFinding
@@ -32,22 +32,19 @@ def _build_anchor_map(registry: list[dict[str, Any]]) -> dict[str, list[str]]:
 
 def run(
     findings: list[RawFinding],
-    registry_path: str,
+    registry: list[dict[str, Any]],
 ) -> list[RawFinding]:
     """Tag each RawFinding with overlay labels derived from the registry.
 
     Parameters
     ----------
-    findings:      List of RawFindings from S5.
-    registry_path: Path to controls_v1.json.
+    findings: List of RawFindings from S5.
+    registry: Full list of control dicts (pre-loaded from the database by the caller).
 
     Returns
     -------
     Same list of findings, each annotated with a ``tags`` attribute.
     """
-    with open(registry_path, encoding="utf-8") as fh:
-        registry: list[dict[str, Any]] = json.load(fh)
-
     anchor_map = _build_anchor_map(registry)
 
     for finding in findings:

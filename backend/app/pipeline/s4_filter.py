@@ -2,7 +2,7 @@
 
 Responsibilities
 ----------------
-1. Load all controls from the registry.
+1. Accept all controls as a list of dicts (pre-loaded by the caller).
 2. Apply profile-based filter rules:
    - Only include tier-1 controls if assurance_level == "basic".
    - Include gen-AI overlay controls when uses_genai is True.
@@ -10,7 +10,6 @@ Responsibilities
 4. Return the filtered list of control dicts and the T3 supplement queue.
 """
 
-import json
 from typing import Any
 
 from app.pipeline.models import ProjectProfile
@@ -18,22 +17,19 @@ from app.pipeline.models import ProjectProfile
 
 def run(
     profile: ProjectProfile,
-    registry_path: str,
+    all_controls: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Filter registry controls for this project.
 
     Parameters
     ----------
-    profile:       Project profile with assurance_level and uses_genai set.
-    registry_path: Path to controls_v1.json.
+    profile:      Project profile with assurance_level and uses_genai set.
+    all_controls: Full list of control dicts (loaded from the database by the caller).
 
     Returns
     -------
     (active_controls, t3_supplement_queue) — both are lists of control dicts.
     """
-    with open(registry_path, encoding="utf-8") as fh:
-        all_controls: list[dict[str, Any]] = json.load(fh)
-
     active: list[dict[str, Any]] = []
     t3_queue: list[dict[str, Any]] = []
 

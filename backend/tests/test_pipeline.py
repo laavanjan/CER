@@ -138,26 +138,26 @@ class TestS1Intake:
 
 class TestS4Filter:
     def test_standard_assurance_includes_tier2(
-        self, registry_file: str, base_profile: ProjectProfile
+        self, base_profile: ProjectProfile
     ) -> None:
-        active, t3 = s4_filter.run(base_profile, registry_file)
+        active, t3 = s4_filter.run(base_profile, REGISTRY_SAMPLE)
         control_ids = [c["id"] for c in active]
         # PRV-01 is tier 2 and should be included for standard assurance
         assert "PRV-01" in control_ids
 
     def test_basic_assurance_excludes_tier2(
-        self, registry_file: str, base_profile: ProjectProfile
+        self, base_profile: ProjectProfile
     ) -> None:
         base_profile.assurance_level = "basic"
-        active, t3 = s4_filter.run(base_profile, registry_file)
+        active, t3 = s4_filter.run(base_profile, REGISTRY_SAMPLE)
         control_ids = [c["id"] for c in active]
         assert "PRV-01" not in control_ids
 
     def test_t3_queue_empty_for_sample_registry(
-        self, registry_file: str, base_profile: ProjectProfile
+        self, base_profile: ProjectProfile
     ) -> None:
         # Sample registry has no tier-3 controls
-        _, t3 = s4_filter.run(base_profile, registry_file)
+        _, t3 = s4_filter.run(base_profile, REGISTRY_SAMPLE)
         assert t3 == []
 
 
