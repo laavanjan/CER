@@ -88,6 +88,15 @@ export interface ControlResultRead {
   created_at: string;
 }
 
+export interface AuditLogRead {
+  id: string;
+  scan_id: string;
+  stage: string;
+  event: string;
+  payload: Record<string, unknown> | null;
+  recorded_at: string;
+}
+
 export interface ControlRead {
   id: string;
   control_id: string;
@@ -129,7 +138,7 @@ export const apiClient = {
   getFindings: (scanId: string): Promise<ControlResultRead[]> =>
     apiFetch(`/api/v1/reports/${scanId}/findings`),
 
-  getAuditLog: (scanId: string): Promise<unknown[]> =>
+  getAuditLog: (scanId: string): Promise<AuditLogRead[]> =>
     apiFetch(`/api/v1/reports/${scanId}/audit`),
 
   // Controls

@@ -11,6 +11,7 @@ from typing import Any
 from app import registry_loader
 from app.core.config import settings
 from app.core.database import SessionLocal
+import app.models  # noqa: F401 — registers all mappers before relationship resolution
 from app.models.scan import Scan
 from app.pipeline import (
     s1_intake,

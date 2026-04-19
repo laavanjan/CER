@@ -1,13 +1,21 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Produce a static HTML export compatible with HF Spaces Docker runtime.
-  // The FastAPI backend serves the exported files and handles SPA fallback.
-  output: "export",
 
-  // Ensure each route gets an index.html file (e.g. /intake/index.html)
+// output:'export' is only needed for the Docker / HF Spaces production build.
+// In local development it breaks dynamic routes with runtime UUIDs (scan IDs,
+// report IDs) because the static exporter requires every param to be known at
+// build time.  Set NEXT_EXPORT=true in the Docker build to enable it.
+const isExport = process.env.NEXT_EXPORT === "true";
+
+const nextConfig = {
+  // Only produce a static HTML export in production Docker builds.
+  ...(isExport && { output: "export" }),
+
+  // Ensure each route gets an index.html file (e.g. /intake/index.html).
+  // Kept on in both modes so URLs are consistent.
   trailingSlash: true,
 
-  // Next.js image optimisation requires a running server — disable for static export.
+  // Next.js image optimisation requires a running server — disable so both
+  // dev and static-export modes work without an image optimisation server.
   images: {
     unoptimized: true,
   },

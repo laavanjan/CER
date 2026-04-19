@@ -13,6 +13,10 @@ COPY frontend/ .
 # Disable telemetry in CI / Docker builds
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Enable static export mode (output:'export') for the production Docker image.
+# This flag is NOT set in local development so dynamic UUID routes work normally.
+ENV NEXT_EXPORT=true
+
 # In production the frontend calls /api/... relative to the origin,
 # so NEXT_PUBLIC_API_URL is intentionally left empty.
 RUN npm run build
