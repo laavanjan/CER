@@ -2,10 +2,11 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.limiter import limiter
 from app.models.project import Project
 from app.models.scan import Scan
 from app.schemas.scan import ScanCreate, ScanRead
@@ -14,7 +15,8 @@ router = APIRouter()
 
 
 @router.post("/", response_model=ScanRead, status_code=status.HTTP_201_CREATED)
-def create_scan(payload: ScanCreate, db: Session = Depends(get_db)) -> ScanRead:
+@limiter.limit("60/minute")
+def create_scan(request: Request, payload: ScanCreate, db: Session = Depends(get_db)) -> ScanRead:
     """Start a new pipeline scan for a project.
 
     Enqueues the `run_scan` Celery task and returns immediately with the scan ID
