@@ -4,11 +4,21 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi.errors import RateLimitExceeded, _rate_limit_exceeded_handler
+from slowapi.middleware import SlowAPIMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
 
 from app.api.v1 import controls, projects, reports, scans
 from app.core.config import settings
+from app.core.limiter import limiter
+
+# ---------------------------------------------------------------------------
+# Rate limiter (shared instance — imported by routers via app.core.limiter)
+# ---------------------------------------------------------------------------
 
 # Instantiate the FastAPI application with metadata
 app = FastAPI(
@@ -16,6 +26,9 @@ app = FastAPI(
     description="AIGAP · Code Ethics Reviewer — automated AI ethics pipeline",
     version="0.1.0",
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
 # Allow the Next.js frontend and any configured origins
 app.add_middleware(
@@ -25,6 +38,34 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ---------------------------------------------------------------------------
+# API key authentication middleware
+# ---------------------------------------------------------------------------
+
+_UNAUTHENTICATED_PATHS = {"/healthz", "/docs", "/openapi.json", "/redoc"}
+
+
+class ApiKeyMiddleware(BaseHTTPMiddleware):
+    """Require X-API-Key header when settings.api_key is configured.
+
+    Paths listed in _UNAUTHENTICATED_PATHS are always allowed so that health
+    checks and Swagger UI continue to work without a key.
+    """
+
+    async def dispatch(self, request: Request, call_next: object) -> Response:
+        if settings.api_key is not None and request.url.path not in _UNAUTHENTICATED_PATHS:
+            key = request.headers.get("X-API-Key")
+            if key != settings.api_key:
+                return JSONResponse(
+                    status_code=401,
+                    content={"detail": "Invalid or missing API key"},
+                )
+        return await call_next(request)  # type: ignore[arg-type]
+
+
+app.add_middleware(ApiKeyMiddleware)
+app.add_middleware(SlowAPIMiddleware)
 
 # Mount versioned routers
 app.include_router(projects.router, prefix="/api/v1/projects", tags=["projects"])

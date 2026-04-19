@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     # CORS — comma-separated list
     cors_origins: list[str] = ["http://localhost:3000"]
 
+    # API key authentication — if unset, all requests are allowed
+    api_key: str | None = None
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

@@ -2,10 +2,11 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.limiter import limiter
 from app.models.project import Project
 from app.schemas.project import ProjectCreate, ProjectRead
 
@@ -13,7 +14,8 @@ router = APIRouter()
 
 
 @router.post("/", response_model=ProjectRead, status_code=status.HTTP_201_CREATED)
-def create_project(payload: ProjectCreate, db: Session = Depends(get_db)) -> ProjectRead:
+@limiter.limit("60/minute")
+def create_project(request: Request, payload: ProjectCreate, db: Session = Depends(get_db)) -> ProjectRead:
     """Create a new project record.
 
     Registry version is stored as-is; S1 will validate it when a scan is started.
