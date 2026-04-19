@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./providers";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "ethiksa-cer | AI Ethics Code Reviewer",
@@ -87,7 +88,9 @@ export default function RootLayout({
             </header>
 
             {/* ── Page content ── */}
-            <div className="max-w-[1600px] mx-auto px-6 py-8">{children}</div>
+            <div className="max-w-[1600px] mx-auto px-6 py-8">
+              <ErrorBoundary>{children}</ErrorBoundary>
+            </div>
 
           </main>
         </Providers>
