@@ -5,6 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.models.project import Project
 from app.schemas.project import ProjectCreate, ProjectRead
@@ -23,7 +24,7 @@ def create_project(payload: ProjectCreate, db: Session = Depends(get_db)) -> Pro
         github_url=str(payload.github_url) if payload.github_url else None,
         assurance_level=payload.assurance_level,
         uses_genai=payload.uses_genai,
-        registry_version=payload.registry_version,
+        registry_version=settings.registry_version,
     )
     db.add(project)
     db.commit()

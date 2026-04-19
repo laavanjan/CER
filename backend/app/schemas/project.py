@@ -13,8 +13,6 @@ class ProjectCreate(BaseModel):
     github_url: HttpUrl | None = None
     assurance_level: str = "standard"
     uses_genai: bool = False
-    # Must match the version string embedded in controls_v1.json (validated by S1)
-    registry_version: str
 
 
 class ProjectRead(BaseModel):

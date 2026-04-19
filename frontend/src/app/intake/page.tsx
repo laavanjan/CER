@@ -12,7 +12,6 @@ export default function IntakePage() {
     github_url: "",
     assurance_level: "standard",
     uses_genai: false,
-    registry_version: "v1",
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -112,24 +111,6 @@ export default function IntakePage() {
               Check if your system uses LLMs, image generation, or other generative models.
             </span>
           </label>
-        </div>
-
-        {/* Registry Version */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Registry Version <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            required
-            value={form.registry_version}
-            onChange={(e) => setForm({ ...form, registry_version: e.target.value })}
-            placeholder="v1"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <p className="mt-1 text-xs text-gray-500">
-            Must match the loaded registry version (currently: v1).
-          </p>
         </div>
 
         {/* Error */}
