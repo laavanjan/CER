@@ -12,6 +12,7 @@ IMPORTANT: files are read as text/bytes only — no code execution takes place.
 
 import hashlib
 import re
+import subprocess
 import tempfile
 import zipfile
 from pathlib import Path
@@ -90,12 +91,15 @@ def run(profile: ProjectProfile) -> tuple[Path, list[ManifestEntry]]:
             zf.extractall(tmp)
         repo_root = Path(tmp)
     elif profile.github_url:
-        # Shallow clone via PyGitHub / git subprocess
-        # NOTE: Actual clone logic would call git subprocess or use PyGitHub archive
-        # download. Stubbed here to avoid network calls in tests.
         tmp = tempfile.mkdtemp(prefix="ethiksa_")
+        result = subprocess.run(
+            ["git", "clone", "--depth", "1", "--single-branch",
+             str(profile.github_url), tmp],
+            capture_output=True,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.decode("utf-8", errors="replace"))
         repo_root = Path(tmp)
-        # TODO: implement git clone / archive download
     else:
         raise ValueError("No source provided — should have been caught by S1.")
 

@@ -212,5 +212,8 @@ node_modules/
 frontend/.next/
 frontend/node_modules/
 
+# Unignore frontend source directories that share names with Python build dirs
+!frontend/src/lib/
+
 # Docker volumes
 docker/volumes/

@@ -1,11 +1,12 @@
 """Controls router — CRUD endpoints for the ethics control registry."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app import registry_loader
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.limiter import limiter
 from app.schemas.control import ControlRead, ControlWrite
 
 router = APIRouter()
@@ -58,8 +59,9 @@ def get_control(control_id: str, db: Session = Depends(get_db)) -> ControlRead:
 
 
 @router.post("/{control_id}", response_model=ControlRead, status_code=status.HTTP_201_CREATED)
+@limiter.limit("60/minute")
 def create_control(
-    control_id: str, payload: ControlWrite, db: Session = Depends(get_db)
+    request: Request, control_id: str, payload: ControlWrite, db: Session = Depends(get_db)
 ) -> ControlRead:
     """Create a new control entry in the registry.
 
