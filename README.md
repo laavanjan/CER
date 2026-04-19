@@ -102,7 +102,16 @@ pip install -r requirements.txt
 
 # Run database migrations
 alembic upgrade head
+
+# Seed controls from the registry JSON into the database (run once after migrations)
+# Windows — provide the full path to the registry file:
+python -c "from scripts.seed_controls import seed; seed(r'../registry/controls_v2.json')"
+# macOS / Linux:
+# python -m scripts.seed_controls
 ```
+
+> The seed script is **idempotent** — safe to run multiple times. Existing records are skipped.
+> You should see: `Seed complete: 78 inserted, 0 skipped.`
 
 ---
 
@@ -127,8 +136,23 @@ Open a **second terminal**, activate the same venv:
 cd backend
 source .venv/Scripts/activate   # or platform equivalent
 
+# macOS / Linux
 celery -A app.worker.celery_app worker --loglevel=info --concurrency=4
+
+# Windows — prefork is broken on Windows; use solo pool instead
+celery -A app.worker.celery_app worker --loglevel=info --pool=solo
 ```
+
+> **Windows note:** The default `prefork` pool uses shared memory semaphores that Windows
+> restricts, causing `PermissionError: [WinError 5] Access is denied`. The `--pool=solo`
+> flag runs tasks in the same process (single-threaded) and works correctly on Windows.
+>
+> **If Ctrl+C hangs or spams errors on Windows**, the worker is stuck in a broken prefork
+> state. Force-kill it from a new terminal:
+> ```powershell
+> taskkill /F /IM python.exe
+> ```
+> Then restart with `--pool=solo`.
 
 You should see `[tasks] . run_scan` listed as a registered task.
 
