@@ -12,7 +12,7 @@ export default function IntakePage() {
     github_url: "",
     assurance_level: "standard",
     uses_genai: false,
-    registry_version: "v1",
+    registry_version: "v2",
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -128,7 +128,7 @@ export default function IntakePage() {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <p className="mt-1 text-xs text-gray-500">
-            Must match the loaded registry version (currently: v1).
+            Must match the loaded registry version (currently: v2).
           </p>
         </div>
 
