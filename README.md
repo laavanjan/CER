@@ -1,3 +1,12 @@
+---
+title: Ethiksa CER
+emoji: 🛡️
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # ethiksa-cer
 
 > **AIGAP · Code Ethics Reviewer** — Automated pipeline that scans AI system repositories against ethical controls, producing structured findings, remediation guidance, and handoff packages for human reviewers.
