@@ -106,6 +106,25 @@ export interface ControlRead {
   description: string | null;
   applies_to_genai: boolean;
   applies_to_reliability: boolean;
+  auto: boolean;
+  plugins: string[];
+  pass_criteria: string;
+  partial_criteria: string;
+  missing_criteria: string;
+}
+
+export interface ControlWrite {
+  title: string;
+  pillar: string;
+  tier: number;
+  description?: string | null;
+  applies_to_genai: boolean;
+  applies_to_reliability: boolean;
+  auto: boolean;
+  plugins: string[];
+  pass_criteria: string;
+  partial_criteria: string;
+  missing_criteria: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,4 +162,16 @@ export const apiClient = {
 
   // Controls
   listControls: (): Promise<ControlRead[]> => apiFetch("/api/v1/controls/"),
+
+  createControl: (controlId: string, data: ControlWrite): Promise<ControlRead> =>
+    apiFetch(`/api/v1/controls/${controlId}`, { method: "POST", body: JSON.stringify(data) }),
+
+  updateControl: (controlId: string, data: ControlWrite): Promise<ControlRead> =>
+    apiFetch(`/api/v1/controls/${controlId}`, { method: "PUT", body: JSON.stringify(data) }),
+
+  deleteControl: (controlId: string): Promise<void> =>
+    apiFetch(`/api/v1/controls/${controlId}`, { method: "DELETE" }),
+
+  getRegistryInfo: (): Promise<{ file: string; version: string }> =>
+    apiFetch("/api/v1/controls/registry-info"),
 };

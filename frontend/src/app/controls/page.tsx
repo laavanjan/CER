@@ -155,7 +155,7 @@ function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, existing
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const plugins = pluginInput.split(",").map((p) => p.trim()).filter(Boolean);
+    const plugins = pluginInput.split(",").map((p: string) => p.trim()).filter(Boolean);
     onSave(controlId, { ...form, plugins });
   };
 
