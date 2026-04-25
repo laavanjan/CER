@@ -13,6 +13,7 @@ NOTE: temperature=0 is mandatory for deterministic, auditable outputs.
 """
 
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 from app.pipeline.models import EvidenceResult, LLMAnnotation
@@ -66,13 +67,19 @@ def _call_gemini(client: Any, prompt: str) -> str:
     return response.text.strip()
 
 
-def _make_call(prompt: str, anthropic_client: Any, gemini_client: Any) -> str:
-    """Try Anthropic first; if it raises any error, fall back to Gemini."""
-    if anthropic_client:
+def _make_call(
+    prompt: str,
+    anthropic_client: Any,
+    gemini_client: Any,
+    state: dict,
+) -> str:
+    """Try Anthropic first; on any failure permanently switch to Gemini for this run."""
+    if anthropic_client and not state.get("anthropic_failed"):
         try:
             return _call_claude(anthropic_client, prompt)
         except Exception as exc:
-            logger.warning("Anthropic call failed (%s) — switching to Gemini.", exc)
+            logger.warning("Anthropic call failed (%s) — switching to Gemini for this run.", exc)
+            state["anthropic_failed"] = True
             if gemini_client:
                 return _call_gemini(gemini_client, prompt)
             raise
@@ -122,25 +129,23 @@ def run(
         except ImportError as exc:
             raise ImportError("pip install google-genai") from exc
 
-    annotations: list[LLMAnnotation] = []
+    state: dict = {}  # tracks per-run fallback state (anthropic_failed flag)
 
-    for result in evidence_results:
+    def _annotate(result: EvidenceResult) -> LLMAnnotation:
         explain = _make_call(
             _EXPLAIN_PROMPT.format(
                 control_id=result.control_id,
                 outcome=result.outcome,
                 evidence_paths=result.evidence_paths,
             ),
-            anthropic_client,
-            gemini_client,
+            anthropic_client, gemini_client, state,
         )
         remediate = _make_call(
             _REMEDIATE_PROMPT.format(
                 control_id=result.control_id,
                 outcome=result.outcome,
             ),
-            anthropic_client,
-            gemini_client,
+            anthropic_client, gemini_client, state,
         )
         classify = _make_call(
             _CLASSIFY_DOC_PROMPT.format(
@@ -148,16 +153,20 @@ def run(
                 outcome=result.outcome,
                 evidence_paths=result.evidence_paths,
             ),
-            anthropic_client,
-            gemini_client,
+            anthropic_client, gemini_client, state,
         )
-        annotations.append(
-            LLMAnnotation(
-                control_id=result.control_id,
-                explanation=explain,
-                remediation=remediate,
-                doc_classification=classify,
-            )
+        return LLMAnnotation(
+            control_id=result.control_id,
+            explanation=explain,
+            remediation=remediate,
+            doc_classification=classify,
         )
+
+    # Run annotations in parallel — 8 workers keeps Gemini rate limits safe
+    annotations: list[LLMAnnotation] = []
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        futures = {executor.submit(_annotate, r): r for r in evidence_results}
+        for future in as_completed(futures):
+            annotations.append(future.result())
 
     return annotations
