@@ -687,8 +687,11 @@ export default function ControlsPage() {
           mode={modalMode}
           initialId={editTarget?.id ?? ""}
           initialData={editTarget ? {
+            title: editTarget.title,
             pillar: editTarget.pillar,
             tier: editTarget.tier,
+            applies_to_genai: editTarget.applies_to_genai,
+            applies_to_reliability: editTarget.applies_to_reliability,
             auto: editTarget.auto,
             plugins: editTarget.plugins,
             pass_criteria: editTarget.pass_criteria,
