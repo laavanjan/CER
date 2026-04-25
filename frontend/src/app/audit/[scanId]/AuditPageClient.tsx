@@ -91,9 +91,9 @@ export default function AuditPageClient() {
           <p className="text-sm font-semibold text-red-800 mb-1">
             Pipeline failed at stage: <span className="font-mono">{failedEntry.stage}</span>
           </p>
-          {failedEntry.payload?.error && (
+          {failedEntry.payload?.error != null && (
             <p className="text-xs text-red-700 font-mono whitespace-pre-wrap break-all">
-              {String(failedEntry.payload.error as string)}
+              {String(failedEntry.payload.error)}
             </p>
           )}
         </div>
