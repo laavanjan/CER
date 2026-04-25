@@ -19,7 +19,10 @@ class Settings(BaseSettings):
     # Anthropic (used by S9, primary LLM)
     anthropic_api_key: str = ""
 
-    # Google Gemini (used by S9 as fallback when Anthropic fails)
+    # Ollama Cloud (used by S9 as first fallback)
+    ollama_api_key: str = ""
+
+    # Google Gemini (used by S9 as last resort fallback)
     gemini_api_key: str = ""
 
     # Registry

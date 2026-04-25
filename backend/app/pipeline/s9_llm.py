@@ -1,12 +1,13 @@
-"""S9 — LLM: call Anthropic Claude API (temp=0) with 3 prompts per control.
+"""S9 — LLM: 3-tier LLM pipeline with Anthropic → Ollama Cloud → Gemini fallback.
 
 Responsibilities
 ----------------
-1. For each control result from S7, call Claude with three prompts:
+1. For each control result from S7, call the LLM with three prompts:
    - EXPLAIN:      Explain the finding in plain language.
    - REMEDIATE:    Provide concrete remediation steps.
    - CLASSIFY_DOC: Classify the documentation quality.
-2. Falls back to Google Gemini automatically if Anthropic fails.
+2. Fallback order: Anthropic → Ollama Cloud → Gemini.
+   Once a provider fails it is skipped for the rest of the run.
 3. Return a list of LLMAnnotation objects.
 
 NOTE: temperature=0 is mandatory for deterministic, auditable outputs.
@@ -59,6 +60,15 @@ def _call_claude(client: Any, prompt: str) -> str:
     return message.content[0].text.strip()
 
 
+def _call_ollama(client: Any, prompt: str) -> str:
+    response = client.chat(
+        model="gpt-oss:120b",
+        messages=[{"role": "user", "content": prompt}],
+        options={"temperature": 0, "num_predict": 512},
+    )
+    return response["message"]["content"].strip()
+
+
 def _call_gemini(client: Any, prompt: str) -> str:
     for attempt in range(5):
         try:
@@ -80,38 +90,42 @@ def _call_gemini(client: Any, prompt: str) -> str:
 def _make_call(
     prompt: str,
     anthropic_client: Any,
+    ollama_client: Any,
     gemini_client: Any,
     state: dict,
 ) -> str:
-    """Try Anthropic first; on any failure permanently switch to Gemini for this run."""
+    """Try Anthropic → Ollama → Gemini, permanently skipping any provider that fails."""
     if anthropic_client and not state.get("anthropic_failed"):
         try:
             return _call_claude(anthropic_client, prompt)
         except Exception as exc:
-            logger.warning("Anthropic call failed (%s) — switching to Gemini for this run.", exc)
+            logger.warning("Anthropic failed (%s) — switching to Ollama Cloud.", exc)
             state["anthropic_failed"] = True
-            if gemini_client:
-                return _call_gemini(gemini_client, prompt)
-            raise
+
+    if ollama_client and not state.get("ollama_failed"):
+        try:
+            return _call_ollama(ollama_client, prompt)
+        except Exception as exc:
+            logger.warning("Ollama Cloud failed (%s) — switching to Gemini.", exc)
+            state["ollama_failed"] = True
+
     if gemini_client:
         return _call_gemini(gemini_client, prompt)
-    raise RuntimeError("No LLM client available")
+
+    raise RuntimeError("All LLM providers failed — no fallback available.")
 
 
 def run(
     evidence_results: list[EvidenceResult],
     anthropic_api_key: str,
+    ollama_api_key: str = "",
     gemini_api_key: str = "",
 ) -> list[LLMAnnotation]:
     """Generate LLM annotations for every evidence result.
 
-    Parameters
-    ----------
-    evidence_results: Per-control outcomes from S7.
-    anthropic_api_key: API key for Anthropic (primary).
-    gemini_api_key: API key for Google Gemini (fallback).
+    Fallback order: Anthropic → Ollama Cloud → Gemini.
     """
-    if not anthropic_api_key and not gemini_api_key:
+    if not anthropic_api_key and not ollama_api_key and not gemini_api_key:
         return [
             LLMAnnotation(
                 control_id=r.control_id,
@@ -123,6 +137,7 @@ def run(
         ]
 
     anthropic_client = None
+    ollama_client = None
     gemini_client = None
 
     if anthropic_api_key:
@@ -132,6 +147,16 @@ def run(
         except ImportError as exc:
             raise ImportError("pip install anthropic") from exc
 
+    if ollama_api_key:
+        try:
+            from ollama import Client as OllamaClient  # type: ignore[import]
+            ollama_client = OllamaClient(
+                host="https://ollama.com",
+                headers={"Authorization": f"Bearer {ollama_api_key}"},
+            )
+        except ImportError as exc:
+            raise ImportError("pip install ollama") from exc
+
     if gemini_api_key:
         try:
             from google import genai  # type: ignore[import]
@@ -139,7 +164,7 @@ def run(
         except ImportError as exc:
             raise ImportError("pip install google-genai") from exc
 
-    state: dict = {}  # tracks per-run fallback state (anthropic_failed flag)
+    state: dict = {}  # tracks which providers have failed this run
 
     def _annotate(result: EvidenceResult) -> LLMAnnotation:
         explain = _make_call(
@@ -148,14 +173,14 @@ def run(
                 outcome=result.outcome,
                 evidence_paths=result.evidence_paths,
             ),
-            anthropic_client, gemini_client, state,
+            anthropic_client, ollama_client, gemini_client, state,
         )
         remediate = _make_call(
             _REMEDIATE_PROMPT.format(
                 control_id=result.control_id,
                 outcome=result.outcome,
             ),
-            anthropic_client, gemini_client, state,
+            anthropic_client, ollama_client, gemini_client, state,
         )
         classify = _make_call(
             _CLASSIFY_DOC_PROMPT.format(
@@ -163,7 +188,7 @@ def run(
                 outcome=result.outcome,
                 evidence_paths=result.evidence_paths,
             ),
-            anthropic_client, gemini_client, state,
+            anthropic_client, ollama_client, gemini_client, state,
         )
         return LLMAnnotation(
             control_id=result.control_id,
@@ -172,7 +197,7 @@ def run(
             doc_classification=classify,
         )
 
-    # Run annotations in parallel — 4 workers stays within Gemini free tier (15 req/min)
+    # 4 workers — safe for Gemini free tier (15 req/min); Ollama Cloud has no strict limit
     annotations: list[LLMAnnotation] = []
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = {executor.submit(_annotate, r): r for r in evidence_results}

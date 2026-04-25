@@ -175,7 +175,12 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         scan.status = "S9_LLM"
         db.commit()
         t = time.perf_counter()
-        annotations = s9_llm.run(evidence_results, settings.anthropic_api_key, settings.gemini_api_key)
+        annotations = s9_llm.run(
+            evidence_results,
+            settings.anthropic_api_key,
+            settings.ollama_api_key,
+            settings.gemini_api_key,
+        )
         d = round(time.perf_counter() - t, 2)
         logger.info("[TIMING] S9_LLM: %.2fs", d)
         s11_audit.record(db, scan_uuid, "S9_LLM", "LLM annotations generated",
