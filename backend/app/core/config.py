@@ -1,5 +1,6 @@
 """Application-wide configuration loaded from environment variables."""
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -26,11 +27,22 @@ class Settings(BaseSettings):
     registry_path: str = "/registry/controls_v2.json"
     registry_version: str = "v2"
 
-    # CORS — comma-separated list
+    # CORS — accepts a comma-separated string or a JSON array
     cors_origins: list[str] = ["http://localhost:3000"]
 
     # API key authentication — if unset, all requests are allowed
     api_key: str | None = None
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: object) -> object:
+        if isinstance(v, str):
+            v = v.strip()
+            if v.startswith("["):
+                import json
+                return json.loads(v)
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v
 
     class Config:
         env_file = ".env"
