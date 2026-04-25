@@ -16,8 +16,11 @@ class Settings(BaseSettings):
     s3_secret_key: str = "minioadmin"
     s3_bucket: str = "ethiksa-cer"
 
-    # Anthropic (used by S9)
+    # Anthropic (used by S9, primary LLM)
     anthropic_api_key: str = ""
+
+    # Google Gemini (used by S9 as fallback when Anthropic fails)
+    gemini_api_key: str = ""
 
     # Registry
     registry_path: str = "/registry/controls_v2.json"

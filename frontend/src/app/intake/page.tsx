@@ -62,7 +62,7 @@ export default function IntakePage() {
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             placeholder="My AI System"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           />
         </div>
 
@@ -76,7 +76,7 @@ export default function IntakePage() {
             value={form.github_url ?? ""}
             onChange={(e) => setForm({ ...form, github_url: e.target.value || undefined })}
             placeholder="https://github.com/org/repo"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           />
         </div>
 
@@ -88,7 +88,7 @@ export default function IntakePage() {
           <select
             value={form.assurance_level}
             onChange={(e) => setForm({ ...form, assurance_level: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           >
             <option value="basic">Basic (Tier 1 only)</option>
             <option value="standard">Standard (Tier 1–2)</option>
@@ -125,7 +125,7 @@ export default function IntakePage() {
             value={form.registry_version}
             onChange={(e) => setForm({ ...form, registry_version: e.target.value })}
             placeholder="v1"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           />
           <p className="mt-1 text-xs text-gray-500">
             Must match the loaded registry version (currently: v2).

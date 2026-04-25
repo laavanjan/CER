@@ -148,7 +148,7 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         # S9 — LLM annotation
         scan.status = "S9_LLM"
         db.commit()
-        annotations = s9_llm.run(evidence_results, settings.anthropic_api_key)
+        annotations = s9_llm.run(evidence_results, settings.anthropic_api_key, settings.gemini_api_key)
         s11_audit.record(db, scan_uuid, "S9_LLM", "LLM annotations generated")
 
         # S10 — Assemble packages

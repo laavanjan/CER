@@ -17,6 +17,8 @@ celery_app.conf.update(
     accept_content=["json"],
     timezone="UTC",
     enable_utc=True,
-    # Retry on connection errors during startup
     broker_connection_retry_on_startup=True,
+    # Windows fix: prefork pool uses shared memory handles that Windows denies.
+    # solo pool runs tasks in-process and avoids the WinError 5/6 crashes.
+    worker_pool="solo",
 )
