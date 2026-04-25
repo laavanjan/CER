@@ -61,12 +61,21 @@ def _call_claude(client: Any, prompt: str) -> str:
 
 
 def _call_ollama(client: Any, prompt: str) -> str:
-    response = client.chat(
-        model="gpt-oss:120b",
-        messages=[{"role": "user", "content": prompt}],
-        options={"temperature": 0, "num_predict": 512},
-    )
-    return response["message"]["content"].strip()
+    for attempt in range(4):
+        try:
+            response = client.chat(
+                model="gpt-oss:120b",
+                messages=[{"role": "user", "content": prompt}],
+                options={"temperature": 0, "num_predict": 512},
+            )
+            return response["message"]["content"].strip()
+        except Exception as exc:
+            if "429" in str(exc) and attempt < 3:
+                wait = 10 * (attempt + 1)
+                logger.warning("Ollama 429 — waiting %ss before retry %s/4.", wait, attempt + 1)
+                time.sleep(wait)
+            else:
+                raise
 
 
 def _call_gemini(client: Any, prompt: str) -> str:
@@ -107,7 +116,9 @@ def _make_call(
             return _call_ollama(ollama_client, prompt)
         except Exception as exc:
             logger.warning("Ollama Cloud failed (%s) — switching to Gemini.", exc)
-            state["ollama_failed"] = True
+            # Only permanently switch if it's not a recoverable 429
+            if "429" not in str(exc):
+                state["ollama_failed"] = True
 
     if gemini_client:
         return _call_gemini(gemini_client, prompt)
