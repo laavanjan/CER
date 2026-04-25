@@ -118,8 +118,11 @@ function generateNextId(pillar: string, controls: ControlRead[]): string {
 // ---------------------------------------------------------------------------
 
 const EMPTY_FORM: ControlWrite = {
+  title: "",
   pillar: "Governance",
   tier: 1,
+  applies_to_genai: false,
+  applies_to_reliability: false,
   auto: false,
   plugins: [],
   pass_criteria: "",
