@@ -93,7 +93,7 @@ export default function AuditPageClient() {
           </p>
           {failedEntry.payload?.error && (
             <p className="text-xs text-red-700 font-mono whitespace-pre-wrap break-all">
-              {String(failedEntry.payload.error)}
+              {String(failedEntry.payload.error as string)}
             </p>
           )}
         </div>

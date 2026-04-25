@@ -1,5 +1,7 @@
 """Celery application factory."""
 
+import sys
+
 from celery import Celery
 
 from app.core.config import settings
@@ -18,7 +20,7 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     broker_connection_retry_on_startup=True,
-    # Windows fix: prefork pool uses shared memory handles that Windows denies.
-    # solo pool runs tasks in-process and avoids the WinError 5/6 crashes.
-    worker_pool="solo",
+    # solo pool on Windows avoids WinError 5/6 shared-memory crashes.
+    # On Linux (production) the default prefork pool is used.
+    **( {"worker_pool": "solo"} if sys.platform == "win32" else {} ),
 )

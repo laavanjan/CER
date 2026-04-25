@@ -8,6 +8,8 @@
 
 set -e
 
+export PORT="${PORT:-8000}"
+
 cd /app
 
 echo "==> Running database migrations..."
