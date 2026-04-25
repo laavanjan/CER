@@ -13,6 +13,7 @@ NOTE: temperature=0 is mandatory for deterministic, auditable outputs.
 """
 
 import logging
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
@@ -59,12 +60,21 @@ def _call_claude(client: Any, prompt: str) -> str:
 
 
 def _call_gemini(client: Any, prompt: str) -> str:
-    response = client.models.generate_content(
-        model="gemma-4-26b-a4b-it",
-        contents=prompt,
-        config={"temperature": 0, "max_output_tokens": 512},
-    )
-    return response.text.strip()
+    for attempt in range(5):
+        try:
+            response = client.models.generate_content(
+                model="gemma-4-26b-a4b-it",
+                contents=prompt,
+                config={"temperature": 0, "max_output_tokens": 512},
+            )
+            return response.text.strip()
+        except Exception as exc:
+            if "429" in str(exc) and attempt < 4:
+                wait = 35 * (attempt + 1)
+                logger.warning("Gemini 429 rate limit — waiting %ss before retry %s/5.", wait, attempt + 1)
+                time.sleep(wait)
+            else:
+                raise
 
 
 def _make_call(
@@ -162,9 +172,9 @@ def run(
             doc_classification=classify,
         )
 
-    # Run annotations in parallel — 8 workers keeps Gemini rate limits safe
+    # Run annotations in parallel — 4 workers stays within Gemini free tier (15 req/min)
     annotations: list[LLMAnnotation] = []
-    with ThreadPoolExecutor(max_workers=8) as executor:
+    with ThreadPoolExecutor(max_workers=4) as executor:
         futures = {executor.submit(_annotate, r): r for r in evidence_results}
         for future in as_completed(futures):
             annotations.append(future.result())

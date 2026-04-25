@@ -4,9 +4,13 @@ Each task updates the Scan.status field as it progresses through stages S1–S11
 so the frontend progress page can poll for live updates.
 """
 
+import logging
+import time
 import uuid
 from datetime import UTC, datetime
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 from app import registry_loader
 from app.core.config import settings
@@ -61,6 +65,7 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
             raise ValueError(f"Scan {scan_id} not found in database.")
 
         # Mark scan as started
+        pipeline_start = time.perf_counter()
         scan.status = "S1_INTAKE"
         scan.started_at = datetime.now(UTC)
         db.commit()
@@ -76,86 +81,115 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
             registry_version=project_data.get("registry_version", settings.registry_version),
         )
 
+        def _timed(label: str):
+            """Return a simple context-free timer helper."""
+            return time.perf_counter()
+
         # S1 — Intake validation
+        t = time.perf_counter()
         profile = s1_intake.run(profile, settings.registry_path)
-        s11_audit.record(db, scan_uuid, "S1_INTAKE", "Intake validated", payload={"profile": project_data})
+        d = round(time.perf_counter() - t, 2)
+        logger.info("[TIMING] S1_INTAKE: %.2fs", d)
+        s11_audit.record(db, scan_uuid, "S1_INTAKE", "Intake validated",
+                         payload={"profile": project_data, "duration_s": d})
 
         # S2 — Manifest
         scan.status = "S2_MANIFEST"
         db.commit()
+        t = time.perf_counter()
         repo_root, manifest = s2_manifest.run(profile)
-        s11_audit.record(db, scan_uuid, "S2_MANIFEST", f"Manifest built: {len(manifest)} files")
+        d = round(time.perf_counter() - t, 2)
+        logger.info("[TIMING] S2_MANIFEST: %.2fs", d)
+        s11_audit.record(db, scan_uuid, "S2_MANIFEST", f"Manifest built: {len(manifest)} files",
+                         payload={"duration_s": d})
 
         # S3 — AI detection
         scan.status = "S3_AI_DETECT"
         db.commit()
+        t = time.perf_counter()
         profile = s3_ai_detect.run(profile, manifest, repo_root)
-        s11_audit.record(
-            db, scan_uuid, "S3_AI_DETECT",
-            "AI signals detected",
-            payload={
-                "gen_triggered": getattr(profile, "gen_triggered", False),
-                "rel_triggered": getattr(profile, "rel_triggered", False),
-            },
-        )
+        d = round(time.perf_counter() - t, 2)
+        logger.info("[TIMING] S3_AI_DETECT: %.2fs", d)
+        s11_audit.record(db, scan_uuid, "S3_AI_DETECT", "AI signals detected",
+                         payload={
+                             "gen_triggered": getattr(profile, "gen_triggered", False),
+                             "rel_triggered": getattr(profile, "rel_triggered", False),
+                             "duration_s": d,
+                         })
 
         # S4 — Filter controls
         scan.status = "S4_FILTER"
         db.commit()
+        t = time.perf_counter()
         all_controls = registry_loader.load(db)
         active_controls, t3_queue = s4_filter.run(profile, all_controls)
-        s11_audit.record(
-            db, scan_uuid, "S4_FILTER",
-            f"Filtered {len(active_controls)} active controls, {len(t3_queue)} T3 queued",
-        )
+        d = round(time.perf_counter() - t, 2)
+        logger.info("[TIMING] S4_FILTER: %.2fs", d)
+        s11_audit.record(db, scan_uuid, "S4_FILTER",
+                         f"Filtered {len(active_controls)} active controls, {len(t3_queue)} T3 queued",
+                         payload={"duration_s": d})
 
         # S5 — Plugin runner
         scan.status = "S5_RUNNER"
         db.commit()
+        t = time.perf_counter()
         raw_findings = s5_runner.run(active_controls, manifest, str(repo_root))
-        s11_audit.record(
-            db, scan_uuid, "S5_RUNNER",
-            f"Plugin runner produced {len(raw_findings)} raw findings",
-        )
+        d = round(time.perf_counter() - t, 2)
+        logger.info("[TIMING] S5_RUNNER: %.2fs", d)
+        s11_audit.record(db, scan_uuid, "S5_RUNNER",
+                         f"Plugin runner produced {len(raw_findings)} raw findings",
+                         payload={"duration_s": d})
 
         # S6 — Tag
         scan.status = "S6_TAG"
         db.commit()
+        t = time.perf_counter()
         tagged_findings = s6_tag.run(raw_findings, all_controls)
-        s11_audit.record(db, scan_uuid, "S6_TAG", "Overlay tags applied")
+        d = round(time.perf_counter() - t, 2)
+        logger.info("[TIMING] S6_TAG: %.2fs", d)
+        s11_audit.record(db, scan_uuid, "S6_TAG", "Overlay tags applied",
+                         payload={"duration_s": d})
 
         # S7 — Evidence mapping (deterministic)
         scan.status = "S7_EVIDENCE"
         db.commit()
+        t = time.perf_counter()
         evidence_results = s7_evidence.run(tagged_findings, active_controls)
-        s11_audit.record(
-            db, scan_uuid, "S7_EVIDENCE",
-            "Evidence outcomes determined",
-            payload={
-                r.control_id: r.outcome for r in evidence_results
-            },
-        )
+        d = round(time.perf_counter() - t, 2)
+        logger.info("[TIMING] S7_EVIDENCE: %.2fs", d)
+        s11_audit.record(db, scan_uuid, "S7_EVIDENCE", "Evidence outcomes determined",
+                         payload={r.control_id: r.outcome for r in evidence_results} | {"duration_s": d})
 
         # S8 — Honesty check
         scan.status = "S8_HONESTY"
         db.commit()
+        t = time.perf_counter()
         escalation_hints = s8_honesty.run(profile)
-        s11_audit.record(
-            db, scan_uuid, "S8_HONESTY",
-            f"{len(escalation_hints)} escalation hints produced",
-        )
+        d = round(time.perf_counter() - t, 2)
+        logger.info("[TIMING] S8_HONESTY: %.2fs", d)
+        s11_audit.record(db, scan_uuid, "S8_HONESTY",
+                         f"{len(escalation_hints)} escalation hints produced",
+                         payload={"duration_s": d})
 
         # S9 — LLM annotation
         scan.status = "S9_LLM"
         db.commit()
+        t = time.perf_counter()
         annotations = s9_llm.run(evidence_results, settings.anthropic_api_key, settings.gemini_api_key)
-        s11_audit.record(db, scan_uuid, "S9_LLM", "LLM annotations generated")
+        d = round(time.perf_counter() - t, 2)
+        logger.info("[TIMING] S9_LLM: %.2fs", d)
+        s11_audit.record(db, scan_uuid, "S9_LLM", "LLM annotations generated",
+                         payload={"duration_s": d})
 
         # S10 — Assemble packages
         scan.status = "S10_ASSEMBLE"
         db.commit()
+        t = time.perf_counter()
         output_packages = s10_assemble.run(profile, evidence_results, escalation_hints, annotations)
-        s11_audit.record(db, scan_uuid, "S10_ASSEMBLE", "Output packages assembled")
+        d = round(time.perf_counter() - t, 2)
+        logger.info("[TIMING] S10_ASSEMBLE: %.2fs", d)
+        s11_audit.record(db, scan_uuid, "S10_ASSEMBLE", "Output packages assembled",
+                         payload={"duration_s": d})
 
         # Persist ControlResult rows
         from app.models.control_result import ControlResult
@@ -172,11 +206,14 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
             )
             db.add(cr)
 
+        total = round(time.perf_counter() - pipeline_start, 2)
         scan.status = "COMPLETE"
         scan.completed_at = datetime.now(UTC)
         db.commit()
 
-        s11_audit.record(db, scan_uuid, "S11_AUDIT", "Scan completed successfully")
+        logger.info("[TIMING] TOTAL pipeline: %.2fs (%.1fmin)", total, total / 60)
+        s11_audit.record(db, scan_uuid, "S11_AUDIT", "Scan completed successfully",
+                         payload={"total_duration_s": total})
 
         return output_packages
 
