@@ -16,7 +16,15 @@ export default function HomePage() {
           className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
         >
           Start Review →
-        </Link> 
+        </Link>
+        <a
+          href="file:///C:/Users/laavanjan/Documents/Ethiksa/AIGAP%20%C2%B7%20Code%20Ethics%20Reviewer%20%E2%80%94%20Complete%20Reference.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-800 font-medium rounded-lg hover:bg-gray-200 transition-colors border border-gray-300"
+        >
+          Info
+        </a>
       </div>
     </div>
   );
