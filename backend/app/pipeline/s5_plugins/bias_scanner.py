@@ -4,7 +4,7 @@ Targets controls FAR-01 and FAR-02.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _BIAS_FILENAMES = [
@@ -57,6 +57,7 @@ class BiasScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "FAR-01":
             keywords = _BIAS_TEST_KEYWORDS
@@ -72,6 +73,7 @@ class BiasScanner(BasePlugin):
                 if found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.85)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, keywords, "Bias keyword"))
 
         for entry in self.filter_manifest(manifest, "*.py"):
             content = self.read_text(repo_root, entry.path) or ""
@@ -79,6 +81,7 @@ class BiasScanner(BasePlugin):
             if found and entry.path not in evidence:
                 evidence.append(entry.path)
                 confidence = max(confidence, 0.80)
+                ev_locs.extend(self.scan_lines(repo_root, entry.path, keywords, "Bias keyword"))
 
         for entry in self.filter_manifest(manifest, "*.md"):
             content = self.read_text(repo_root, entry.path) or ""
@@ -86,6 +89,7 @@ class BiasScanner(BasePlugin):
             if found and entry.path not in evidence:
                 evidence.append(entry.path)
                 confidence = max(confidence, 0.60)
+                ev_locs.extend(self.scan_lines(repo_root, entry.path, keywords, "Bias keyword"))
 
         if not evidence:
             missing.append(missing_msg)
@@ -98,5 +102,6 @@ class BiasScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

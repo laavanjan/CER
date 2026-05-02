@@ -4,7 +4,7 @@ Targets controls OVR-05, OVR-06, OVR-07.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _PERF_MONITORING_KEYWORDS = [
@@ -69,6 +69,7 @@ class MonitoringScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "OVR-05":
             for entry in self.filter_manifest(manifest, "*.py"):
@@ -128,5 +129,6 @@ class MonitoringScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

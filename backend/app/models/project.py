@@ -23,6 +23,8 @@ class Project(Base):
     )
     # Whether the project declares generative AI usage
     uses_genai: Mapped[bool] = mapped_column(default=False)
+    # Whether the project declares reliability/classical AI usage (TF, PyTorch, sklearn, …)
+    uses_rel_ai: Mapped[bool] = mapped_column(default=False)
     # Registry version pinned at intake (validated by S1)
     registry_version: Mapped[str] = mapped_column(String(20), nullable=False)
     created_at: Mapped[datetime] = mapped_column(

@@ -4,7 +4,7 @@ Targets controls with plugin_id "governance_scanner" (e.g. GOV-01, GOV-02).
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 # Filenames that commonly contain AI governance policies
@@ -56,6 +56,7 @@ class GovernanceScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         # Find candidate governance documents
         for pattern in _GOVERNANCE_FILENAMES:
@@ -66,6 +67,7 @@ class GovernanceScanner(BasePlugin):
                 if keywords_found:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.8)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _GOVERNANCE_KEYWORDS, "Governance keyword"))
 
         if control_id == "GOV-02":
             # Extra check: look for roles/responsibilities keywords
@@ -75,6 +77,7 @@ class GovernanceScanner(BasePlugin):
                 if roles_found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.5)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _ROLES_KEYWORDS, "Role/responsibility keyword"))
 
         if not evidence:
             missing.append("No governance policy document found")
@@ -87,5 +90,6 @@ class GovernanceScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

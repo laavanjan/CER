@@ -31,7 +31,7 @@ def run(profile: ProjectProfile) -> list[EscalationHint]:
     if not profile.uses_genai and gen_triggered:
         hints.append(
             EscalationHint(
-                control_id="GOV-01",  # Governance is the primary escalation pillar
+                control_id="GOV-01",
                 hint=(
                     "Project declared uses_genai=False but generative-AI library "
                     "imports were detected in the repository. "
@@ -41,21 +41,35 @@ def run(profile: ProjectProfile) -> list[EscalationHint]:
             )
         )
 
-    # Reliance-critical AI detected — flag for human review regardless of declaration
-    if rel_triggered:
+    # Declared no rel-AI but we found reliability/classical AI indicators in the code
+    if not profile.uses_rel_ai and rel_triggered:
         hints.append(
             EscalationHint(
                 control_id="GOV-02",
                 hint=(
-                    "Reliance-critical AI libraries detected (e.g. TensorFlow, PyTorch). "
-                    "Ensure safety-critical controls are reviewed by a human auditor."
+                    "Project declared uses_rel_ai=False but reliability/classical AI library "
+                    "imports were detected in the repository (e.g. TensorFlow, PyTorch, sklearn). "
+                    "REL overlay controls were not applied — consider re-running with uses_rel_ai=True."
                 ),
                 severity="WARNING",
             )
         )
 
-    # Basic assurance but reliance-critical AI detected
-    if profile.assurance_level == "basic" and rel_triggered:
+    # Declared rel-AI — flag for human review of safety-critical controls
+    if profile.uses_rel_ai:
+        hints.append(
+            EscalationHint(
+                control_id="GOV-02",
+                hint=(
+                    "Reliability/classical AI declared or detected (e.g. TensorFlow, PyTorch). "
+                    "Ensure safety-critical REL overlay controls are reviewed by a human auditor."
+                ),
+                severity="WARNING",
+            )
+        )
+
+    # Basic assurance but reliance-critical AI declared or detected
+    if profile.assurance_level == "basic" and (profile.uses_rel_ai or rel_triggered):
         hints.append(
             EscalationHint(
                 control_id="GOV-02",

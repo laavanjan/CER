@@ -4,7 +4,7 @@ Targets controls ACC-05, ACC-06, ACC-07.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _I18N_CODE_PATTERNS = [
@@ -93,6 +93,7 @@ class InclusionScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "ACC-05":
             for pattern in _I18N_FILENAMES:
@@ -153,5 +154,6 @@ class InclusionScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

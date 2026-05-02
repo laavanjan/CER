@@ -4,7 +4,7 @@ Targets controls SAF-04, SAF-05, SAF-06.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _SAFETY_TEST_KEYWORDS = [
@@ -73,6 +73,7 @@ class SafetyTestingScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "SAF-04":
             for entry in self.filter_manifest(manifest, "*.py"):
@@ -131,5 +132,6 @@ class SafetyTestingScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

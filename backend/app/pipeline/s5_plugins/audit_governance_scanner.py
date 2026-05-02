@@ -4,7 +4,7 @@ Targets controls GOV-08, GOV-09, GOV-10.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _AUDIT_KEYWORDS = [
@@ -82,6 +82,7 @@ class AuditGovernanceScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "GOV-08":
             for pattern in _AUDIT_FILENAMES:
@@ -137,5 +138,6 @@ class AuditGovernanceScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

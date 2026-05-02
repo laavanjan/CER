@@ -13,6 +13,7 @@ class ProjectCreate(BaseModel):
     github_url: HttpUrl | None = None
     assurance_level: str = "standard"
     uses_genai: bool = False
+    uses_rel_ai: bool = False
 
 
 class ProjectRead(BaseModel):
@@ -23,6 +24,7 @@ class ProjectRead(BaseModel):
     github_url: str | None
     assurance_level: str
     uses_genai: bool
+    uses_rel_ai: bool
     registry_version: str
     created_at: datetime
     updated_at: datetime

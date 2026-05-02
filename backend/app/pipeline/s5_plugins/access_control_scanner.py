@@ -4,7 +4,7 @@ Targets controls SEC-05, SEC-06, SEC-07, SEC-08.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _ACCESS_CONTROL_KEYWORDS = [
@@ -98,6 +98,8 @@ class AccessControlScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
+        issue_locs: list[EvidenceLocation] = []
 
         if control_id == "SEC-05":
             for entry in self.filter_manifest(manifest, "*.md"):
@@ -106,12 +108,14 @@ class AccessControlScanner(BasePlugin):
                 if found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.80)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _ACCESS_CONTROL_KEYWORDS, "Access control keyword"))
             for entry in self.filter_manifest(manifest, "*.py"):
                 content = self.read_text(repo_root, entry.path) or ""
                 found = [k for k in _ACCESS_CONTROL_KEYWORDS if k.lower() in content.lower()]
                 if len(found) >= 2 and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.75)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _ACCESS_CONTROL_KEYWORDS, "Access control keyword"))
             if not evidence:
                 missing.append("No access control documentation for AI artefacts found")
 
@@ -124,10 +128,13 @@ class AccessControlScanner(BasePlugin):
                 if any(p in content for p in _SECRET_PATTERNS):
                     secrets_found = True
                     missing.append(f"{entry.path}: potential hardcoded credential detected")
+                    # Populate issue_locations for hardcoded secrets (line-precise)
+                    issue_locs.extend(self.scan_lines_exact(repo_root, entry.path, _SECRET_PATTERNS, "Hardcoded credential"))
                 if any(p in content for p in _SECRETS_MANAGEMENT_PATTERNS):
                     env_patterns_found = True
                     if entry.path not in evidence:
                         evidence.append(entry.path)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _SECRETS_MANAGEMENT_PATTERNS, "Secrets management pattern"))
             if env_patterns_found and not secrets_found:
                 confidence = 0.85
             elif env_patterns_found and secrets_found:
@@ -145,9 +152,11 @@ class AccessControlScanner(BasePlugin):
                 if code_found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.85)
+                    ev_locs.extend(self.scan_lines_exact(repo_root, entry.path, _INPUT_VALIDATION_CODE_PATTERNS, "Input validation pattern"))
                 elif kw_found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.60)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _INPUT_VALIDATION_KEYWORDS, "Input validation keyword"))
             if not evidence:
                 missing.append("No input validation implementation found in the AI pipeline")
 
@@ -159,12 +168,14 @@ class AccessControlScanner(BasePlugin):
                     if found and entry.path not in evidence:
                         evidence.append(entry.path)
                         confidence = max(confidence, 0.85)
+                        ev_locs.extend(self.scan_lines_exact(repo_root, entry.path, _SECURITY_TEST_KEYWORDS, "Security test keyword"))
             for entry in self.filter_manifest(manifest, "*.md"):
                 content = self.read_text(repo_root, entry.path) or ""
                 found = [k for k in _SECURITY_TEST_KEYWORDS if k.lower() in content.lower()]
                 if found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.65)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _SECURITY_TEST_KEYWORDS, "Security test keyword"))
             if not evidence:
                 missing.append("No security testing documentation found")
 
@@ -175,5 +186,7 @@ class AccessControlScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
+                issue_locations=issue_locs,
             )
         ]

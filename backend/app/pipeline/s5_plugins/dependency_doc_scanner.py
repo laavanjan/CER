@@ -4,7 +4,7 @@ Targets controls DOC-07 and DOC-08.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _DEPENDENCY_DOC_FILENAMES = [
@@ -72,6 +72,7 @@ class DependencyDocScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "DOC-07":
             for pattern in _DEPENDENCY_DOC_FILENAMES:
@@ -115,5 +116,6 @@ class DependencyDocScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

@@ -38,9 +38,11 @@ def run(
         # Basic assurance: only tier-1 automated controls
         if profile.assurance_level == "basic" and tier > 1:
             continue
-        # GEN overlay: skip GEN-specific controls if project doesn't use gen-AI
-        # (Pillar prefix "GEN" indicates generative-AI-specific control)
+        # GEN overlay: skip GEN-specific controls if project doesn't use generative AI
         if control.get("id", "").startswith("GEN") and not profile.uses_genai:
+            continue
+        # REL overlay: skip REL-specific controls if project doesn't use reliability/classical AI
+        if control.get("id", "").startswith("REL") and not profile.uses_rel_ai:
             continue
 
         if tier == 3:

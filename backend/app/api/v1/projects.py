@@ -26,6 +26,7 @@ def create_project(request: Request, payload: ProjectCreate, db: Session = Depen
         github_url=str(payload.github_url) if payload.github_url else None,
         assurance_level=payload.assurance_level,
         uses_genai=payload.uses_genai,
+        uses_rel_ai=payload.uses_rel_ai,
         registry_version=settings.registry_version,
     )
     db.add(project)

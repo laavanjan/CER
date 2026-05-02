@@ -4,7 +4,7 @@ Targets controls OVR-01 and OVR-02.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _OVERRIDE_KEYWORDS = [
@@ -62,6 +62,7 @@ class HumanOverrideScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "OVR-01":
             for entry in self.filter_manifest(manifest, "*.md"):
@@ -109,5 +110,6 @@ class HumanOverrideScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

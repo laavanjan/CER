@@ -4,7 +4,7 @@ Targets controls DQ-04, DQ-05, DQ-06.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _DRIFT_FILENAMES = [
@@ -90,6 +90,7 @@ class DriftScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "DQ-04":
             for entry in self.filter_manifest(manifest, "*.py"):
@@ -161,5 +162,6 @@ class DriftScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

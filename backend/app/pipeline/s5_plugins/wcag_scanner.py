@@ -4,7 +4,7 @@ Targets controls ACC-01, ACC-02, ACC-03, ACC-04.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _ACCESSIBILITY_FILENAMES = [
@@ -93,6 +93,7 @@ class WcagScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "ACC-01":
             for pattern in _ACCESSIBILITY_FILENAMES:
@@ -169,5 +170,6 @@ class WcagScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

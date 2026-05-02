@@ -2,13 +2,15 @@
 
 Responsibilities
 ----------------
-1. For each control result from S7, call the LLM with three prompts:
-   - EXPLAIN:      Explain the finding in plain language.
-   - REMEDIATE:    Provide concrete remediation steps.
-   - CLASSIFY_DOC: Classify the documentation quality.
-2. Fallback order: Anthropic → Ollama Cloud → Gemini.
+1. For each control result from S7, call the LLM with tier-aware prompts:
+   - Tier 1 PASS/PARTIAL : Include file:line evidence locations in explanation prompt.
+   - Tier 1 ISSUE        : Include file:line issue locations + reason in a dedicated prompt.
+   - Tier 1 MISSING      : Same as Tier 2/3 (no locations to show).
+   - Tier 2/3            : Use the original prompts (no line-level context needed).
+2. Three LLM calls per control: EXPLAIN, REMEDIATE, CLASSIFY_DOC.
+3. Fallback order: Anthropic → Ollama Cloud → Gemini.
    Once a provider fails it is skipped for the rest of the run.
-3. Return a list of LLMAnnotation objects.
+4. Return a list of LLMAnnotation objects.
 
 NOTE: temperature=0 is mandatory for deterministic, auditable outputs.
 """
@@ -18,9 +20,13 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
-from app.pipeline.models import EvidenceResult, LLMAnnotation
+from app.pipeline.models import EvidenceLocation, EvidenceResult, LLMAnnotation
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Tier 2/3 prompts (unchanged baseline)
+# ---------------------------------------------------------------------------
 
 _EXPLAIN_PROMPT = """You are an AI ethics auditor. Given the following control and evidence,
 explain in 2-3 sentences what was found and why it matters for ethical AI compliance.
@@ -48,6 +54,159 @@ Outcome: {outcome}
 Evidence paths: {evidence_paths}
 
 Respond with only one of the three classification labels."""
+
+# ---------------------------------------------------------------------------
+# Tier 1 PASS / PARTIAL prompts (include file:line evidence)
+# ---------------------------------------------------------------------------
+
+_T1_EXPLAIN_PASS_PROMPT = """You are an AI ethics auditor. The following Tier 1 control PASSED.
+Explain in 2-3 sentences what evidence was found and why this demonstrates compliance.
+
+Control ID: {control_id}
+Outcome: PASS
+
+Evidence locations (file : line — matched text):
+{evidence_locations}
+
+Respond with only the explanation text."""
+
+_T1_EXPLAIN_PARTIAL_PROMPT = """You are an AI ethics auditor. The following Tier 1 control is PARTIAL.
+Explain what evidence was found, which lines support it, and what is still missing.
+
+Control ID: {control_id}
+Outcome: PARTIAL
+
+Evidence locations (file : line — matched text):
+{evidence_locations}
+
+Respond with only the explanation text."""
+
+# ---------------------------------------------------------------------------
+# Tier 1 ISSUE prompt (include file:line problems + reason)
+# ---------------------------------------------------------------------------
+
+_T1_EXPLAIN_ISSUE_PROMPT = """You are an AI ethics auditor. The following Tier 1 control has ISSUES.
+Active problems were detected in specific files. Explain what was found at each location
+and why it represents a compliance risk.
+
+Control ID: {control_id}
+Outcome: ISSUE
+
+Issue locations (file : line — content — reason):
+{issue_locations}
+
+Respond with only the explanation text (2-4 sentences)."""
+
+_T1_ISSUE_REMEDIATE_PROMPT = """You are an AI ethics auditor. Active compliance issues were found
+at specific lines in the repository. Provide 3-5 concrete remediation steps, referencing
+the specific files and lines where fixes are needed.
+
+Control ID: {control_id}
+Outcome: ISSUE
+
+Issue locations (file : line — content — reason):
+{issue_locations}
+
+Respond with only the numbered remediation steps."""
+
+_T1_ISSUE_CLASSIFY_PROMPT = """You are a documentation quality classifier.
+An active compliance ISSUE was detected (not just missing documentation).
+Classify as one of: ADEQUATE | NEEDS_IMPROVEMENT | ABSENT.
+
+Control ID: {control_id}
+Outcome: ISSUE
+Issue count: {issue_count}
+
+Respond with only one of the three classification labels."""
+
+
+def _fmt_evidence_locations(locs: list[EvidenceLocation]) -> str:
+    """Format EvidenceLocation objects into a compact readable block."""
+    if not locs:
+        return "(none)"
+    lines = []
+    for loc in locs[:20]:  # cap at 20 to avoid token bloat
+        lines.append(f"  {loc.file}:{loc.line} — {loc.snippet}")
+    if len(locs) > 20:
+        lines.append(f"  ... and {len(locs) - 20} more locations")
+    return "\n".join(lines)
+
+
+def _fmt_issue_locations(locs: list[EvidenceLocation]) -> str:
+    """Format issue EvidenceLocation objects with reason field."""
+    if not locs:
+        return "(none)"
+    lines = []
+    for loc in locs[:20]:
+        lines.append(f"  {loc.file}:{loc.line} — {loc.snippet} [{loc.reason}]")
+    if len(locs) > 20:
+        lines.append(f"  ... and {len(locs) - 20} more locations")
+    return "\n".join(lines)
+
+
+def _build_prompts(result: EvidenceResult) -> tuple[str, str, str]:
+    """Return (explain_prompt, remediate_prompt, classify_prompt) for a result.
+
+    Tier 1 controls get outcome-specific prompts that include file:line context.
+    Tier 2 and 3 controls use the original baseline prompts.
+    """
+    cid = result.control_id
+    outcome = result.outcome
+    ev_paths = result.evidence_paths
+
+    if result.tier == 1:
+        if outcome == "PASS":
+            ev_block = _fmt_evidence_locations(result.evidence_locations)
+            explain = _T1_EXPLAIN_PASS_PROMPT.format(
+                control_id=cid, evidence_locations=ev_block
+            )
+            remediate = _REMEDIATE_PROMPT.format(control_id=cid, outcome=outcome)
+            classify = _CLASSIFY_DOC_PROMPT.format(
+                control_id=cid, outcome=outcome, evidence_paths=ev_paths
+            )
+
+        elif outcome == "PARTIAL":
+            ev_block = _fmt_evidence_locations(result.evidence_locations)
+            explain = _T1_EXPLAIN_PARTIAL_PROMPT.format(
+                control_id=cid, evidence_locations=ev_block
+            )
+            remediate = _REMEDIATE_PROMPT.format(control_id=cid, outcome=outcome)
+            classify = _CLASSIFY_DOC_PROMPT.format(
+                control_id=cid, outcome=outcome, evidence_paths=ev_paths
+            )
+
+        elif outcome == "ISSUE":
+            issue_block = _fmt_issue_locations(result.issue_locations)
+            explain = _T1_EXPLAIN_ISSUE_PROMPT.format(
+                control_id=cid, issue_locations=issue_block
+            )
+            remediate = _T1_ISSUE_REMEDIATE_PROMPT.format(
+                control_id=cid, issue_locations=issue_block
+            )
+            classify = _T1_ISSUE_CLASSIFY_PROMPT.format(
+                control_id=cid, issue_count=len(result.issue_locations)
+            )
+
+        else:  # MISSING — no locations to show, use baseline
+            explain = _EXPLAIN_PROMPT.format(
+                control_id=cid, outcome=outcome, evidence_paths=ev_paths
+            )
+            remediate = _REMEDIATE_PROMPT.format(control_id=cid, outcome=outcome)
+            classify = _CLASSIFY_DOC_PROMPT.format(
+                control_id=cid, outcome=outcome, evidence_paths=ev_paths
+            )
+
+    else:
+        # Tier 2 / 3 — baseline prompts unchanged
+        explain = _EXPLAIN_PROMPT.format(
+            control_id=cid, outcome=outcome, evidence_paths=ev_paths
+        )
+        remediate = _REMEDIATE_PROMPT.format(control_id=cid, outcome=outcome)
+        classify = _CLASSIFY_DOC_PROMPT.format(
+            control_id=cid, outcome=outcome, evidence_paths=ev_paths
+        )
+
+    return explain, remediate, classify
 
 
 def _call_claude(client: Any, prompt: str) -> str:
@@ -116,7 +275,6 @@ def _make_call(
             return _call_ollama(ollama_client, prompt)
         except Exception as exc:
             logger.warning("Ollama Cloud failed (%s) — switching to Gemini.", exc)
-            # Only permanently switch if it's not a recoverable 429
             if "429" not in str(exc):
                 state["ollama_failed"] = True
 
@@ -135,6 +293,7 @@ def run(
     """Generate LLM annotations for every evidence result.
 
     Fallback order: Anthropic → Ollama Cloud → Gemini.
+    Tier 1 controls receive outcome-specific prompts including file:line context.
     """
     if not anthropic_api_key and not ollama_api_key and not gemini_api_key:
         return [
@@ -143,6 +302,7 @@ def run(
                 explanation="[LLM unavailable — no API key configured]",
                 remediation="[LLM unavailable — no API key configured]",
                 doc_classification="NEEDS_IMPROVEMENT",
+                issue_detail=_fmt_issue_locations(r.issue_locations) if r.issue_locations else "",
             )
             for r in evidence_results
         ]
@@ -178,34 +338,23 @@ def run(
     state: dict = {}  # tracks which providers have failed this run
 
     def _annotate(result: EvidenceResult) -> LLMAnnotation:
-        explain = _make_call(
-            _EXPLAIN_PROMPT.format(
-                control_id=result.control_id,
-                outcome=result.outcome,
-                evidence_paths=result.evidence_paths,
-            ),
-            anthropic_client, ollama_client, gemini_client, state,
-        )
-        remediate = _make_call(
-            _REMEDIATE_PROMPT.format(
-                control_id=result.control_id,
-                outcome=result.outcome,
-            ),
-            anthropic_client, ollama_client, gemini_client, state,
-        )
-        classify = _make_call(
-            _CLASSIFY_DOC_PROMPT.format(
-                control_id=result.control_id,
-                outcome=result.outcome,
-                evidence_paths=result.evidence_paths,
-            ),
-            anthropic_client, ollama_client, gemini_client, state,
-        )
+        explain_prompt, remediate_prompt, classify_prompt = _build_prompts(result)
+
+        explain = _make_call(explain_prompt, anthropic_client, ollama_client, gemini_client, state)
+        remediate = _make_call(remediate_prompt, anthropic_client, ollama_client, gemini_client, state)
+        classify = _make_call(classify_prompt, anthropic_client, ollama_client, gemini_client, state)
+
+        # For Tier 1 ISSUE outcomes, populate issue_detail with the structured locations
+        issue_detail = ""
+        if result.tier == 1 and result.issue_locations:
+            issue_detail = _fmt_issue_locations(result.issue_locations)
+
         return LLMAnnotation(
             control_id=result.control_id,
             explanation=explain,
             remediation=remediate,
             doc_classification=classify,
+            issue_detail=issue_detail,
         )
 
     # 4 workers — safe for Gemini free tier (15 req/min); Ollama Cloud has no strict limit

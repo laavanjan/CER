@@ -4,7 +4,7 @@ Targets controls FAR-06 and FAR-07.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _POLICY_FILENAMES = [
@@ -65,6 +65,7 @@ class DiscriminationScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "FAR-06":
             for pattern in _POLICY_FILENAMES:
@@ -107,5 +108,6 @@ class DiscriminationScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

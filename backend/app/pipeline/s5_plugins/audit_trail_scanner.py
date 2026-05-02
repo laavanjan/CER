@@ -4,7 +4,7 @@ Targets controls TRN-06, TRN-07, TRN-08.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _AUDIT_DOC_FILENAMES = [
@@ -73,6 +73,7 @@ class AuditTrailScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "TRN-06":
             for pattern in _AUDIT_DOC_FILENAMES:
@@ -135,5 +136,6 @@ class AuditTrailScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

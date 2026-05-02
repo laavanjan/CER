@@ -4,7 +4,7 @@ Targets controls DQ-01, DQ-02, DQ-03.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _DATA_FILENAMES = [
@@ -72,6 +72,7 @@ class DataProvenanceScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "DQ-01":
             keywords = _PROVENANCE_KEYWORDS
@@ -116,5 +117,6 @@ class DataProvenanceScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

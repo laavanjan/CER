@@ -4,7 +4,7 @@ Targets controls TRN-03, TRN-04, TRN-05.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _DISCLOSURE_FILENAMES = [
@@ -76,6 +76,7 @@ class DisclosureScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "TRN-03":
             for pattern in _DISCLOSURE_FILENAMES:
@@ -136,5 +137,6 @@ class DisclosureScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

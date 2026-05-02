@@ -4,7 +4,7 @@ Targets controls SEC-03 and SEC-04.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 # Lockfile and pinned dependency file names
@@ -63,6 +63,7 @@ class DependencyScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "SEC-03":
             # Check for lockfiles
@@ -100,5 +101,6 @@ class DependencyScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

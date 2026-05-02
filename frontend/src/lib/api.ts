@@ -53,6 +53,7 @@ export interface ProjectCreate {
   github_url?: string;
   assurance_level: string;
   uses_genai: boolean;
+  uses_rel_ai: boolean;
   registry_version: string;
 }
 
@@ -62,6 +63,7 @@ export interface ProjectRead {
   github_url: string | null;
   assurance_level: string;
   uses_genai: boolean;
+  uses_rel_ai: boolean;
   registry_version: string;
   created_at: string;
   updated_at: string;

@@ -4,7 +4,7 @@ Targets controls PRV-06, PRV-07, PRV-08.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _PII_MASKING_CODE_PATTERNS = [
@@ -73,6 +73,7 @@ class PiiCodeScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "PRV-06":
             for entry in self.filter_manifest(manifest, "*.py"):
@@ -82,15 +83,18 @@ class PiiCodeScanner(BasePlugin):
                 if code_found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.90)
+                    ev_locs.extend(self.scan_lines_exact(repo_root, entry.path, _PII_MASKING_CODE_PATTERNS, "PII masking pattern"))
                 elif kw_found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.65)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _PII_MASKING_KEYWORDS, "PII masking keyword"))
             for entry in self.filter_manifest(manifest, "*.md"):
                 content = self.read_text(repo_root, entry.path) or ""
                 found = [k for k in _PII_MASKING_KEYWORDS if k.lower() in content.lower()]
                 if found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.55)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _PII_MASKING_KEYWORDS, "PII masking keyword"))
             if not evidence:
                 missing.append("No PII masking or redaction found in the codebase")
 
@@ -101,12 +105,14 @@ class PiiCodeScanner(BasePlugin):
                 if found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.85)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _ANONYMISATION_KEYWORDS, "Anonymisation keyword"))
             for entry in self.filter_manifest(manifest, "*.md"):
                 content = self.read_text(repo_root, entry.path) or ""
                 found = [k for k in _ANONYMISATION_KEYWORDS if k.lower() in content.lower()]
                 if found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.65)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _ANONYMISATION_KEYWORDS, "Anonymisation keyword"))
             if not evidence:
                 missing.append("No data anonymisation or pseudonymisation documentation found")
 
@@ -117,6 +123,7 @@ class PiiCodeScanner(BasePlugin):
                 if found and entry.path not in evidence:
                     evidence.append(entry.path)
                     confidence = max(confidence, 0.80)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _THIRD_PARTY_SHARING_KEYWORDS, "Third-party sharing keyword"))
             for pattern in ("*dpa*", "*DPA*", "*data-sharing*", "*data_sharing*", "*processor*"):
                 for entry in self.filter_manifest(manifest, pattern):
                     if entry.path not in evidence:
@@ -124,6 +131,7 @@ class PiiCodeScanner(BasePlugin):
                         if content:
                             evidence.append(entry.path)
                             confidence = max(confidence, 0.85)
+                            ev_locs.extend(self.scan_lines(repo_root, entry.path, _THIRD_PARTY_SHARING_KEYWORDS, "Third-party sharing keyword"))
             if not evidence:
                 missing.append("No third-party data sharing agreements or controls documented")
 
@@ -134,5 +142,6 @@ class PiiCodeScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

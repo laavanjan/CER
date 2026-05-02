@@ -12,6 +12,7 @@ export default function IntakePage() {
     github_url: "",
     assurance_level: "standard",
     uses_genai: false,
+    uses_rel_ai: false,
     registry_version: "v2",
   });
   const [error, setError] = useState<string | null>(null);
@@ -110,6 +111,24 @@ export default function IntakePage() {
             <br />
             <span className="text-gray-500">
               Check if your system uses LLMs, image generation, or other generative models.
+            </span>
+          </label>
+        </div>
+
+        {/* Uses Reliability / Classical AI */}
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id="uses_rel_ai"
+            checked={form.uses_rel_ai}
+            onChange={(e) => setForm({ ...form, uses_rel_ai: e.target.checked })}
+            className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
+          />
+          <label htmlFor="uses_rel_ai" className="text-sm text-gray-700">
+            <span className="font-medium">Uses Reliability / Classical AI</span>
+            <br />
+            <span className="text-gray-500">
+              Check if your system uses traditional ML models (TensorFlow, PyTorch, scikit-learn, XGBoost, etc.) in safety-critical or decision-making roles.
             </span>
           </label>
         </div>

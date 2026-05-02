@@ -72,10 +72,11 @@ def run(
         if gen_triggered and rel_triggered:
             break  # No need to scan further
 
-    # Attach detection results to the profile as ad-hoc attributes.
-    # Downstream stages read these flags to adjust control filtering.
+    # Merge declared flags with auto-detected signals.
+    # A user ticking the checkbox OR detection finding the pattern both count.
     profile.uses_genai = profile.uses_genai or gen_triggered
-    # Store detection flags as extra fields (pipeline convention)
+    profile.uses_rel_ai = profile.uses_rel_ai or rel_triggered
+    # Store raw detection flags as extra attributes for S8 honesty check.
     profile.gen_triggered = gen_triggered
     profile.rel_triggered = rel_triggered
 

@@ -4,7 +4,7 @@ Targets controls GOV-03 and GOV-04.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _RISK_FILENAMES = [
@@ -53,6 +53,7 @@ class RiskAssessmentScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         for pattern in _RISK_FILENAMES:
             for entry in self.filter_manifest(manifest, pattern):
@@ -82,5 +83,6 @@ class RiskAssessmentScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

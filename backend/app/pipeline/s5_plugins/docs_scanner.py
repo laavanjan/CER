@@ -4,7 +4,7 @@ Targets controls with plugin_id "docs_scanner" (e.g. DOC-01, DOC-02).
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 # Filenames that commonly contain model cards or system cards
@@ -46,6 +46,7 @@ class DocsScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "DOC-01":
             # Check for model card with mandatory fields
@@ -55,11 +56,11 @@ class DocsScanner(BasePlugin):
                     found_fields = [f for f in _MANDATORY_FIELDS if f.lower() in content.lower()]
                     if found_fields:
                         evidence.append(entry.path)
-                        # Full confidence only if all mandatory fields present
                         if len(found_fields) >= 3:
                             confidence = max(confidence, 0.9)
                         else:
                             confidence = max(confidence, 0.5)
+                        ev_locs.extend(self.scan_lines(repo_root, entry.path, _MANDATORY_FIELDS, "Model card field"))
                     else:
                         # File exists but fields missing
                         evidence.append(entry.path)
@@ -80,6 +81,7 @@ class DocsScanner(BasePlugin):
                     if keywords_found:
                         evidence.append(entry.path)
                         confidence = max(confidence, 0.75)
+                        ev_locs.extend(self.scan_lines(repo_root, entry.path, _ADR_KEYWORDS, "ADR keyword"))
 
             if not evidence:
                 missing.append("No ADR or architecture documentation found")
@@ -91,5 +93,6 @@ class DocsScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

@@ -9,7 +9,9 @@ must be refused.
 import abc
 from pathlib import Path
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
+
+_SNIPPET_MAX = 200  # max chars per snippet to avoid bloated output
 
 
 class BasePlugin(abc.ABC):
@@ -40,6 +42,49 @@ class BasePlugin(abc.ABC):
         from fnmatch import fnmatch
 
         return [e for e in manifest if fnmatch(e.path, glob_pattern)]
+
+    def scan_lines(
+        self,
+        repo_root: str,
+        rel_path: str,
+        keywords: list[str],
+        reason_prefix: str = "Keyword match",
+        case_sensitive: bool = False,
+    ) -> list[EvidenceLocation]:
+        """Scan a file line-by-line and return one EvidenceLocation per matching line.
+
+        Only the first matching keyword on each line is recorded so a single line
+        does not produce multiple locations for the same match.
+        """
+        content = self.read_text(repo_root, rel_path) or ""
+        locations: list[EvidenceLocation] = []
+        for line_num, line_text in enumerate(content.splitlines(), start=1):
+            compare = line_text if case_sensitive else line_text.lower()
+            for kw in keywords:
+                needle = kw if case_sensitive else kw.lower()
+                if needle in compare:
+                    locations.append(
+                        EvidenceLocation(
+                            file=rel_path,
+                            line=line_num,
+                            snippet=line_text.strip()[:_SNIPPET_MAX],
+                            reason=f"{reason_prefix}: '{kw}'",
+                        )
+                    )
+                    break  # one location per line
+        return locations
+
+    def scan_lines_exact(
+        self,
+        repo_root: str,
+        rel_path: str,
+        patterns: list[str],
+        reason_prefix: str = "Pattern match",
+    ) -> list[EvidenceLocation]:
+        """Case-sensitive variant of scan_lines used for code patterns."""
+        return self.scan_lines(
+            repo_root, rel_path, patterns, reason_prefix, case_sensitive=True
+        )
 
     # -- Abstract interface ----------------------------------------------------
 

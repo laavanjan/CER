@@ -4,7 +4,7 @@ Targets controls ENV-01, ENV-02, ENV-03.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _ENV_FILENAMES = [
@@ -78,6 +78,7 @@ class EnvironmentalScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "ENV-01":
             keywords = _COMPUTE_EFFICIENCY_KEYWORDS
@@ -122,5 +123,6 @@ class EnvironmentalScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

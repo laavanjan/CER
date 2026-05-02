@@ -4,7 +4,7 @@ Targets controls with plugin_id "privacy_scanner" (e.g. PRV-01).
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 # Filenames that commonly contain privacy impact assessments
@@ -54,6 +54,7 @@ class PrivacyScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         for pattern in _PIA_PATTERNS:
             for entry in self.filter_manifest(manifest, pattern):
@@ -63,11 +64,11 @@ class PrivacyScanner(BasePlugin):
 
                 if pia_found:
                     evidence.append(entry.path)
+                    ev_locs.extend(self.scan_lines(repo_root, entry.path, _PIA_KEYWORDS, "PIA keyword"))
                     if dp_found:
-                        # PIA present AND references data processing activities → PASS
                         confidence = max(confidence, 0.9)
+                        ev_locs.extend(self.scan_lines(repo_root, entry.path, _DATA_PROCESSING_KEYWORDS, "Data processing keyword"))
                     else:
-                        # PIA present but incomplete
                         confidence = max(confidence, 0.5)
                         missing.append(
                             f"{entry.path}: PIA found but does not reference "
@@ -85,5 +86,6 @@ class PrivacyScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

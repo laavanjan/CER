@@ -4,7 +4,7 @@ Targets controls PRV-02 and PRV-03.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _CONSENT_FILENAMES = [
@@ -56,6 +56,7 @@ class ConsentScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "PRV-02":
             for pattern in _CONSENT_FILENAMES:
@@ -104,5 +105,6 @@ class ConsentScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]

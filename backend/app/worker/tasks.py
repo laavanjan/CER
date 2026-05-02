@@ -79,6 +79,7 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
             assurance_level=project_data.get("assurance_level", "standard"),
             uses_genai=project_data.get("uses_genai", False),
             registry_version=project_data.get("registry_version", settings.registry_version),
+            uses_rel_ai=project_data.get("uses_rel_ai", False),
         )
 
         def _timed(label: str):

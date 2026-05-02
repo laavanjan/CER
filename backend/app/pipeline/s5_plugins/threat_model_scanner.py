@@ -4,7 +4,7 @@ Targets controls SEC-01 and SEC-02.
 Reads files as text only — no code execution.
 """
 
-from app.pipeline.models import ManifestEntry, RawFinding
+from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
 _THREAT_MODEL_FILENAMES = [
@@ -62,6 +62,7 @@ class ThreatModelScanner(BasePlugin):
         evidence: list[str] = []
         missing: list[str] = []
         confidence = 0.0
+        ev_locs: list[EvidenceLocation] = []
 
         if control_id == "SEC-01":
             keywords = _THREAT_MODEL_KEYWORDS
@@ -103,5 +104,6 @@ class ThreatModelScanner(BasePlugin):
                 evidence_found=evidence,
                 missing=missing,
                 confidence=confidence,
+                evidence_locations=ev_locs,
             )
         ]
