@@ -11,20 +11,20 @@ export default function HomePage() {
         controls across 11 pillars, producing structured findings and remediation guidance.
       </p>
       <div className="flex gap-4 justify-center">
-        <Link
-          href="/intake"
-          className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Start Review →
-        </Link>
         <a
-          href="/index.html"
+          href="/info.html"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-800 font-medium rounded-lg hover:bg-gray-200 transition-colors border border-gray-300"
         >
           Info
         </a>
+        <Link
+          href="/intake"
+          className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Start Review →
+        </Link>
       </div>
     </div>
   );
