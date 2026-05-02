@@ -315,7 +315,7 @@ pytest tests/ -v
 After making changes, use the following commands to commit and push to all three remotes at once:
 
 ```bash
-git add frontend/src/app/page.tsx
+git add .
 git commit -m "add Info button linking to AIGAP reference doc"
 git push origin main
 git push laavan main

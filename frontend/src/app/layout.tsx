@@ -51,7 +51,7 @@ export default function RootLayout({
                 {/* Right nav */}
                 <nav className="flex items-center gap-1 ml-auto">
                   <a
-                    href="/info.html"
+                    href="/info"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-gray-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
