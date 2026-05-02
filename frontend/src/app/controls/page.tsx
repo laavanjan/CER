@@ -179,7 +179,7 @@ function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, existing
           value={form[key] as string}
           onChange={(e) => setForm({ ...form, [key]: e.target.value })}
           placeholder={placeholder}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+          className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
         />
       ) : (
         <input
@@ -188,7 +188,7 @@ function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, existing
           value={form[key] as string}
           onChange={(e) => setForm({ ...form, [key]: e.target.value })}
           placeholder={placeholder}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
       )}
     </div>
@@ -220,7 +220,7 @@ function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, existing
               value={controlId}
               onChange={(e) => setControlId(e.target.value.toUpperCase())}
               placeholder="GOV-03"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono disabled:bg-gray-50 disabled:text-gray-400"
             />
           </div>
 
@@ -231,7 +231,7 @@ function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, existing
               <select
                 value={form.pillar}
                 onChange={(e) => setForm({ ...form, pillar: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
               >
                 {PILLARS.map((p) => <option key={p}>{p}</option>)}
               </select>
@@ -241,7 +241,7 @@ function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, existing
               <select
                 value={form.tier}
                 onChange={(e) => setForm({ ...form, tier: Number(e.target.value) })}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
               >
                 {[1, 2, 3].map((t) => <option key={t} value={t}>Tier {t}</option>)}
               </select>
@@ -269,7 +269,7 @@ function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, existing
               value={pluginInput}
               onChange={(e) => setPluginInput(e.target.value)}
               placeholder="governance_scanner, docs_scanner"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono"
+              className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono"
             />
           </div>
 
@@ -540,7 +540,7 @@ export default function ControlsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by ID, pillar, or criteria…"
-            className="w-full pl-9 pr-9 py-2 text-sm border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full pl-9 pr-9 py-2 text-sm text-gray-900 border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
           {search && (
             <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
