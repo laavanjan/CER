@@ -18,7 +18,7 @@ export default function HomePage() {
           Start Review →
         </Link>
         <a
-          href="file:///C:/Users/laavanjan/Documents/Ethiksa/AIGAP%20%C2%B7%20Code%20Ethics%20Reviewer%20%E2%80%94%20Complete%20Reference.html"
+          href="/index.html"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-800 font-medium rounded-lg hover:bg-gray-200 transition-colors border border-gray-300"
