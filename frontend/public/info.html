@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIGAP · Code Ethics Reviewer — Complete Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root {
+  --ink:       #0e0e0c;
+  --ink2:      #1c1c18;
+  --ink3:      #2e2e28;
+  --dust:      #f5f4f0;
+  --dust2:     #eeecea;
+  --dust3:     #e5e3de;
+  --fog:       #9a9890;
+  --fog2:      #b8b6ae;
+  --line:      #e0deda;
+  --line2:     #d0cec8;
+  --blue:      #1a44c2;
+  --blue-s:    #eef1fb;
+  --blue-b:    #c7d0f0;
+  --green:     #166534;
+  --green-s:   #f0fdf4;
+  --green-b:   #86efac;
+  --amber:     #92400e;
+  --amber-s:   #fffbeb;
+  --amber-b:   #fcd34d;
+  --red:       #991b1b;
+  --red-s:     #fef2f2;
+  --red-b:     #fca5a5;
+  --violet:    #5b21b6;
+  --violet-s:  #f5f3ff;
+  --violet-b:  #c4b5fd;
+  --r:         10px;
+  --r-sm:      6px;
+  --sh:        0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh-md:     0 4px 16px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  --sh-lg:     0 8px 32px rgba(0,0,0,.1),0 4px 8px rgba(0,0,0,.05);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;font-size:16px;}
+body{font-family:'Lora',serif;background:var(--dust);color:var(--ink);line-height:1.7;overflow-x:hidden;}
+::selection{background:var(--blue);color:#fff;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px;}
+
+/* ── UTILITY ── */
+.mono{font-family:'JetBrains Mono',monospace;}
+.sans{font-family:'Plus Jakarta Sans',sans-serif;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--dust2);padding:.1em .35em;border-radius:3px;color:var(--blue);}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;height:52px;background:rgba(245,244,240,.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;}
+.nav-logo{display:flex;align-items:center;gap:.6rem;}
+.nav-pulse{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:pulse 2.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);}}
+.nav-logo span{font-family:'Plus Jakarta Sans',sans-serif;font-size:.75rem;font-weight:700;color:var(--blue);letter-spacing:.04em;}
+.nav-links{display:flex;gap:.1rem;flex-wrap:wrap;}
+.nav-links a{font-family:'Plus Jakarta Sans',sans-serif;font-size:.68rem;font-weight:600;color:var(--fog);text-decoration:none;padding:.3rem .55rem;border-radius:4px;transition:all .15s;letter-spacing:.02em;}
+.nav-links a:hover{color:var(--blue);background:var(--blue-s);}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 5rem;position:relative;overflow:hidden;background:var(--dust);}
+.hero-bg{position:absolute;inset:0;pointer-events:none;}
+.hero-bg::before{content:'';position:absolute;top:-20%;left:-10%;width:70%;height:80%;background:radial-gradient(ellipse,rgba(26,68,194,.06) 0%,transparent 65%);}
+.hero-bg::after{content:'';position:absolute;bottom:-10%;right:-5%;width:55%;height:60%;background:radial-gradient(ellipse,rgba(22,101,52,.05) 0%,transparent 65%);}
+.grid-overlay{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:48px 48px;opacity:.4;}
+.hero-inner{position:relative;z-index:1;max-width:800px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--blue);background:var(--blue-s);border:1px solid var(--blue-b);border-radius:99px;padding:.35rem 1rem;margin-bottom:2rem;letter-spacing:.04em;}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--blue);animation:pulse 2.5s ease-in-out infinite;}
+.hero h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;line-height:1.15;letter-spacing:-.02em;margin-bottom:1.25rem;color:var(--ink);}
+.hero h1 em{font-style:normal;color:var(--blue);}
+.hero-sub{font-family:'Lora',serif;font-size:1.05rem;color:var(--fog);line-height:1.85;max-width:560px;margin:0 auto 2.5rem;font-style:italic;}
+.hero-stats{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem;}
+.stat{text-align:center;}
+.stat-num{font-family:'Plus Jakarta Sans',sans-serif;font-size:2rem;font-weight:800;color:var(--ink);line-height:1;}
+.stat-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);letter-spacing:.05em;text-transform:uppercase;margin-top:.2rem;}
+.hero-btns{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;}
+.btn{font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:700;padding:.65rem 1.4rem;border-radius:var(--r-sm);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:all .15s;cursor:pointer;border:none;letter-spacing:.02em;}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 2px 12px rgba(26,68,194,.3);}
+.btn-blue:hover{background:#1237a8;transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--line2);}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+
+/* ── PAGE SECTIONS ── */
+.page-section{padding:5rem 0;border-top:1px solid var(--line);}
+.container{max-width:1100px;margin:0 auto;padding:0 2rem;}
+.section-header{margin-bottom:3rem;}
+.section-kicker{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--blue);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.6rem;display:flex;align-items:center;gap:.6rem;}
+.section-kicker::before{content:'';display:inline-block;width:18px;height:2px;background:var(--blue);}
+.section-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.15;margin-bottom:.6rem;}
+.section-sub{font-family:'Lora',serif;font-size:.95rem;color:var(--fog);font-style:italic;line-height:1.8;max-width:580px;}
+
+/* ── CARDS ── */
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.5rem;box-shadow:var(--sh);transition:all .2s;}
+.card:hover{border-color:var(--blue-b);box-shadow:var(--sh-md);transform:translateY(-2px);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+@media(max-width:900px){.grid-4{grid-template-columns:1fr 1fr;}.grid-3{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+/* ── CODE BLOCKS ── */
+.codeblock{background:var(--ink2);border-radius:var(--r);padding:1.25rem 1.5rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;line-height:1.85;color:#e2e0da;overflow-x:auto;margin:.85rem 0;position:relative;border:1px solid var(--ink3);}
+.codeblock .c-comment{color:#6b7280;}
+.codeblock .c-key{color:#93c5fd;}
+.codeblock .c-val{color:#86efac;}
+.codeblock .c-str{color:#fbbf24;}
+.codeblock .c-op{color:#f87171;}
+.codeblock .c-dim{color:#6b7280;}
+.codeblock .c-hi{color:#e2e0da;}
+.cb-label{position:absolute;top:.6rem;right:.75rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#4b5563;letter-spacing:.05em;text-transform:uppercase;}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:.25rem;font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:500;padding:.2rem .55rem;border-radius:99px;border:1px solid;}
+.b-t1{background:var(--green-s);color:var(--green);border-color:var(--green-b);}
+.b-t2{background:var(--amber-s);color:var(--amber);border-color:var(--amber-b);}
+.b-t3{background:var(--red-s);color:var(--red);border-color:var(--red-b);}
+.b-det{background:#f0f9ff;color:#0369a1;border-color:#bae6fd;}
+.b-hyb{background:var(--violet-s);color:var(--violet);border-color:var(--violet-b);}
+.b-pass{background:var(--green-s);color:var(--green);border-color:var(--green-b);}
+.b-partial{background:var(--amber-s);color:var(--amber);border-color:var(--amber-b);}
+.b-missing{background:var(--red-s);color:var(--red);border-color:var(--red-b);}
+.b-nt{background:var(--dust2);color:var(--fog);border-color:var(--line2);}
+.b-ne{background:var(--violet-s);color:var(--violet);border-color:var(--violet-b);}
+
+/* ── CALLOUTS ── */
+.callout{border-radius:var(--r-sm);padding:1rem 1.15rem;display:flex;gap:.75rem;align-items:flex-start;margin:1rem 0;border-left:3px solid;}
+.callout-icon{font-size:1rem;flex-shrink:0;margin-top:.1rem;}
+.callout p,.callout div{font-size:.875rem;line-height:1.75;}
+.callout.blue{background:var(--blue-s);border-color:var(--blue);}
+.callout.blue p,.callout.blue div{color:#1e3a8a;}
+.callout.green{background:var(--green-s);border-color:var(--green);}
+.callout.green p,.callout.green div{color:#14532d;}
+.callout.amber{background:var(--amber-s);border-color:var(--amber);}
+.callout.amber p,.callout.amber div{color:#78350f;}
+.callout.red{background:var(--red-s);border-color:var(--red);}
+.callout.red p,.callout.red div{color:#7f1d1d;}
+
+/* ── TABLES ── */
+.table-wrap{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);}
+table{width:100%;border-collapse:collapse;}
+th{font-family:'Plus Jakarta Sans',sans-serif;font-size:.67rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.75rem 1rem;background:var(--dust2);color:var(--fog);border-bottom:1px solid var(--line);text-align:left;}
+td{padding:.85rem 1rem;border-bottom:1px solid var(--line);font-size:.855rem;color:var(--ink3);vertical-align:top;line-height:1.65;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--dust);}
+.ctrl-id{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;padding:.18rem .5rem;border-radius:4px;white-space:nowrap;}
+.signal-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;background:var(--dust2);border:1px solid var(--line2);color:var(--fog);padding:.12rem .4rem;border-radius:3px;display:inline-block;margin:.1rem .1rem .1rem 0;}
+.signals{margin-top:.35rem;}
+
+/* ── LIFECYCLE STRIP ── */
+.lifecycle{display:flex;align-items:stretch;gap:0;background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-md);}
+.lc-item{flex:1;padding:1.5rem 1.25rem;border-right:1px solid var(--line);position:relative;}
+.lc-item:last-child{border-right:none;}
+.lc-item.active{background:var(--blue-s);}
+.lc-step{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--fog);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.4rem;}
+.lc-tool{font-family:'Plus Jakarta Sans',sans-serif;font-size:.95rem;font-weight:800;color:var(--ink);margin-bottom:.3rem;}
+.lc-item.active .lc-tool{color:var(--blue);}
+.lc-desc{font-family:'Lora',serif;font-size:.8rem;color:var(--fog);font-style:italic;line-height:1.6;}
+.lc-arrow{position:absolute;right:-10px;top:50%;transform:translateY(-50%);z-index:2;font-size:1rem;color:var(--fog2);}
+@media(max-width:700px){.lifecycle{flex-direction:column;}.lc-item{border-right:none;border-bottom:1px solid var(--line);}.lc-arrow{display:none;}}
+
+/* ── TIER CARDS ── */
+.tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+@media(max-width:700px){.tier-grid{grid-template-columns:1fr;}}
+.tier-card{background:#fff;border:2px solid;border-radius:var(--r);padding:1.5rem;box-shadow:var(--sh);}
+.tier-card.t1{border-color:var(--green-b);}
+.tier-card.t2{border-color:var(--amber-b);}
+.tier-card.t3{border-color:var(--red-b);}
+.tier-top{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;}
+.tier-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.tier-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:1rem;font-weight:800;}
+.tier-count{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);}
+.tier-desc{font-size:.875rem;color:var(--fog);line-height:1.75;margin-bottom:1rem;}
+.tier-flow{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--ink3);background:var(--dust);border-radius:var(--r-sm);padding:.75rem 1rem;line-height:1.8;}
+
+/* ── PIPELINE ── */
+.pipeline{display:flex;flex-direction:column;gap:.5rem;}
+.stage{display:grid;grid-template-columns:72px 1fr;gap:.85rem;align-items:flex-start;}
+.stage-badge{background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:.6rem .4rem;text-align:center;box-shadow:var(--sh);flex-shrink:0;}
+.stage-step{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--fog);text-transform:uppercase;letter-spacing:.04em;display:block;}
+.stage-code{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.1rem;font-weight:800;color:var(--blue);display:block;line-height:1;}
+.stage-type{font-family:'JetBrains Mono',monospace;font-size:.55rem;display:inline-block;padding:.1rem .3rem;border-radius:3px;margin-top:.3rem;}
+.det-t{background:var(--green-s);color:var(--green);}
+.llm-t{background:var(--violet-s);color:var(--violet);}
+.stage-body{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.25rem 1.4rem;box-shadow:var(--sh);}
+.stage-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;}
+.stage-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:.95rem;font-weight:800;color:var(--ink);}
+.stage-tagline{font-family:'Lora',serif;font-size:.82rem;color:var(--fog);font-style:italic;}
+.io-row{display:grid;grid-template-columns:1fr 36px 1fr;gap:.5rem;align-items:start;margin-top:.85rem;}
+.io-box{border-radius:var(--r-sm);padding:.75rem .9rem;}
+.io-in{background:var(--blue-s);border:1px solid var(--blue-b);}
+.io-out{background:var(--green-s);border:1px solid var(--green-b);}
+.io-label{font-family:'Plus Jakarta Sans',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.35rem;}
+.io-in .io-label{color:var(--blue);}
+.io-out .io-label{color:var(--green);}
+.io-list{list-style:none;}
+.io-list li{font-family:'JetBrains Mono',monospace;font-size:.71rem;color:var(--ink3);line-height:1.7;padding:.05rem 0;}
+.io-list li::before{content:'→ ';color:var(--fog2);}
+.io-arrow{text-align:center;font-size:1.1rem;color:var(--fog2);padding-top:.9rem;}
+@media(max-width:600px){.stage{grid-template-columns:1fr;}.io-row{grid-template-columns:1fr;}.io-arrow{display:none;}}
+
+/* ── PILLARS ── */
+.pillar-stack{display:flex;flex-direction:column;gap:.5rem;}
+.pillar{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);}
+.pillar-head{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.4rem;cursor:pointer;user-select:none;transition:background .15s;}
+.pillar-head:hover{background:var(--dust);}
+.p-num{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:.75rem;font-weight:800;flex-shrink:0;}
+.p-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;font-weight:800;flex:1;color:var(--ink);}
+.p-meta{display:flex;align-items:center;gap:.5rem;}
+.p-count{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);background:var(--dust2);padding:.15rem .45rem;border-radius:99px;}
+.p-chevron{color:var(--fog2);font-size:.7rem;transition:transform .25s;}
+.pillar.open .p-chevron{transform:rotate(180deg);}
+.pillar-body{display:none;border-top:1px solid var(--line);}
+.pillar.open .pillar-body{display:block;}
+.pillar-intro{padding:1.25rem 1.4rem;background:var(--dust);font-size:.875rem;color:var(--fog);line-height:1.8;font-style:italic;border-bottom:1px solid var(--line);}
+.ctrl-table-wrap{margin:1.25rem 1.4rem;background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;}
+.ctrl-table{width:100%;border-collapse:collapse;}
+.ctrl-table th{font-family:'Plus Jakarta Sans',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.65rem .9rem;background:var(--dust2);color:var(--fog);border-bottom:1px solid var(--line);text-align:left;}
+.ctrl-table td{padding:.85rem .9rem;border-bottom:1px solid var(--line);font-size:.835rem;color:var(--ink3);vertical-align:top;line-height:1.65;}
+.ctrl-table tr:last-child td{border-bottom:none;}
+.ctrl-table tr:hover td{background:var(--dust);}
+.ctrl-what strong{display:block;font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:700;color:var(--ink);margin-bottom:.25rem;}
+.ctrl-what p{font-size:.8rem;color:var(--fog);line-height:1.7;}
+
+/* ── PLUGIN TABLE ── */
+.plugin-group{margin-bottom:2rem;}
+.pg-header{font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--fog);padding:.5rem 0 .75rem;border-bottom:2px solid var(--line);margin-bottom:.75rem;}
+.plugin-name{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--blue);font-weight:500;}
+
+/* ── STATUS CARDS ── */
+.status-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;}
+@media(max-width:900px){.status-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:500px){.status-grid{grid-template-columns:1fr;}}
+.status-card{border-radius:var(--r);padding:1.25rem;border:2px solid;background:#fff;box-shadow:var(--sh);}
+.sc-icon{font-size:1.4rem;margin-bottom:.6rem;}
+.sc-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:800;margin-bottom:.35rem;}
+.sc-desc{font-size:.8rem;color:var(--fog);line-height:1.65;}
+
+/* ── LEVEL CARDS ── */
+.level-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+@media(max-width:900px){.level-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:500px){.level-grid{grid-template-columns:1fr;}}
+.level-card{background:#fff;border:2px solid;border-radius:var(--r);padding:1.4rem;box-shadow:var(--sh);}
+.lv-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:.95rem;font-weight:800;margin-bottom:.2rem;}
+.lv-range{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);margin-bottom:.75rem;}
+.lv-desc{font-size:.845rem;color:var(--fog);line-height:1.7;}
+.lv-bar{height:4px;border-radius:2px;margin-top:1rem;}
+
+/* ── HANDOFF ── */
+.handoff-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+@media(max-width:700px){.handoff-grid{grid-template-columns:1fr;}}
+.handoff-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.75rem;box-shadow:var(--sh-md);}
+.hc-dest{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fog);margin-bottom:.25rem;}
+.hc-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.05rem;font-weight:800;color:var(--ink);margin-bottom:1rem;}
+.field-row{display:flex;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--line);}
+.field-row:last-child{border-bottom:none;}
+.fk{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--blue);min-width:160px;flex-shrink:0;padding-top:.05rem;}
+.fv{font-size:.8rem;color:var(--fog);line-height:1.6;}
+
+/* ── GLOSSARY ── */
+.gloss-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;}
+@media(max-width:900px){.gloss-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:500px){.gloss-grid{grid-template-columns:1fr;}}
+.gloss-item{background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:1rem 1.1rem;box-shadow:var(--sh);}
+.gloss-term{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--blue);margin-bottom:.3rem;font-weight:500;}
+.gloss-def{font-size:.835rem;color:var(--fog);line-height:1.7;}
+
+/* ── ANALOGY BOX ── */
+.analogy{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.75rem;box-shadow:var(--sh-md);position:relative;overflow:hidden;}
+.analogy::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--violet));}
+.analogy-emoji{font-size:2rem;display:block;margin-bottom:.75rem;}
+.analogy h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:.95rem;font-weight:800;margin-bottom:.5rem;}
+.analogy p{font-size:.875rem;color:var(--fog);line-height:1.85;}
+.analogy strong{color:var(--ink3);}
+
+/* ── INTAKE SECTION ── */
+.intake-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+@media(max-width:700px){.intake-grid{grid-template-columns:1fr;}}
+.intake-field{background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:1rem 1.2rem;box-shadow:var(--sh);}
+.if-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--blue);margin-bottom:.25rem;}
+.if-desc{font-size:.845rem;color:var(--fog);line-height:1.65;}
+
+/* ── CHECK CARDS ── */
+.check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+@media(max-width:700px){.check-grid{grid-template-columns:1fr;}}
+.check-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.5rem;box-shadow:var(--sh);}
+.check-num{font-family:'Plus Jakarta Sans',sans-serif;font-size:2rem;font-weight:800;color:var(--dust3);line-height:1;margin-bottom:.75rem;}
+.check-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;font-weight:800;color:var(--ink);margin-bottom:.4rem;}
+.check-flag{display:inline-flex;align-items:center;gap:.3rem;font-family:'JetBrains Mono',monospace;font-size:.65rem;padding:.2rem .55rem;border-radius:99px;margin-bottom:.75rem;}
+.cf-hint{background:var(--amber-s);color:var(--amber);border:1px solid var(--amber-b);}
+.cf-block{background:var(--red-s);color:var(--red);border:1px solid var(--red-b);}
+.check-desc{font-size:.855rem;color:var(--fog);line-height:1.75;}
+
+/* ── OUTPUT CARDS ── */
+.output-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+@media(max-width:900px){.output-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:500px){.output-grid{grid-template-columns:1fr;}}
+.output-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.4rem;box-shadow:var(--sh);}
+.oc-num{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);margin-bottom:.4rem;}
+.oc-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;font-weight:800;color:var(--ink);margin-bottom:.25rem;}
+.oc-audience{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--blue);margin-bottom:.65rem;}
+.oc-desc{font-size:.835rem;color:var(--fog);line-height:1.7;}
+.oc-items{margin-top:.65rem;display:flex;flex-direction:column;gap:.25rem;}
+.oc-item{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ink3);padding:.2rem 0;border-bottom:1px solid var(--line);}
+.oc-item:last-child{border-bottom:none;}
+.oc-item::before{content:'▸ ';color:var(--fog2);}
+
+/* ── AUDIT SECTION ── */
+.audit-cols{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start;}
+@media(max-width:700px){.audit-cols{grid-template-columns:1fr;}}
+.audit-field{display:flex;flex-direction:column;gap:.15rem;padding:.75rem 0;border-bottom:1px solid var(--line);}
+.audit-field:last-child{border-bottom:none;}
+.af-key{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--blue);}
+.af-val{font-size:.835rem;color:var(--fog);line-height:1.6;}
+
+/* ── GEN REL SECTION ── */
+.gen-rel-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+@media(max-width:700px){.gen-rel-grid{grid-template-columns:1fr;}}
+.anchor-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.5rem;box-shadow:var(--sh);}
+.ac-label{font-family:'Plus Jakarta Sans',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--fog);margin-bottom:.75rem;}
+.anchor-row{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--line);}
+.anchor-row:last-child{border-bottom:none;}
+.ar-overlay{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--blue);min-width:56px;}
+.ar-arrow{color:var(--fog2);font-size:.8rem;}
+.ar-primary{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--green);min-width:60px;}
+.ar-desc{font-size:.78rem;color:var(--fog);line-height:1.5;}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);color:#4b5563;text-align:center;padding:2.5rem 2rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.04em;line-height:2;}
+footer span{color:#6b7280;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.hero-inner>*{animation:fadeUp .6s ease both;}
+.hero-eyebrow{animation-delay:.1s;}
+.hero h1{animation-delay:.2s;}
+.hero-sub{animation-delay:.3s;}
+.hero-stats{animation-delay:.4s;}
+.hero-btns{animation-delay:.5s;}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <div class="nav-logo"><div class="nav-pulse"></div><span>AIGAP · CER COMPLETE REFERENCE</span></div>
+  <div class="nav-links">
+    <a href="#what">Overview</a>
+    <a href="#lifecycle">Lifecycle</a>
+    <a href="#intake">Intake</a>
+    <a href="#tiers">Tiers</a>
+    <a href="#flow">Pipeline</a>
+    <a href="#genrel">GEN/REL</a>
+    <a href="#pillars">Pillars</a>
+    <a href="#plugins">Plugins</a>
+    <a href="#statuses">Statuses</a>
+    <a href="#s8">Step 8</a>
+    <a href="#s10">Outputs</a>
+    <a href="#s11">Audit</a>
+    <a href="#levels">Levels</a>
+    <a href="#handoff">Handoff</a>
+    <a href="#glossary">Glossary</a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<div class="hero">
+  <div class="hero-bg"><div class="grid-overlay"></div></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Ethiksa (Pvt) Ltd · AIGAP Platform · CER Subsystem · Confidential</div>
+    <h1>The <em>Code Ethics Reviewer</em> — Complete Reference</h1>
+    <p class="hero-sub">Every pillar, every control, every plugin, every pipeline step — with inputs, outputs, and worked examples. Built from the full architecture conversation.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">78</div><div class="stat-label">Controls</div></div>
+      <div class="stat"><div class="stat-num">11</div><div class="stat-label">Pillars</div></div>
+      <div class="stat"><div class="stat-num">31</div><div class="stat-label">Plugins</div></div>
+      <div class="stat"><div class="stat-num">11</div><div class="stat-label">Pipeline Steps</div></div>
+      <div class="stat"><div class="stat-num">6</div><div class="stat-label">Outputs</div></div>
+    </div>
+    <div class="hero-btns">
+      <a href="#flow" class="btn btn-blue">⚡ Jump to Pipeline</a>
+      <a href="#pillars" class="btn btn-outline">🏛 All 11 Pillars</a>
+      <a href="#plugins" class="btn btn-outline">🔌 31 Plugins</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SECTION 1: WHAT ══ -->
+<section class="page-section" id="what">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 1 · Overview</div>
+    <h2 class="section-title">What is the AIGAP and the CER?</h2>
+    <p class="section-sub">One sentence each — before anything else.</p>
+  </div>
+
+  <div class="analogy" style="margin-bottom:1.5rem;">
+    <span class="analogy-emoji">🏥</span>
+    <h3>The Hospital Intake Analogy</h3>
+    <p><strong>AIGAP</strong> = The full medical system that checks whether an AI is ethical and safe before it reaches real users.<br><br>
+    <strong>CER</strong> = The first doctor who reads your code and says: <em>"Here's what you've done right, here's what's missing, here's what you need to build — before we can certify this."</em><br><br>
+    <strong>The 78 rules</strong> = The clinical checklist the doctor uses. Grouped into 11 categories called Pillars. The doctor observes — they never certify.</p>
+  </div>
+
+  <div class="grid-4">
+    <div class="card"><div style="font-size:1.5rem;margin-bottom:.65rem;">🏗️</div><h4 class="sans" style="font-size:.9rem;font-weight:800;margin-bottom:.35rem;">AIGAP Platform</h4><p style="font-size:.835rem;color:var(--fog);line-height:1.7;">4 tools that together govern whether an AI system is ethical. Aligned to EU AI Act, NIST AI RMF, ISO 42001.</p></div>
+    <div class="card"><div style="font-size:1.5rem;margin-bottom:.65rem;">🔍</div><h4 class="sans" style="font-size:.9rem;font-weight:800;margin-bottom:.35rem;">The CER</h4><p style="font-size:.835rem;color:var(--fog);line-height:1.7;">Scans your GitHub repo or ZIP against 78 ethical rules. Pre-assurance only. Tells you what to build before the formal review.</p></div>
+    <div class="card"><div style="font-size:1.5rem;margin-bottom:.65rem;">🎯</div><h4 class="sans" style="font-size:.9rem;font-weight:800;margin-bottom:.35rem;">Who Uses It</h4><p style="font-size:.835rem;color:var(--fog);line-height:1.7;">Developers building AI systems. Run the CER repeatedly to close gaps — before the human AI Design Reviewer phase begins.</p></div>
+    <div class="card"><div style="font-size:1.5rem;margin-bottom:.65rem;">⛔</div><h4 class="sans" style="font-size:.9rem;font-weight:800;margin-bottom:.35rem;">Never Says</h4><p style="font-size:.835rem;color:var(--fog);line-height:1.7;">"Certified", "Compliant", "Legally required", "Passed", "Failed." Only: pass · partial · missing · not triggered · not evaluable.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SECTION 2: LIFECYCLE ══ -->
+<section class="page-section" id="lifecycle">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 2 · Lifecycle</div>
+    <h2 class="section-title">The 4-Tool Assurance Lifecycle</h2>
+    <p class="section-sub">AIGAP has 4 tools in sequence. The CER is Tool 2 — the first thing a developer actively works with.</p>
+  </div>
+  <div class="lifecycle">
+    <div class="lc-item"><div class="lc-step">Tool 01</div><div class="lc-tool">DEA</div><p class="lc-desc">Dataset Ethics Analyzer. Checks training data — fairness, licensing, provenance.</p><div class="lc-arrow">›</div></div>
+    <div class="lc-item active"><div class="lc-step">Tool 02 · This Project</div><div class="lc-tool">CER</div><p class="lc-desc">Code Ethics Reviewer. Scans code against 78 rules. Produces findings and handoff packages.</p><div class="lc-arrow">›</div></div>
+    <div class="lc-item"><div class="lc-step">Tool 03</div><div class="lc-tool">ADR</div><p class="lc-desc">AI Design Reviewer. Human reviewer uses CER handoff package to assess design intent.</p><div class="lc-arrow">›</div></div>
+    <div class="lc-item"><div class="lc-step">Tool 04</div><div class="lc-tool">AC</div><p class="lc-desc">AI Certifier. Final stamp. Issues PASS / CONDITIONAL / FAIL using CER pre-registered evidence.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SECTION 3: INTAKE ══ -->
+<section class="page-section" id="intake">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 3 · Project Intake</div>
+    <h2 class="section-title">The Intake Questionnaire & Project Profile</h2>
+    <p class="section-sub">The developer fills this form before the scan. It sits just outside the CER boundary — but feeds directly into every key step.</p>
+  </div>
+
+  <div class="analogy" style="margin-bottom:1.5rem;">
+    <span class="analogy-emoji">🛂</span>
+    <h3>The Passport Analogy</h3>
+    <p><strong>Your passport is not part of airport security</strong> — but security reads it at every checkpoint. The intake profile is the CER's passport. The developer fills it in once. The CER uses it at S1, S3, S4, and S8 to know what to look for, what rules apply, and whether the code is honest about what was declared.</p>
+  </div>
+
+  <div class="callout blue" style="margin-bottom:1.5rem;">
+    <div class="callout-icon">💡</div>
+    <p><strong>Is the intake part of the CER?</strong> It sits just outside the CER boundary — filled in a separate AIGAP registration step. But the CER ingests the resulting project profile as a structured data object at S1 and reads it throughout the scan.</p>
+  </div>
+
+  <div class="intake-grid">
+    <div class="intake-field"><div class="if-label">project_id / registry_version</div><div class="if-desc">Unique project ID and the exact rulebook version locked at registration. CER verifies this at S1.</div></div>
+    <div class="intake-field"><div class="if-label">uses_genai</div><div class="if-desc">Does this AI use a generative model — LLMs, image gen, audio gen? If true, GEN overlay rules activate at S3.</div></div>
+    <div class="intake-field"><div class="if-label">uses_pretrained</div><div class="if-desc">Does this AI use a third-party pre-trained model (HuggingFace, OpenAI API)? If true, REL overlay rules activate at S3.</div></div>
+    <div class="intake-field"><div class="if-label">vulnerable_users</div><div class="if-desc">Are there children, elderly, or otherwise vulnerable people in the user base? Triggers ACC-05 and Capstone-level override.</div></div>
+    <div class="intake-field"><div class="if-label">rights_affecting</div><div class="if-desc">Does this AI make decisions that affect people's rights — loans, hiring, benefits, medical, legal? Triggers Capstone-level override.</div></div>
+    <div class="intake-field"><div class="if-label">regulated_sector</div><div class="if-desc">Is this deployed in healthcare, finance, insurance, or legal? Triggers Industrial-level override. Highest strictness bar.</div></div>
+    <div class="intake-field"><div class="if-label">cross_border_transfer</div><div class="if-desc">Does personal data leave the country? If true, PRIV-07 activates. If false but detected in code, S8 raises escalation hint.</div></div>
+    <div class="intake-field"><div class="if-label">assurance_level</div><div class="if-desc">Developer declares UG / PG / Capstone / Industrial. Override rules can only raise this — never lower it.</div></div>
+    <div class="intake-field"><div class="if-label">jurisdiction</div><div class="if-desc">Operating countries. Determines which regulations map to the system and affects cross-border transfer logic.</div></div>
+    <div class="intake-field"><div class="if-label">user_facing</div><div class="if-desc">Internal tool or public-facing system? Affects ACC-02, ACC-04, and the overall evidence bar across pillars.</div></div>
+  </div>
+
+  <div style="margin-top:1.5rem;" class="codeblock">
+<span class="cb-label">how profile is used across pipeline</span>
+<span class="c-comment"># Project profile is read at these steps:</span>
+
+<span class="c-key">S1</span>  registry_version → <span class="c-val">validate it matches the locked version. Mismatch = hard stop.</span>
+<span class="c-key">S3</span>  uses_genai, uses_pretrained → <span class="c-val">detect AI type, set gen_triggered / rel_triggered flags</span>
+<span class="c-key">S4</span>  assurance_level, vulnerable_users, etc → <span class="c-val">filter which of 78 controls apply</span>
+<span class="c-key">S8</span>  ALL fields → <span class="c-val">compare against what was actually detected in code. Conflicts = escalation hints.</span>
+
+<span class="c-comment"># Direction of reasoning:</span>
+<span class="c-key">S3</span>  Profile → <span class="c-val">configure what to scan</span>    <span class="c-dim">(forward: setup)</span>
+<span class="c-key">S8</span>  Code    → <span class="c-val">check vs profile</span>          <span class="c-dim">(backward: verify honesty)</span></div>
+
+</div>
+</section>
+
+<!-- ══ SECTION 4: TIERS ══ -->
+<section class="page-section" id="tiers">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 4 · Evidence Tiers</div>
+    <h2 class="section-title">The 3 Tiers — Where is Evidence Found?</h2>
+    <p class="section-sub">A tier tells the CER where to look for evidence of a rule. Every one of the 78 controls has exactly one tier.</p>
+  </div>
+
+  <div class="tier-grid">
+    <div class="tier-card t1">
+      <div class="tier-top">
+        <div class="tier-icon" style="background:var(--green-s);">✅</div>
+        <div><div class="tier-title" style="color:var(--green);">T1 — In Code</div><div class="tier-count">21 controls</div></div>
+      </div>
+      <p class="tier-desc">Evidence is directly in source files, config files, test files, lockfiles, or prompt templates. CER plugins scan automatically.</p>
+      <div class="tier-flow">Plugin reads code as text
+→ Evidence found or not
+→ RawFinding produced
+→ Status: PASS / PARTIAL / MISSING</div>
+    </div>
+    <div class="tier-card t2">
+      <div class="tier-top">
+        <div class="tier-icon" style="background:var(--amber-s);">📄</div>
+        <div><div class="tier-title" style="color:var(--amber);">T2 — In a Document</div><div class="tier-count">48 controls</div></div>
+      </div>
+      <p class="tier-desc">Evidence lives in a document file — policy doc, model card, risk register, markdown. Plugin finds the file, then LLM reads the content to check quality.</p>
+      <div class="tier-flow">Plugin finds file automatically
+→ LLM reads content for quality
+→ Not just "file exists" — content checked
+→ Status: PASS / PARTIAL / MISSING</div>
+    </div>
+    <div class="tier-card t3">
+      <div class="tier-top">
+        <div class="tier-icon" style="background:var(--red-s);">🧠</div>
+        <div><div class="tier-title" style="color:var(--red);">T3 — Human Decision</div><div class="tier-count">15 controls</div></div>
+      </div>
+      <p class="tier-desc">Evidence is in a human governance decision — signed approvals, stakeholder reviews. Cannot be detected in code. CER sends a supplement form.</p>
+      <div class="tier-flow">No plugin runs
+→ Supplement form sent:
+   "Where is this document?
+    Give us the file path."
+→ CER checks file exists
+→ Status: PARTIAL / MISSING</div>
+    </div>
+  </div>
+
+  <div class="callout amber" style="margin-top:1.25rem;">
+    <div class="callout-icon">⚠️</div>
+    <p><strong>T3 asks for a file path — not a yes/no.</strong> Developer types <code>governance/risk_register.xlsx</code>. CER checks if that file exists in the manifest. File found → PARTIAL. File not found → MISSING. Not submitted at all → NOT_EVALUABLE + escalation_required = true.</p>
+  </div>
+
+  <div class="callout blue" style="margin-top:.75rem;">
+    <div class="callout-icon">💡</div>
+    <p><strong>Not all 15 T3 controls fire for every project.</strong> T3 controls go through the same applicability filter as T1/T2 at S4. Only T3 controls that pass the applicability check get a supplement form. T3 controls that fail the check → NOT_TRIGGERED → no supplement sent.</p>
+  </div>
+</div>
+</section>
+
+<!-- ══ SECTION 5: PIPELINE ══ -->
+<section class="page-section" id="flow">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 5 · The 11-Step Pipeline</div>
+    <h2 class="section-title">Complete CER Flow — Input to Output</h2>
+    <p class="section-sub">Every step shown with what goes in, what comes out, and why it exists. S9 is the only step with an LLM. Everything else is deterministic.</p>
+  </div>
+
+  <div class="callout amber" style="margin-bottom:1.5rem;">
+    <div class="callout-icon">⚠️</div>
+    <p><strong>Not all 78 controls fire automatically.</strong> S3 detects AI type. S4 filters using the project profile. Controls that don't apply → NOT_TRIGGERED (removed entirely). T3 controls → supplement queue. Only active T1/T2 controls enter the plugin queue.</p>
+  </div>
+
+  <div class="pipeline">
+
+    <!-- S1 -->
+    <div class="stage">
+      <div class="stage-badge"><span class="stage-step">step</span><span class="stage-code">S1</span><span class="stage-type det-t">AUTO</span></div>
+      <div class="stage-body">
+        <div class="stage-head"><span class="stage-name">Accept the Code</span></div>
+        <p class="stage-tagline">Developer submits. Registry version verified. Hard stop if mismatch.</p>
+        <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-top:.5rem;">Developer provides a GitHub URL, ZIP file, or pasted snippets. CER immediately checks that the registry version in the project profile matches the one locked when the project was registered. A version mismatch is a hard stop — not a warning. The rulebook must be identical to when the project was first scanned.</p>
+        <div class="io-row">
+          <div class="io-box io-in"><div class="io-label">Input</div><ul class="io-list"><li>GitHub URL / ZIP / code snippets</li><li>Project profile from intake</li><li>Registry version declared at registration</li></ul></div>
+          <div class="io-arrow">→</div>
+          <div class="io-box io-out"><div class="io-label">Output</div><ul class="io-list"><li>Validated scan request</li><li>Registry version confirmed ✓</li><li>scan_id generated (UUID)</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S2 -->
+    <div class="stage">
+      <div class="stage-badge"><span class="stage-step">step</span><span class="stage-code">S2</span><span class="stage-type det-t">AUTO</span></div>
+      <div class="stage-body">
+        <div class="stage-head"><span class="stage-name">Read the Repository</span></div>
+        <p class="stage-tagline">Full manifest built. Secrets masked before anything is stored. Workspace fingerprinted.</p>
+        <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-top:.5rem;">CER clones or unzips the repository and builds a complete file manifest — every file path with its SHA-256 fingerprint. Secret masking runs immediately — any detected API key or password is replaced with <code>[REDACTED]</code> before being stored anywhere. Secret values are never held. Only "secret detected at line X" is logged. Finally the entire codebase is fingerprinted as the workspace_hash for the sealed audit record at S11.</p>
+        <div class="codeblock">
+<span class="cb-label">why secret masking runs first</span>
+<span class="c-comment"># CER handles untrusted code from many developers</span>
+<span class="c-comment"># If it stored file contents with API keys inside them → massive security risk</span>
+<span class="c-comment"># Secret masking runs BEFORE anything is stored</span>
+
+<span class="c-key">logging.info</span>(<span class="c-str">"key=sk-ant-xxxxx"</span>)   <span class="c-op">←</span> found by secrets_scanner
+  <span class="c-dim">→ stored as:</span> <span class="c-val">"key=[REDACTED] at ride_handler.py:line 22"</span>
+  <span class="c-dim">→ actual key value NEVER touches the database</span></div>
+        <div class="io-row">
+          <div class="io-box io-in"><div class="io-label">Input</div><ul class="io-list"><li>Raw repository files (all of them)</li></ul></div>
+          <div class="io-arrow">→</div>
+          <div class="io-box io-out"><div class="io-label">Output</div><ul class="io-list"><li>File manifest (path + SHA-256 per file)</li><li>workspace_hash (full codebase fingerprint)</li><li>Detected languages and frameworks</li><li>All secrets masked as [REDACTED]</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S3 -->
+    <div class="stage">
+      <div class="stage-badge"><span class="stage-step">step</span><span class="stage-code">S3</span><span class="stage-type det-t">AUTO</span></div>
+      <div class="stage-body">
+        <div class="stage-head"><span class="stage-name">Detect What Type of AI This Is</span></div>
+        <p class="stage-tagline">Code import patterns read. gen_triggered and rel_triggered flags set. Conflicts noted as escalation hints.</p>
+        <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-top:.5rem;">S3 reads import statements and file patterns across all source files to understand what kind of AI system this is. Code import patterns are specific lines — like <code>import openai</code> or <code>from transformers import AutoModel</code> — that reveal which libraries or APIs the project depends on. The CER reads these as text only — it never executes the imports. The detected flags then control which of the 78 rules activate at S4.</p>
+        <div class="codeblock">
+<span class="cb-label">code import pattern examples</span>
+<span class="c-comment"># GenAI signals → gen_triggered = true</span>
+<span class="c-key">import openai</span>                         <span class="c-dim">→ using OpenAI API</span>
+<span class="c-key">from anthropic import Anthropic</span>       <span class="c-dim">→ using Claude API</span>
+<span class="c-key">import google.generativeai</span>            <span class="c-dim">→ using Gemini</span>
+<span class="c-key">prompts/system_prompt.txt</span>            <span class="c-dim">→ prompt template file detected</span>
+
+<span class="c-comment"># REL signals → rel_triggered = true</span>
+<span class="c-key">from transformers import AutoModel</span>    <span class="c-dim">→ HuggingFace model</span>
+<span class="c-key">model_card_url = "huggingface.co/..."</span> <span class="c-dim">→ external model reference</span>
+
+<span class="c-comment"># Escalation conflict example</span>
+<span class="c-dim">intake said:</span>  uses_genai = <span class="c-op">false</span>
+<span class="c-dim">code shows:</span>   import openai <span class="c-dim">at chatbot/handler.py:3</span>
+<span class="c-op">→ CONFLICT → escalation_hint raised at S8</span></div>
+        <div class="io-row">
+          <div class="io-box io-in"><div class="io-label">Input</div><ul class="io-list"><li>File manifest from S2</li><li>Project profile from intake</li><li>Code import patterns (read as text)</li></ul></div>
+          <div class="io-arrow">→</div>
+          <div class="io-box io-out"><div class="io-label">Output</div><ul class="io-list"><li>gen_triggered: true / false</li><li>rel_triggered: true / false</li><li>assurance_level confirmed</li><li>Conflict notes (used by S8)</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S4 -->
+    <div class="stage">
+      <div class="stage-badge"><span class="stage-step">step</span><span class="stage-code">S4</span><span class="stage-type det-t">AUTO</span></div>
+      <div class="stage-body">
+        <div class="stage-head"><span class="stage-name">Filter & Route All 78 Controls</span></div>
+        <p class="stage-tagline">One universal applicability filter. T3 → supplement queue. Active T1/T2 → plugin queue. NOT_TRIGGERED → gone.</p>
+        <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-top:.5rem;">This is the critical filter step. S4 applies one universal applicability check to all 78 controls. Tier is only used to decide <em>what happens next</em> — not whether a control applies. Controls that fail the applicability rule are removed entirely regardless of tier. Only T3 controls that pass the filter get supplement forms.</p>
+        <div class="codeblock">
+<span class="cb-label">applicability filter — same logic for all 78</span>
+<span class="c-key">For each of the 78 controls:</span>
+
+  <span class="c-comment"># Step 1: Does the applicability rule pass?</span>
+  TRAN-08: <span class="c-dim">applicability = gen_triggered</span>
+           <span class="c-dim">gen_triggered = false</span> <span class="c-op">→ NOT_TRIGGERED → removed entirely</span>
+           <span class="c-dim">gen_triggered = true</span>  <span class="c-val">→ ACTIVE → go to step 2</span>
+
+  SEC-07:  <span class="c-dim">applicability = assurance_level = Industrial</span>
+           <span class="c-dim">level = PG</span>            <span class="c-op">→ NOT_TRIGGERED → removed</span>
+           <span class="c-dim">level = Industrial</span>    <span class="c-val">→ ACTIVE → go to step 2</span>
+
+  GOV-03:  <span class="c-dim">applicability = always</span>
+                                <span class="c-val">→ ACTIVE → go to step 2</span>
+
+  <span class="c-comment"># Step 2: Which queue does it go to?</span>
+  Active + T1 or T2  <span class="c-val">→ plugin queue (S5)</span>
+  Active + T3        <span class="c-val">→ supplement queue (form generated)</span></div>
+        <div class="io-row">
+          <div class="io-box io-in"><div class="io-label">Input</div><ul class="io-list"><li>All 78 canonical controls</li><li>S3 flags (gen_triggered, rel_triggered)</li><li>Project profile (assurance level, declared fields)</li></ul></div>
+          <div class="io-arrow">→</div>
+          <div class="io-box io-out"><div class="io-label">Output</div><ul class="io-list"><li>NOT_TRIGGERED controls removed</li><li>Active T3 → supplement queue (form per control)</li><li>Active T1/T2 → plugin queue</li><li>Each control routed to its registered plugins</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S5 -->
+    <div class="stage">
+      <div class="stage-badge"><span class="stage-step">step</span><span class="stage-code">S5</span><span class="stage-type det-t">AUTO</span></div>
+      <div class="stage-body">
+        <div class="stage-head"><span class="stage-name">All Plugins Run in Parallel</span></div>
+        <p class="stage-tagline">31 plugins. All simultaneously. 30-second timeout each. Never execute code. Produce RawFindings only — never PASS/FAIL.</p>
+        <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-top:.5rem;">Every active T1/T2 control's registered plugins run simultaneously — not sequentially. Each plugin reads files as data only — like reading a book, not running a program. Plugins never execute Python, never run notebooks, never run shell commands. A single plugin can be registered to multiple controls and produces one RawFinding per control it covers.</p>
+        <div class="codeblock">
+<span class="cb-label">rawfinding schema — what every plugin produces</span>
+{
+  <span class="c-key">"plugin_id"</span>:   <span class="c-str">"privacy_log_scanner"</span>,
+  <span class="c-key">"control_id"</span>:  <span class="c-str">"PRIV-01"</span>,
+  <span class="c-key">"scan_id"</span>:     <span class="c-str">"uuid-xxx"</span>,
+  <span class="c-key">"found"</span>:        <span class="c-val">true</span>,
+  <span class="c-key">"evidence"</span>: [{
+    <span class="c-key">"file"</span>:    <span class="c-str">"api/ride_handler.py"</span>,
+    <span class="c-key">"line"</span>:    <span class="c-val">47</span>,
+    <span class="c-key">"pattern"</span>: <span class="c-str">"logging.info(user.email)"</span>,
+    <span class="c-key">"note"</span>:    <span class="c-str">"PII detected in log statement"</span>
+  }],
+  <span class="c-key">"missing"</span>: [
+    <span class="c-str">"No field-level redaction pattern found"</span>,
+    <span class="c-str">"No retention TTL config found"</span>
+  ],
+  <span class="c-key">"confidence"</span>: <span class="c-str">"high"</span>
+}
+
+<span class="c-comment"># One plugin registered to 3 controls produces 3 RawFindings</span>
+privacy_log_scanner → <span class="c-val">RawFinding for PRIV-01</span>
+                    → <span class="c-val">RawFinding for PRIV-03</span>
+                    → <span class="c-val">RawFinding for PRIV-04</span>
+<span class="c-dim">(files read ONCE. Outputs produced THREE times — one per control.)</span></div>
+        <div class="callout green" style="margin-top:.75rem;">
+          <div class="callout-icon">🎯</div>
+          <p><strong>Plugin = witness. RawFinding = sworn statement. Evidence Mapper = judge.</strong> The witness only reports facts. "I saw this, I did not see that." The judge at S7 decides the verdict — never the witness.</p>
+        </div>
+        <div class="io-row">
+          <div class="io-box io-in"><div class="io-label">Input</div><ul class="io-list"><li>File manifest from S2</li><li>Active control → plugin routing from S4</li><li>Repository files (read-only, as data)</li></ul></div>
+          <div class="io-arrow">→</div>
+          <div class="io-box io-out"><div class="io-label">Output (RawFinding per plugin per control)</div><ul class="io-list"><li>plugin_id + control_id</li><li>evidence_found[] — file paths + line numbers</li><li>missing[] — what was expected but absent</li><li>confidence: high / medium / low</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S6 -->
+    <div class="stage">
+      <div class="stage-badge"><span class="stage-step">step</span><span class="stage-code">S6</span><span class="stage-type det-t">AUTO</span></div>
+      <div class="stage-body">
+        <div class="stage-head"><span class="stage-name">Tag GEN and REL Findings</span></div>
+        <p class="stage-tagline">Registry anchor mapping lookup. Qualified RawFindings tagged with overlay_relevance + anchoring_primary. Unqualified findings pass through unchanged.</p>
+        <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-top:.5rem;">S6 is a routing and tagging step — no new scans run. It reads every RawFinding from S5, looks up the GEN/REL anchor mapping table in the registry, and tags findings that belong to GEN or REL overlay controls. <strong>"Anchored by" means</strong> the GEN/REL control is bolted onto a PRIMARY control — it cannot float freely. The GEN/REL control is the dependent one. The PRIMARY is the foundation. The tag does not change the CER's question — it is a signal to the Reviewer that this PRIMARY result also carries GEN/REL significance.</p>
+        <div class="codeblock">
+<span class="cb-label">s6 tagging logic</span>
+<span class="c-comment"># S6 reads each RawFinding and checks the registry anchor table:</span>
+
+RawFinding: control_id = <span class="c-str">"SEC-02"</span>
+  registry: SEC-02 ← anchored by GEN-02
+  gen_triggered = true  <span class="c-val">→ anchor applies</span>
+  <span class="c-val">→ tagged: overlay_relevance = "GEN-02"</span>
+             <span class="c-val">anchoring_primary = "SEC-02"</span>
+
+RawFinding: control_id = <span class="c-str">"TRAN-08"</span>
+  registry: TRAN-08 ← anchored by GEN-04
+  gen_triggered = true  <span class="c-val">→ anchor applies</span>
+  <span class="c-val">→ tagged: overlay_relevance = "GEN-04"</span>
+             <span class="c-val">anchoring_primary = "TRAN-08"</span>
+
+RawFinding: control_id = <span class="c-str">"SEC-06"</span>
+  registry: SEC-06 ← anchored by REL-01
+  rel_triggered = true  <span class="c-val">→ anchor applies</span>
+  <span class="c-val">→ tagged: overlay_relevance = "REL-01"</span>
+             <span class="c-val">anchoring_primary = "SEC-06"</span>
+
+RawFinding: control_id = <span class="c-str">"PRIV-01"</span>
+  registry: no GEN or REL anchor for PRIV-01
+  <span class="c-dim">→ passes through UNTAGGED — plain PRIMARY finding</span></div>
+        <div class="callout amber">
+          <div class="callout-icon">⚠️</div>
+          <p><strong>TRAN-08's question does NOT change when GEN-04 is anchored.</strong> The CER always asks the same question — "does watermarking exist?" The GEN-04 tag is a sticky note for the Reviewer: "When you look at this TRAN-08 result, remember GEN-04 also needs your attention." The Reviewer derives GEN/REL status — the CER never assigns it directly.</p>
+        </div>
+        <div class="io-row">
+          <div class="io-box io-in"><div class="io-label">Input</div><ul class="io-list"><li>All RawFindings from S5</li><li>GEN/REL anchor mapping table from registry</li><li>gen_triggered + rel_triggered flags from S3</li></ul></div>
+          <div class="io-arrow">→</div>
+          <div class="io-box io-out"><div class="io-label">Output</div><ul class="io-list"><li>Tagged findings: overlay_relevance + anchoring_primary added</li><li>Untagged findings: passed through unchanged</li><li>All findings forwarded to S7</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S7 -->
+    <div class="stage">
+      <div class="stage-badge"><span class="stage-step">step</span><span class="stage-code">S7</span><span class="stage-type det-t">AUTO</span></div>
+      <div class="stage-body">
+        <div class="stage-head"><span class="stage-name">Evidence Mapper Assigns Status</span></div>
+        <p class="stage-tagline">100% deterministic. No AI. Same input → same output. Always. Strict decision tree applied per control.</p>
+        <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-top:.5rem;">The most important step. The Evidence Mapper reads every tagged RawFinding, compares it against what the canonical registry says is required at this assurance level, and assigns a status. The LLM in S9 can only explain this decision — never change it.</p>
+        <div class="codeblock">
+<span class="cb-label">evidence mapper decision tree — applied per control in strict order</span>
+<span class="c-key">Step 1:</span> Applicability rule not satisfied?      <span class="c-op">→ NOT_TRIGGERED</span>  <span class="c-dim">stop</span>
+<span class="c-key">Step 2:</span> T3 control?                            <span class="c-op">→ NOT_EVALUABLE</span>  <span class="c-dim">stop (supplement sent)</span>
+<span class="c-key">Step 3:</span> T1/T2, no files found in repo?          <span class="c-op">→ NOT_EVALUABLE</span>  <span class="c-dim">stop (not accessible)</span>
+<span class="c-key">Step 4:</span> No expected evidence artefacts present? <span class="c-op">→ MISSING</span>
+<span class="c-key">Step 5:</span> Some but not all evidence present?      <span class="c-op">→ PARTIAL</span>
+<span class="c-key">Step 6:</span> All required evidence present?          <span class="c-val">→ PASS</span>
+
+<span class="c-comment"># Example — PRIV-01 with ride-hailing fare predictor:</span>
+privacy_log_scanner found: <span class="c-str">logging.info(user.email)</span> at line 47
+privacy_log_scanner missing: <span class="c-dim">redaction pattern, retention TTL config</span>
+
+evidence_mapper:
+  files found? <span class="c-val">YES</span> → not NOT_EVALUABLE
+  all evidence? <span class="c-op">NO</span>
+  some evidence? <span class="c-val">YES</span> → <span class="c-key">PARTIAL</span>
+  severity: <span class="c-str">major</span>  <span class="c-dim">(high control + Capstone + some missing)</span></div>
+        <div class="io-row">
+          <div class="io-box io-in"><div class="io-label">Input</div><ul class="io-list"><li>All tagged RawFindings from S6</li><li>Canonical registry — required evidence per control</li><li>Assurance level — how strict the evidence bar is</li></ul></div>
+          <div class="io-arrow">→</div>
+          <div class="io-box io-out"><div class="io-label">Output (per control)</div><ul class="io-list"><li>status: pass / partial / missing / not_triggered / not_evaluable</li><li>severity: critical / major / minor / info</li><li>evidence_found[] + gaps[] confirmed</li><li>recommended_next_artifact[] — what to build</li><li>Overlay tags travel with the status record</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S8 -->
+    <div class="stage">
+      <div class="stage-badge"><span class="stage-step">step</span><span class="stage-code">S8</span><span class="stage-type det-t">AUTO</span></div>
+      <div class="stage-body">
+        <div class="stage-head"><span class="stage-name">Escalation Check</span></div>
+        <p class="stage-tagline">3 checks. escalation_hints[] from all 3. escalation_required = true only from Check 2 and Check 3.</p>
+        <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-top:.5rem;">S8 is a comparison engine. It takes the project profile (what was declared) and everything detected (code signals, statuses, T3 supplement responses) and checks if they agree. It produces hints and flags — but does not change any statuses, re-run plugins, or cancel the scan.</p>
+
+        <div class="check-grid" style="margin-top:1rem;">
+          <div class="check-card">
+            <div class="check-num">01</div>
+            <div class="check-title">Declaration vs Code Reality</div>
+            <div class="check-flag cf-hint">📋 hints only — not a blocker</div>
+            <p class="check-desc">Compares every intake field against what was detected in code. Intake said no GenAI but <code>import openai</code> found? Hint raised. Scan can still proceed — developer should correct intake.</p>
+            <div class="codeblock" style="margin-top:.75rem;">
+<span class="c-dim">intake:</span>  uses_genai = <span class="c-op">false</span>
+<span class="c-dim">found:</span>   import openai at handler.py:3
+<span class="c-op">→</span> <span class="c-str">"Undeclared GenAI usage detected"</span>
+  escalation_hints[] <span class="c-val">← added</span>
+  escalation_required <span class="c-dim">← NOT changed</span></div>
+          </div>
+          <div class="check-card">
+            <div class="check-num">02</div>
+            <div class="check-title">Assurance Level Override</div>
+            <div class="check-flag cf-block">🚫 blocker — must fix before proceeding</div>
+            <p class="check-desc">Checks override rules: rights-affecting endpoint detected → minimum Capstone. Minor users detected → minimum Capstone. Regulated sector → minimum Industrial. Level can only go up.</p>
+            <div class="codeblock" style="margin-top:.75rem;">
+<span class="c-dim">declared:</span> assurance_level = <span class="c-op">PG</span>
+<span class="c-dim">detected:</span> POST /loan-decision endpoint
+<span class="c-op">→</span> <span class="c-str">"Rights-affecting endpoint detected"</span>
+  escalation_hints[] <span class="c-val">← added</span>
+  escalation_required = <span class="c-val">true</span>  <span class="c-op">← BLOCKED</span></div>
+          </div>
+          <div class="check-card">
+            <div class="check-num">03</div>
+            <div class="check-title">T3 Supplement Completeness</div>
+            <div class="check-flag cf-block">🚫 blocker — must fix before proceeding</div>
+            <p class="check-desc">All active T3 controls must have their supplement forms submitted. Missing submission → NOT_EVALUABLE + blocker. Submitted but file not found → MISSING (not a blocker, but a finding).</p>
+            <div class="codeblock" style="margin-top:.75rem;">
+<span class="c-dim">RISK-05 active (T3)</span>
+<span class="c-dim">supplement form sent at S4</span>
+<span class="c-dim">developer never filled it in</span>
+<span class="c-op">→</span> <span class="c-str">"RISK-05 supplement not submitted"</span>
+  escalation_hints[] <span class="c-val">← added</span>
+  escalation_required = <span class="c-val">true</span>  <span class="c-op">← BLOCKED</span></div>
+          </div>
+        </div>
+
+        <div class="callout blue" style="margin-top:1rem;">
+          <div class="callout-icon">💡</div>
+          <p><strong>escalation_hints[] comes from all 3 checks. escalation_required = true comes only from Check 2 and Check 3.</strong> Check 1 is informational — "you should fix this." Checks 2 and 3 are hard blockers — "you cannot move forward until you fix this."</p>
+        </div>
+
+        <div class="io-row" style="margin-top:.85rem;">
+          <div class="io-box io-in"><div class="io-label">Input</div><ul class="io-list"><li>Project profile (all declared fields)</li><li>S3 detected signals</li><li>S7 statuses (rights-affecting patterns)</li><li>T3 supplement responses</li></ul></div>
+          <div class="io-arrow">→</div>
+          <div class="io-box io-out"><div class="io-label">Output</div><ul class="io-list"><li>escalation_hints[] — one per conflict found</li><li>escalation_required: true / false</li><li>No statuses changed. No plugins re-run.</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S9 -->
+    <div class="stage">
+      <div class="stage-badge"><span class="stage-step">step</span><span class="stage-code">S9</span><span class="stage-type llm-t">LLM</span></div>
+      <div class="stage-body">
+        <div class="stage-head"><span class="stage-name">LLM Writes Plain English Explanations</span></div>
+        <p class="stage-tagline">The only AI step. 3 prompts. Temperature = 0. LLM input built by CER automatically. LLM never changes a status.</p>
+        <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-top:.5rem;">By S8, every control has a status. But "PRIV-01 PARTIAL" means nothing to a developer who doesn't know the system. S9 fixes that — it writes plain English explanations, remediation steps, and classifies ambiguous documents. The CER builds the LLM input automatically from S2/S3/S5/S7 data. The developer never writes these prompts. Temperature = 0 — same input, same output, every time.</p>
+        <div class="codeblock">
+<span class="cb-label">3 prompts in s9</span>
+<span class="c-comment"># Prompt 1: CODE_REVIEWER_EXPLAIN</span>
+<span class="c-dim">runs for every non-pass result</span>
+input:  control_result + evidence + gaps + assurance_level + scan_context
+output: developer_explanation <span class="c-dim">(max 150 words)</span>
+        student_summary <span class="c-dim">(max 80 words)</span>
+        what_is_present + what_is_missing
+
+<span class="c-comment"># Prompt 2: CODE_REVIEWER_REMEDIATE</span>
+<span class="c-dim">runs for every non-pass result</span>
+input:  gaps[] + recommended_next_artifact[] + scan_context
+        <span class="c-dim">(language, framework, assurance_level — from S2/S3)</span>
+output: up to 5 steps, each with:
+        action + artifact_to_produce + example_approach
+        priority: <span class="c-str">immediate</span> / <span class="c-str">before_reviewer</span> / <span class="c-str">before_certifier</span>
+
+<span class="c-comment"># Prompt 3: CODE_REVIEWER_CLASSIFY_DOC</span>
+<span class="c-dim">runs for ambiguous documents found by docs_scanner</span>
+input:  document text <span class="c-dim">(max 2000 tokens)</span> + candidate artefact types
+output: best_match + confidence <span class="c-dim">(high/medium/low)</span> + reasoning <span class="c-dim">(50w)</span>
+        returns <span class="c-op">"none"</span> if no clear match
+
+<span class="c-comment"># Guardrails — ALL 3 prompts</span>
+temperature = <span class="c-val">0</span>          <span class="c-dim">← no randomness</span>
+forbidden words: <span class="c-op">"certified" "compliant" "passed" "failed" "legally required"</span>
+LLM output → <span class="c-val">stored verbatim in audit record</span>
+LLM status → <span class="c-op">cannot change S7 decisions. Ever.</span></div>
+        <div class="io-row">
+          <div class="io-box io-in"><div class="io-label">Input (built by CER automatically)</div><ul class="io-list"><li>Control result + evidence + gaps (S7)</li><li>Language + framework detected (S2)</li><li>Assurance level confirmed (S3)</li><li>recommended_next_artifact from registry</li><li>Document text for ambiguous files</li></ul></div>
+          <div class="io-arrow">→</div>
+          <div class="io-box io-out"><div class="io-label">Output</div><ul class="io-list"><li>developer_explanation (150w per non-pass)</li><li>student_summary (80w per non-pass)</li><li>Remediation steps (up to 5, prioritised)</li><li>Document classification results</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S10 -->
+    <div class="stage">
+      <div class="stage-badge"><span class="stage-step">step</span><span class="stage-code">S10</span><span class="stage-type det-t">AUTO</span></div>
+      <div class="stage-body">
+        <div class="stage-head"><span class="stage-name">Assemble All 6 Outputs</span></div>
+        <p class="stage-tagline">Pure assembly. Zero new decisions. Same data — 6 different packages — 6 different audiences.</p>
+        <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-top:.5rem;">S10 takes everything produced by S7, S8, and S9 and packages it into 6 outputs. Like a post office sorting room — all the letters are already written. S10 puts each letter in the right envelope and sends them out. It makes no decisions, runs no scans, calls no LLM.</p>
+        <div class="output-grid" style="margin-top:1rem;">
+          <div class="output-card"><div class="oc-num">Output 01</div><div class="oc-title">Developer Report</div><div class="oc-audience">→ The developer</div><p class="oc-desc">Human-readable findings. Plain English from S9. Remediation steps with priority. Severity flags. T3 supplement form. Escalation hints.</p><div class="oc-items"><div class="oc-item">Per-control status + explanation</div><div class="oc-item">Up to 5 remediation steps each</div><div class="oc-item">T3 supplement form included</div><div class="oc-item">Escalation hints from S8</div></div></div>
+          <div class="output-card"><div class="oc-num">Output 02</div><div class="oc-title">Student Report</div><div class="oc-audience">→ Student developers</div><p class="oc-desc">Same findings — simpler language. Uses 80-word student_summary from S9. No "critical" severity language. Encourages learning over compliance tone.</p><div class="oc-items"><div class="oc-item">80-word summaries per control</div><div class="oc-item">Simplified remediation steps</div><div class="oc-item">Softer severity labels</div></div></div>
+          <div class="output-card"><div class="oc-num">Output 03</div><div class="oc-title">JSON Findings File</div><div class="oc-audience">→ CI/CD pipelines, machines</div><p class="oc-desc">Machine-readable. All 78 control statuses as structured objects. Evidence paths, gap signals, overlay tags, escalation hints — all queryable.</p><div class="oc-items"><div class="oc-item">All statuses as structured JSON</div><div class="oc-item">Evidence paths + gap signals</div><div class="oc-item">GEN/REL overlay tags included</div></div></div>
+          <div class="output-card"><div class="oc-num">Output 04</div><div class="oc-title">SARIF Export</div><div class="oc-audience">→ GitHub / GitLab / Azure</div><p class="oc-desc">Upload to GitHub — ethics findings appear as inline code annotations in pull requests. Like lint errors but for ethics. Developer sees issues without leaving GitHub.</p><div class="oc-items"><div class="oc-item">GitHub-compatible format</div><div class="oc-item">Inline PR annotations</div><div class="oc-item">Ethics as code review</div></div></div>
+          <div class="output-card"><div class="oc-num">Output 05</div><div class="oc-title">Reviewer Handoff</div><div class="oc-audience">→ Human AI Design Reviewer</div><p class="oc-desc">Pre-fills the ADR human reviewer's workspace. Per-control records, T3 supplement entries, escalation hints, overlay tags. Reviewer does not start from scratch.</p><div class="oc-items"><div class="oc-item">Per-control evidence records</div><div class="oc-item">T3 supplement entries</div><div class="oc-item">GEN/REL anchor tags for Reviewer</div></div></div>
+          <div class="output-card"><div class="oc-num">Output 06</div><div class="oc-title">Certifier Pre-Reg</div><div class="oc-audience">→ AI Certifier (automated)</div><p class="oc-desc">Registers evidence files found with SHA-256 fingerprints. Certifier already knows what to verify. e_type_candidates is advisory only — developer must confirm E-type at submission.</p><div class="oc-items"><div class="oc-item">file_path + sha256 per artefact</div><div class="oc-item">e_type_candidates[] — advisory</div><div class="oc-item">plugin_id that found each file</div></div></div>
+        </div>
+        <div class="io-row" style="margin-top:1rem;">
+          <div class="io-box io-in"><div class="io-label">Input</div><ul class="io-list"><li>All S7 statuses + evidence records</li><li>All S8 escalation hints</li><li>All S9 LLM explanations</li><li>T3 supplement responses</li></ul></div>
+          <div class="io-arrow">→</div>
+          <div class="io-box io-out"><div class="io-label">Output</div><ul class="io-list"><li>6 packaged outputs delivered simultaneously</li><li>Zero new decisions made</li><li>All passed to S11 for sealing</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S11 -->
+    <div class="stage">
+      <div class="stage-badge"><span class="stage-step">step</span><span class="stage-code">S11</span><span class="stage-type det-t">AUTO</span></div>
+      <div class="stage-body">
+        <div class="stage-head"><span class="stage-name">Seal the Audit Record & Delete Workspace</span></div>
+        <p class="stage-tagline">Immutable record sealed first. Workspace deleted within 60 seconds. Source code gone. Fingerprints remain forever.</p>
+        <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-top:.5rem;">S11 produces nothing new. Every other step produces something. S11 preserves what was produced and removes what is no longer needed. The sealed record cannot be changed by anyone — developer, Ethiksa, Reviewer, Certifier. The 60-second workspace deletion is a hard deadline — audit record is always sealed first, then code is deleted. Never the other way.</p>
+        <div class="codeblock">
+<span class="cb-label">what gets sealed — audit record contents</span>
+<span class="c-key">scan_id</span>               <span class="c-dim">unique UUID for this scan</span>
+<span class="c-key">registry_version</span>      <span class="c-dim">exact rulebook version used</span>
+<span class="c-key">commit_sha</span>            <span class="c-dim">exact Git commit scanned</span>
+<span class="c-key">workspace_hash</span>        <span class="c-dim">SHA-256 fingerprint of entire codebase at scan time</span>
+<span class="c-key">plugin_versions_used</span>  <span class="c-dim">exact version of every plugin that ran</span>
+<span class="c-key">raw_findings</span>          <span class="c-dim">every plugin output VERBATIM — nothing summarised</span>
+<span class="c-key">llm_call_log</span>          <span class="c-dim">every S9 prompt sent + every response received VERBATIM</span>
+<span class="c-key">escalation_hints</span>      <span class="c-dim">from S8</span>
+<span class="c-key">final_statuses</span>        <span class="c-dim">all control statuses from S7</span>
+
+<span class="c-comment"># What gets deleted after sealing (within 60 seconds):</span>
+<span class="c-op">DELETED:</span> all raw source code files
+<span class="c-op">DELETED:</span> all cloned repo contents
+<span class="c-op">DELETED:</span> all temporary working files
+
+<span class="c-comment"># What remains forever:</span>
+<span class="c-val">KEPT:</span> file manifest (paths + SHA-256 hashes only — no content)
+<span class="c-val">KEPT:</span> raw findings (what was found / not found)
+<span class="c-val">KEPT:</span> sealed audit record
+<span class="c-val">KEPT:</span> all 6 outputs from S10</div>
+
+        <div class="audit-cols" style="margin-top:1rem;">
+          <div class="card">
+            <h4 class="sans" style="font-size:.85rem;font-weight:800;margin-bottom:.75rem;">Why the record matters</h4>
+            <div class="audit-field"><div class="af-key">Developer disputes finding</div><div class="af-val">workspace_hash + raw_findings prove exactly which code was scanned and what the plugin found. Cannot be challenged.</div></div>
+            <div class="audit-field"><div class="af-key">Certifier verifies evidence</div><div class="af-val">SHA-256 hash of every evidence file. If the file was modified after the scan, the hash won't match. Provenance guaranteed.</div></div>
+            <div class="audit-field"><div class="af-key">Regulatory audit</div><div class="af-val">Every control evaluated, every plugin version, every LLM call verbatim. registry_version proves which rulebook applied.</div></div>
+          </div>
+          <div class="card">
+            <h4 class="sans" style="font-size:.85rem;font-weight:800;margin-bottom:.75rem;">Why code is deleted</h4>
+            <div class="audit-field"><div class="af-key">Security</div><div class="af-val">CER handles code from many developers. Holding source code indefinitely creates risk even after masking.</div></div>
+            <div class="audit-field"><div class="af-key">SHA-256 is enough</div><div class="af-val">If a file needs re-examination, developer resubmits. Hash proves it's the same file that was originally scanned.</div></div>
+            <div class="audit-field"><div class="af-key">Hard deadline order</div><div class="af-val">Audit record sealed FIRST. Then workspace deleted. Never reversed. The record is always complete before cleanup.</div></div>
+          </div>
+        </div>
+
+        <div class="io-row" style="margin-top:.85rem;">
+          <div class="io-box io-in"><div class="io-label">Input</div><ul class="io-list"><li>All raw plugin findings (verbatim)</li><li>All S9 LLM call inputs + outputs (verbatim)</li><li>workspace_hash, scan_id, registry_version</li><li>plugin_versions_used</li></ul></div>
+          <div class="io-arrow">→</div>
+          <div class="io-box io-out"><div class="io-label">Output</div><ul class="io-list"><li>Immutable sealed audit record</li><li>Workspace deleted ≤ 60 seconds</li><li>Source code gone — hashes remain</li><li>Developer receives their report</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end pipeline -->
+</div>
+</section>
+
+<!-- ══ SECTION 6: GEN / REL ══ -->
+<section class="page-section" id="genrel">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 6 · Overlay Controls</div>
+    <h2 class="section-title">GEN and REL Overlay Controls</h2>
+    <p class="section-sub">Extra obligations that activate only for specific AI types. Neither GEN nor REL ever gets a direct status from the CER — only the Reviewer assigns those.</p>
+  </div>
+
+  <div class="gen-rel-grid" style="margin-bottom:1.25rem;">
+    <div class="anchor-card">
+      <div class="ac-label">GEN Overlay — activates when gen_triggered = true</div>
+      <p style="font-size:.835rem;color:var(--fog);line-height:1.7;margin-bottom:1rem;">Extra rules for systems using LLMs, image gen, audio gen. Each GEN control is anchored to a PRIMARY control it cannot exist without.</p>
+      <div class="anchor-row"><span class="ar-overlay">GEN-01</span><span class="ar-arrow">→</span><span class="ar-primary">TRAN-01</span><span class="ar-desc">AI output disclosure for generative systems</span></div>
+      <div class="anchor-row"><span class="ar-overlay">GEN-02</span><span class="ar-arrow">→</span><span class="ar-primary">SEC-02</span><span class="ar-desc">Prompt injection specific to LLM systems</span></div>
+      <div class="anchor-row"><span class="ar-overlay">GEN-03</span><span class="ar-arrow">→</span><span class="ar-primary">TRAN-02</span><span class="ar-desc">Hallucination and grounding for generative output</span></div>
+      <div class="anchor-row"><span class="ar-overlay">GEN-04</span><span class="ar-arrow">→</span><span class="ar-primary">TRAN-08</span><span class="ar-desc">Content provenance and watermarking</span></div>
+      <div class="anchor-row"><span class="ar-overlay">GEN-05</span><span class="ar-arrow">→</span><span class="ar-primary">SAFE-01</span><span class="ar-desc">Output safety constraints for generative systems</span></div>
+    </div>
+    <div class="anchor-card">
+      <div class="ac-label">REL Overlay — activates when rel_triggered = true</div>
+      <p style="font-size:.835rem;color:var(--fog);line-height:1.7;margin-bottom:1rem;">Extra due-diligence rules when you use someone else's model instead of training your own.</p>
+      <div class="anchor-row"><span class="ar-overlay">REL-01</span><span class="ar-arrow">→</span><span class="ar-primary">SEC-06</span><span class="ar-desc">Pre-trained model license and safety assessed</span></div>
+      <div class="anchor-row"><span class="ar-overlay">REL-02</span><span class="ar-arrow">→</span><span class="ar-primary">DOC-03</span><span class="ar-desc">Model card references base model + its limitations</span></div>
+      <div class="anchor-row"><span class="ar-overlay">REL-03</span><span class="ar-arrow">→</span><span class="ar-primary">TRAN-04</span><span class="ar-desc">System docs explain third-party model is in use</span></div>
+      <div class="anchor-row"><span class="ar-overlay">REL-04</span><span class="ar-arrow">→</span><span class="ar-primary">RISK-01</span><span class="ar-desc">Risk assessment accounts for third-party model failure modes</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">💡</div>
+    <div><strong>"Anchored by" — direction explained:</strong> GEN-04 is anchored TO TRAN-08. GEN-04 is the dependent one — the coat. TRAN-08 is the foundation — the hook. If TRAN-08 is MISSING → GEN-04 is also unmet. If gen_triggered = false → the coat is never hung, but the hook (TRAN-08) is still evaluated normally. The CER's question for TRAN-08 does not change when GEN-04 is anchored. Only the Reviewer uses the tag to assess GEN-04's own status.</div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SECTION 7: PILLARS ══ -->
+<section class="page-section" id="pillars">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 7 · All 11 Pillars</div>
+    <h2 class="section-title">78 Controls — What Each One Searches For</h2>
+    <p class="section-sub">Click any pillar to see exactly what every control looks for, what files or code patterns it targets, and what makes it pass.</p>
+  </div>
+  <div class="pillar-stack" id="pillar-list">
+
+    <!-- P1 -->
+    <div class="pillar" data-p="p1">
+      <div class="pillar-head" onclick="tp('p1')"><div class="p-num" style="background:var(--blue-s);color:var(--blue);">P1</div><div class="p-title">Governance & Accountability</div><div class="p-meta"><span class="p-count">10 controls</span></div><span class="p-chevron">▼</span></div>
+      <div class="pillar-body">
+        <p class="pillar-intro">Who owns this AI? Who approves changes? What happens when it fails? These 10 controls verify that ownership, oversight, and governance processes are formally in place.</p>
+        <div class="ctrl-table-wrap">
+          <table class="ctrl-table">
+            <thead><tr><th>ID</th><th>Tier</th><th>What it searches for</th><th>Key signals</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">GOV-01</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Named owners + enforced PR approval gates</strong><p>CODEOWNERS file assigning responsibility per directory. PR approval gates enforced in CI before any code merges. Both must exist.</p></div></td><td><div class="signals"><span class="signal-pill">CODEOWNERS</span><span class="signal-pill">PR approval rules</span><span class="signal-pill">release workflow YAML</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">GOV-02</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>System purpose, intended users, non-use boundaries</strong><p>A document stating what this AI does, who it's for, and explicitly what it must NOT be used for.</p></div></td><td><div class="signals"><span class="signal-pill">system_description.*</span><span class="signal-pill">intended_use.*</span><span class="signal-pill">README purpose</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">GOV-03</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Stakeholder impact assessment</strong><p>Who is helped, harmed, or excluded by this AI? Developer must point to the document via supplement form.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: file path required</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">GOV-04</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Initial project risk assessment</strong><p>Was a risk assessment done at design time — before building started? Supplement required.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: file path required</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">GOV-05</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Human oversight model documented</strong><p>Who reviews AI outputs, who can intervene, at what decision points. Roles + intervention points both required.</p></div></td><td><div class="signals"><span class="signal-pill">oversight_plan.*</span><span class="signal-pill">escalation_workflow.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">GOV-06</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Incident response plan with escalation chain</strong><p>What happens when the AI causes harm or fails? Written runbook with named escalation chain.</p></div></td><td><div class="signals"><span class="signal-pill">incident_response.*</span><span class="signal-pill">runbook.*</span><span class="signal-pill">INCIDENT.md</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">GOV-07</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Post-deployment monitoring schedule</strong><p>How often is the AI reviewed after launch? Defined cadence and monitoring workflow required.</p></div></td><td><div class="signals"><span class="signal-pill">monitoring_schedule.*</span><span class="signal-pill">review_cadence.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">GOV-08</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Change management / version governance policy</strong><p>When model, prompt, or data changes — who approves? What must be tested first? Supplement required.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: file path required</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">GOV-09</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Re-evaluation trigger policy</strong><p>What events — model change, incident, new users — must force a formal re-review of the system?</p></div></td><td><div class="signals"><span class="signal-pill">reevaluation_policy.*</span><span class="signal-pill">trigger_conditions.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">GOV-10</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Regulatory compliance mapping</strong><p>Which laws (GDPR, EU AI Act) apply? How does each design choice respond to each obligation? Full mapping required.</p></div></td><td><div class="signals"><span class="signal-pill">regulatory_mapping.*</span><span class="signal-pill">compliance_matrix.*</span><span class="signal-pill">eu_ai_act_mapping.*</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- P2 -->
+    <div class="pillar" data-p="p2">
+      <div class="pillar-head" onclick="tp('p2')"><div class="p-num" style="background:var(--red-s);color:var(--red);">P2</div><div class="p-title">Risk Management & Impact Assessment</div><div class="p-meta"><span class="p-count">6 controls</span></div><span class="p-chevron">▼</span></div>
+      <div class="pillar-body">
+        <p class="pillar-intro">Did you think about what could go wrong before building? RISK-01/02/03 are T2 — CER scans for documents. RISK-04/05/06 are T3 — human governance decisions, CER asks for file paths.</p>
+        <div class="ctrl-table-wrap">
+          <table class="ctrl-table">
+            <thead><tr><th>ID</th><th>Tier</th><th>What it searches for</th><th>Key signals</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">RISK-01</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>System context documentation</strong><p>Domain, stakeholders, scale, decision impact, operating environment, and dependency context — all 6 components documented.</p></div></td><td><div class="signals"><span class="signal-pill">system_context.*</span><span class="signal-pill">project_risk.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">RISK-02</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Risk classification with written rationale</strong><p>System formally classified as low/medium/high risk with a written justification for why that classification was chosen.</p></div></td><td><div class="signals"><span class="signal-pill">risk_classification.*</span><span class="signal-pill">risk_matrix.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">RISK-03</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Ethical impact assessment</strong><p>Who could be harmed by this AI — identified, prioritised, and mitigation noted before implementation. Not after.</p></div></td><td><div class="signals"><span class="signal-pill">ethics_impact.*</span><span class="signal-pill">impact_assessment.*</span><span class="signal-pill">/ethics/ directory</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">RISK-04</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Signed residual risk acceptance</strong><p>After mitigations — remaining risks must be accepted by a named accountable owner with their signature on record.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: signed risk acceptance doc</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">RISK-05</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Maintained risk register — living document</strong><p>A document tracking all risks with owners, mitigations, and review dates — kept updated over time. Not a one-time artifact.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: maintained risk register</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">RISK-06</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Reassessment trigger events defined</strong><p>What specific events must trigger a formal risk re-assessment? Model change, new users, incidents — all must be named.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: reassessment trigger policy</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- P3 -->
+    <div class="pillar" data-p="p3">
+      <div class="pillar-head" onclick="tp('p3')"><div class="p-num" style="background:var(--green-s);color:var(--green);">P3</div><div class="p-title">Human Oversight & Recourse</div><div class="p-meta"><span class="p-count">7 controls</span></div><span class="p-chevron">▼</span></div>
+      <div class="pillar-body">
+        <p class="pillar-intro">Can a human stop the AI? Can users fight back? HUMO-02 and HUMO-04 are T1 — visible in code. HUMO-01/03/06/07 are T2. HUMO-05 is T3.</p>
+        <div class="ctrl-table-wrap">
+          <table class="ctrl-table">
+            <thead><tr><th>ID</th><th>Tier</th><th>What it searches for</th><th>Key signals</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">HUMO-01</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Named oversight roles with training requirements</strong><p>Who reviews AI outputs, what competence is required, how are roles assigned. All three components documented.</p></div></td><td><div class="signals"><span class="signal-pill">oversight_roles.*</span><span class="signal-pill">training_requirement.*</span><span class="signal-pill">RACI chart</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">HUMO-02</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Working kill switch and admin override in code</strong><p>Actual working code — not documentation — that lets a human pause, halt, or override AI decisions. Enforced on critical paths.</p></div></td><td><div class="signals"><span class="signal-pill">kill_switch</span><span class="signal-pill">admin_override endpoint</span><span class="signal-pill">manual_review_queue</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">HUMO-03</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>User appeal / dispute endpoint + recourse process</strong><p>A real working endpoint for users to challenge decisions, plus documentation of the recourse process and timeline.</p></div></td><td><div class="signals"><span class="signal-pill">POST /appeal</span><span class="signal-pill">POST /dispute</span><span class="signal-pill">recourse UI strings</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">HUMO-04</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Timeout + retry + fallback + abstention — all 4 linked</strong><p>When AI is uncertain or fails, it steps aside gracefully. All 4 components must be present and linked. Timeout alone = PARTIAL.</p></div></td><td><div class="signals"><span class="signal-pill">timeout logic</span><span class="signal-pill">retry chain</span><span class="signal-pill">fallback function</span><span class="signal-pill">abstention_threshold</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">HUMO-05</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Support SLA — response time commitments</strong><p>Written commitment on how long it takes to get help for different issue types. Supplement required.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: support SLA document</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">HUMO-06</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>HITL gate enforced in code for high-risk decisions</strong><p>For decisions that matter — code must force a human to review and approve before the AI acts.</p></div></td><td><div class="signals"><span class="signal-pill">@requires_human_review</span><span class="signal-pill">approval_queue</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">HUMO-07</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>No fully autonomous consequential decisions</strong><p>Checks for ABSENCE of human gate on rights-affecting endpoints. Autonomous consequential paths = MISSING.</p></div></td><td><div class="signals"><span class="signal-pill">consequential endpoints without @requires_human_review</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- P4 -->
+    <div class="pillar" data-p="p4">
+      <div class="pillar-head" onclick="tp('p4')"><div class="p-num" style="background:var(--violet-s);color:var(--violet);">P4</div><div class="p-title">Data Governance & Privacy</div><div class="p-meta"><span class="p-count">9 controls</span></div><span class="p-chevron">▼</span></div>
+      <div class="pillar-body">
+        <p class="pillar-intro">How does your AI handle personal data? PRIV-01/03/04/05 are T1 — directly in code. PRIV-02/06/08/09 are T2. PRIV-07 is T3.</p>
+        <div class="ctrl-table-wrap">
+          <table class="ctrl-table">
+            <thead><tr><th>ID</th><th>Tier</th><th>What it searches for</th><th>Key signals</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">PRIV-01</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>PII not in logs, field-level minimisation in schema</strong><p>Personal data must not appear in log statements. Schema must collect only necessary fields. Both checked.</p></div></td><td><div class="signals"><span class="signal-pill">log statements near email/phone</span><span class="signal-pill">redaction patterns</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">PRIV-02</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Lawful basis for data collection</strong><p>A document stating the legal reason for collecting each type of data — consent, contract, legitimate interest.</p></div></td><td><div class="signals"><span class="signal-pill">lawful_basis.*</span><span class="signal-pill">privacy_notice.*</span><span class="signal-pill">GDPR_basis.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">PRIV-03</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>User-facing AI disclosure and data use notice in UI code</strong><p>Users told in the app that AI is involved and what data is used — not just in buried terms and conditions.</p></div></td><td><div class="signals"><span class="signal-pill">AI disclosure strings in UI</span><span class="signal-pill">consent banner config</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">PRIV-04</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Data retention TTL config AND working deletion jobs</strong><p>Rules saying "delete after X days" AND working code that actually executes the deletion. Config alone = PARTIAL.</p></div></td><td><div class="signals"><span class="signal-pill">TTL config values</span><span class="signal-pill">deletion endpoints</span><span class="signal-pill">deletion cron jobs</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">PRIV-05</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>RBAC — least-privilege on all data and model endpoints</strong><p>Role-based access control decorators on all sensitive routes. No over-privileged roles.</p></div></td><td><div class="signals"><span class="signal-pill">@requires_role</span><span class="signal-pill">RBAC middleware</span><span class="signal-pill">IAM policy files</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">PRIV-06</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Training data provenance — origin, license, restrictions</strong><p>Where did training data come from, what license does it have, are you legally allowed to use it for AI?</p></div></td><td><div class="signals"><span class="signal-pill">dataset_provenance.*</span><span class="signal-pill">data_rights.*</span><span class="signal-pill">data_card.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">PRIV-07</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Cross-border data transfer assessment</strong><p>Does data leave the country? If yes — has the legal basis for that transfer been assessed and documented?</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: cross-border assessment</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">PRIV-08</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>De-identification evaluation report</strong><p>If you anonymised data — prove it works. Method + validation approach + guarantee all required.</p></div></td><td><div class="signals"><span class="signal-pill">deidentification_eval.*</span><span class="signal-pill">k-anonymity config</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">PRIV-09</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Synthetic data governance — provenance + bias amplification</strong><p>If using GAN/VAE synthetic data — how was it made, what biases might it carry, and are limitations disclosed?</p></div></td><td><div class="signals"><span class="signal-pill">synthetic_data_config.*</span><span class="signal-pill">bias_amplification_assessment.*</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- P5 -->
+    <div class="pillar" data-p="p5">
+      <div class="pillar-head" onclick="tp('p5')"><div class="p-num" style="background:var(--amber-s);color:var(--amber);">P5</div><div class="p-title">Fairness & Non-Discrimination</div><div class="p-meta"><span class="p-count">7 controls</span></div><span class="p-chevron">▼</span></div>
+      <div class="pillar-body">
+        <p class="pillar-intro">Does your AI treat everyone equally? FAIR-01/02 are T1. FAIR-03 through FAIR-07 are T2. No T3 rules. Story: Find → Plan → Run → Fix → Set Limits → Keep Watching → Let Users Fight Back.</p>
+        <div class="ctrl-table-wrap">
+          <table class="ctrl-table">
+            <thead><tr><th>ID</th><th>Tier</th><th>What it searches for</th><th>Key signals</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">FAIR-01</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Fairness evaluation notebooks with subgroup metrics</strong><p>Notebooks or scripts measuring AI performance broken down by demographic group — not just overall accuracy.</p></div></td><td><div class="signals"><span class="signal-pill">fairness eval notebooks</span><span class="signal-pill">protected_attribute_config.*</span><span class="signal-pill">demographic_parity checks</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">FAIR-02</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Bias testing plan with target groups and thresholds</strong><p>Written plan: which groups tested, what metrics used, what gap is acceptable. All three required.</p></div></td><td><div class="signals"><span class="signal-pill">bias_testing_plan.*</span><span class="signal-pill">fairness_test_config.yaml</span><span class="signal-pill">acceptable_thresholds.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">FAIR-03</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Executed bias test results with interpretation</strong><p>Not just "tests ran" — actual numbers, what they mean, and what action was taken. Results without interpretation = PARTIAL.</p></div></td><td><div class="signals"><span class="signal-pill">bias_test_results.*</span><span class="signal-pill">fairness_evaluation_report.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">FAIR-04</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Bias mitigation code with documented tradeoffs</strong><p>Not just noting bias — actually using libraries to reduce it. Experiment notebook + tradeoff doc both required.</p></div></td><td><div class="signals"><span class="signal-pill">Fairlearn import</span><span class="signal-pill">AIF360 import</span><span class="signal-pill">bias_mitigation.* notebooks</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">FAIR-05</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Numeric fairness thresholds in config file</strong><p>Not "we aim to be fair" — a specific number like "no group can be more than 5% worse than the best performing group."</p></div></td><td><div class="signals"><span class="signal-pill">fairness_thresholds.yaml</span><span class="signal-pill">demographic_parity keys</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">FAIR-06</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Ongoing fairness monitoring on a schedule</strong><p>Fairness monitored post-launch on a recurring schedule — not just once before launch. Cron job or CI/CD workflow.</p></div></td><td><div class="signals"><span class="signal-pill">fairness_monitor.*</span><span class="signal-pill">drift_detection.*</span><span class="signal-pill">CI/CD cron schedule</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">FAIR-07</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Appeals endpoint for fairness complaints + timeline</strong><p>A working route where users can challenge a decision they believe was unfair. Timeline documented.</p></div></td><td><div class="signals"><span class="signal-pill">POST /appeal</span><span class="signal-pill">POST /review-request</span><span class="signal-pill">fairness_recourse.*</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- P6 -->
+    <div class="pillar" data-p="p6">
+      <div class="pillar-head" onclick="tp('p6')"><div class="p-num" style="background:var(--blue-s);color:var(--blue);">P6</div><div class="p-title">Transparency & Explainability</div><div class="p-meta"><span class="p-count">8 controls</span></div><span class="p-chevron">▼</span></div>
+      <div class="pillar-body">
+        <p class="pillar-intro">Is your AI honest about what it is? Can it explain its decisions? TRAN-01/05/07/08 are T1. TRAN-02/03/04/06 are T2. No T3 rules.</p>
+        <div class="ctrl-table-wrap">
+          <table class="ctrl-table">
+            <thead><tr><th>ID</th><th>Tier</th><th>What it searches for</th><th>Key signals</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">TRAN-01</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>"AI-powered" disclosure strings in UI code</strong><p>Users told AI is involved — visible in the app. Plus refusal policy and content moderation API calls.</p></div></td><td><div class="signals"><span class="signal-pill">AI disclosure strings</span><span class="signal-pill">content moderation calls</span><span class="signal-pill">refusal policy code</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">TRAN-02</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>System limitations doc with user-facing text</strong><p>Known failure modes and uncertainty conditions — documented AND communicated to users in the UI. Both required.</p></div></td><td><div class="signals"><span class="signal-pill">limitations.*</span><span class="signal-pill">user-facing limitation strings</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">TRAN-03</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Explainability library or endpoint with documentation</strong><p>The AI can explain why it made a decision. SHAP/LIME imported and used, or explanation endpoint exists.</p></div></td><td><div class="signals"><span class="signal-pill">SHAP import</span><span class="signal-pill">LIME import</span><span class="signal-pill">explanation_api.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">TRAN-04</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>All 4 documentation components present</strong><p>Model card + system description + assumptions + intended/prohibited use. All 4 required. Missing even one = PARTIAL.</p></div></td><td><div class="signals"><span class="signal-pill">model_card.*</span><span class="signal-pill">intended_use.*</span><span class="signal-pill">prohibited_use.*</span><span class="signal-pill">assumptions.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">TRAN-05</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Trace ID on every request + audit log writes on decision paths</strong><p>Every AI decision gets a trace ID. Every decision written to audit log with input, output, and trace ID linked.</p></div></td><td><div class="signals"><span class="signal-pill">trace ID injection</span><span class="signal-pill">audit log writes</span><span class="signal-pill">@log_interaction</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">TRAN-06</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Decision log schema with reconstructable rationale field</strong><p>Not just logging that a decision happened — logging WHY in enough detail to reconstruct the reasoning later.</p></div></td><td><div class="signals"><span class="signal-pill">decision_log.* with rationale field</span><span class="signal-pill">SHAP values stored</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">TRAN-07</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>AI identity truthfulness — no deny-AI patterns in prompts</strong><p>If user sincerely asks "are you AI?" — code must answer honestly. No deny_ai_identity or pretend_human patterns allowed.</p></div></td><td><div class="signals"><span class="signal-pill">sincerity_check condition</span><span class="signal-pill">absence of deny_ai_identity</span><span class="signal-pill">absence of pretend_human</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--blue-s);color:var(--blue)">TRAN-08</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Content provenance watermarking on AI-generated output</strong><p>C2PA library or watermarking applied to every generated output. GEN-conditional — only active if gen_triggered = true.</p></div></td><td><div class="signals"><span class="signal-pill">C2PA library import</span><span class="signal-pill">watermarking config</span><span class="signal-pill">SynthID patterns</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- P7 -->
+    <div class="pillar" data-p="p7">
+      <div class="pillar-head" onclick="tp('p7')"><div class="p-num" style="background:var(--red-s);color:var(--red);">P7</div><div class="p-title">Safety, Robustness & Reliability</div><div class="p-meta"><span class="p-count">6 controls</span></div><span class="p-chevron">▼</span></div>
+      <div class="pillar-body">
+        <p class="pillar-intro">Does your AI behave safely when things go wrong? SAFE-01 and SAFE-04 are T1. SAFE-02/03/05/06 are T2. No T3 rules.</p>
+        <div class="ctrl-table-wrap">
+          <table class="ctrl-table">
+            <thead><tr><th>ID</th><th>Tier</th><th>What it searches for</th><th>Key signals</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">SAFE-01</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Input validation on all external endpoints + safety doc</strong><p>Every API endpoint taking external input must validate it with a schema library. Plus a safety requirements document.</p></div></td><td><div class="signals"><span class="signal-pill">Pydantic validators</span><span class="signal-pill">zod/joi schemas</span><span class="signal-pill">safety_constraints.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">SAFE-02</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Edge-case, stress, and adversarial test files</strong><p>Tests for weird inputs, failure conditions, and deliberate attacks — not just happy-path tests.</p></div></td><td><div class="signals"><span class="signal-pill">edge_case_tests.*</span><span class="signal-pill">adversarial_test.*</span><span class="signal-pill">stress_test.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">SAFE-03</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Distribution-shift robustness evaluation</strong><p>How does the system perform when real-world conditions differ from training? OOD test scripts required.</p></div></td><td><div class="signals"><span class="signal-pill">distribution_shift_eval.*</span><span class="signal-pill">ood_test.*</span><span class="signal-pill">robustness_eval.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">SAFE-04</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Complete fallback chain — all 4 must be linked</strong><p>Timeout + retry + fallback + abstention — all 4 present and linked. One component missing = PARTIAL. None = MISSING.</p></div></td><td><div class="signals"><span class="signal-pill">timeout logic</span><span class="signal-pill">retry chain</span><span class="signal-pill">fallback function</span><span class="signal-pill">abstention_threshold</span><span class="signal-pill">circuit_breaker</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">SAFE-05</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Red-team report with documented attack scenarios</strong><p>Someone deliberately tried to break the AI before launch. Report with scenarios, findings, and what was fixed.</p></div></td><td><div class="signals"><span class="signal-pill">red_team_results.*</span><span class="signal-pill">adversarial_probing.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">SAFE-06</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Post-deployment harm monitoring with alerting thresholds</strong><p>After launch — harm signals defined, alerting thresholds set, and response triggers documented.</p></div></td><td><div class="signals"><span class="signal-pill">harm_monitor.*</span><span class="signal-pill">safety_alert_config.*</span><span class="signal-pill">harm_threshold.*</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- P8 -->
+    <div class="pillar" data-p="p8">
+      <div class="pillar-head" onclick="tp('p8')"><div class="p-num" style="background:var(--green-s);color:var(--green);">P8</div><div class="p-title">Security, Misuse Prevention & Resilience</div><div class="p-meta"><span class="p-count">7 controls</span></div><span class="p-chevron">▼</span></div>
+      <div class="pillar-body">
+        <p class="pillar-intro">Can your AI be hacked or misused? SEC-01/02/03/06/07 are T1. SEC-04/05 are T2. SEC-07 is Industrial-only.</p>
+        <div class="ctrl-table-wrap">
+          <table class="ctrl-table">
+            <thead><tr><th>ID</th><th>Tier</th><th>What it searches for</th><th>Key signals</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SEC-01</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>No hardcoded secrets + auth middleware + threat model</strong><p>No API keys or passwords in code. Auth middleware on all sensitive routes. Threat model document exists. All 3 required.</p></div></td><td><div class="signals"><span class="signal-pill">hardcoded key patterns</span><span class="signal-pill">auth middleware</span><span class="signal-pill">threat_model.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SEC-02</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Prompt injection defences + exfiltration guards</strong><p>For LLM systems — defences against attackers hijacking AI via crafted inputs. Input schema validation on LLM inputs. GEN-conditional.</p></div></td><td><div class="signals"><span class="signal-pill">prompt sanitisation</span><span class="signal-pill">injection test cases</span><span class="signal-pill">system_prompt isolation</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SEC-03</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Pinned lockfile + SBOM + CI secrets scan + PR review gate</strong><p>All 4 must be present. Lockfile pins exact versions. SBOM lists all libraries. CI scans for secrets. PRs require approval.</p></div></td><td><div class="signals"><span class="signal-pill">package-lock.json</span><span class="signal-pill">sbom.json (CycloneDX)</span><span class="signal-pill">secrets scan in CI YAML</span><span class="signal-pill">PR review gate</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SEC-04</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Rate limiting + abuse reporting endpoint</strong><p>Rate limiting stops API abuse. POST /report-abuse lets users flag misuse. Both required.</p></div></td><td><div class="signals"><span class="signal-pill">@limiter.limit decorator</span><span class="signal-pill">POST /report-abuse</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SEC-05</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Vulnerability management policy + Dependabot + CVE disclosure</strong><p>Written plan for handling security bugs. Automated dependency updates. CVE disclosure process. All 3 required.</p></div></td><td><div class="signals"><span class="signal-pill">SECURITY.md</span><span class="signal-pill">dependabot.yml</span><span class="signal-pill">CVE disclosure process</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SEC-06</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Pre-trained model provenance — license, safety, fitness</strong><p>Using HuggingFace/OpenAI models — a document assessing the model's license, known limitations, and safety testing. REL-conditional.</p></div></td><td><div class="signals"><span class="signal-pill">model_provenance.*</span><span class="signal-pill">HuggingFace model card URLs</span><span class="signal-pill">base_model_safety.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SEC-07</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>Membership inference + model inversion assessment</strong><p>Can the model be tricked into revealing training data? Both assessments with risk level and mitigation. Industrial-only.</p></div></td><td><div class="signals"><span class="signal-pill">membership_inference_assessment.*</span><span class="signal-pill">model_inversion_analysis.*</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- P9 -->
+    <div class="pillar" data-p="p9">
+      <div class="pillar-head" onclick="tp('p9')"><div class="p-num" style="background:var(--violet-s);color:var(--violet);">P9</div><div class="p-title">Documentation, Traceability & Auditability</div><div class="p-meta"><span class="p-count">8 controls</span></div><span class="p-chevron">▼</span></div>
+      <div class="pillar-body">
+        <p class="pillar-intro">Is everything written down and traceable? DOC-05 is the only T1 in this pillar. DOC-01/02/03/04/06/07 are T2. DOC-08 is T3.</p>
+        <div class="ctrl-table-wrap">
+          <table class="ctrl-table">
+            <thead><tr><th>ID</th><th>Tier</th><th>What it searches for</th><th>Key signals</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">DOC-01</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>All 5 system description components</strong><p>Purpose + intended users + scope + assumptions + limitations. All 5 required. LLM checks completeness at S9.</p></div></td><td><div class="signals"><span class="signal-pill">system_description.*</span><span class="signal-pill">system_card.*</span><span class="signal-pill">scope_definition.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">DOC-02</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Dataset documentation — provenance, license, context, constraints</strong><p>Where training data came from, its license, collection context, and known constraints. All 4 fields checked by LLM.</p></div></td><td><div class="signals"><span class="signal-pill">datasheet_for_dataset.*</span><span class="signal-pill">dataset_card.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">DOC-03</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Model card — intended use, forbidden use, evaluation approach</strong><p>All 3 fields required. Forbidden use must be explicitly stated — not just implied or absent.</p></div></td><td><div class="signals"><span class="signal-pill">model_card.*</span><span class="signal-pill">model_documentation.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">DOC-04</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Decision log schema — reconstructable rationale field</strong><p>Not just logging outcomes — storing enough to reconstruct exactly what happened. LLM confirms reconstruction is possible.</p></div></td><td><div class="signals"><span class="signal-pill">decision_log.* with rationale field</span><span class="signal-pill">reconstructable decision schema</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">DOC-05</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>All 4 versions pinned and linked — data, model, prompt, code</strong><p>All four components versioned together in one manifest. Any past state must be fully reproducible.</p></div></td><td><div class="signals"><span class="signal-pill">version_manifest.*</span><span class="signal-pill">model version references</span><span class="signal-pill">prompt version tags</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">DOC-06</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Evidence retention policy — scope + duration + access controls</strong><p>All 3 parts required: what is kept, for how long, and who can access it. Missing any one = PARTIAL.</p></div></td><td><div class="signals"><span class="signal-pill">retention_policy.*</span><span class="signal-pill">evidence_retention.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--violet-s);color:var(--violet)">DOC-07</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Append-only audit logs + integrity hash verification</strong><p>Logs that cannot be edited or deleted. Plus a mechanism to detect tampering. Both must exist.</p></div></td><td><div class="signals"><span class="signal-pill">CloudTrail / Kafka config</span><span class="signal-pill">WORM storage</span><span class="signal-pill">hash verification script</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">DOC-08</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Certification-trace design specification</strong><p>Document explaining how certification decisions, inheritance, and audit outputs are structured.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: cert_trace.* doc</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- P10 -->
+    <div class="pillar" data-p="p10">
+      <div class="pillar-head" onclick="tp('p10')"><div class="p-num" style="background:var(--amber-s);color:var(--amber);">P10</div><div class="p-title">Accessibility, Inclusion & Human Factors</div><div class="p-meta"><span class="p-count">8 controls</span></div><span class="p-chevron">▼</span></div>
+      <div class="pillar-body">
+        <p class="pillar-intro">Can everyone use your AI? ACC-07 is the only T1. ACC-01/03/05/06/08 are T2. ACC-02 and ACC-04 are T3 — user testing cannot be detected in code.</p>
+        <div class="ctrl-table-wrap">
+          <table class="ctrl-table">
+            <thead><tr><th>ID</th><th>Tier</th><th>What it searches for</th><th>Key signals</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">ACC-01</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Accessibility requirements — disability, language, device, usability</strong><p>Written plan covering all 4 accessibility dimensions. WCAG lint configured for automated checks.</p></div></td><td><div class="signals"><span class="signal-pill">accessibility_requirements.*</span><span class="signal-pill">WCAG lint config</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">ACC-02</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Inclusive design testing with real or proxy users</strong><p>Was the system tested with people from the intended audience? Participant records or proxy testing report.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: testing evidence</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">ACC-03</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Human-factors hazard doc — over-trust, automation bias, misuse</strong><p>All 3 hazard types identified and designed against. UI warning strings about AI limitations.</p></div></td><td><div class="signals"><span class="signal-pill">human_factors_hazards.*</span><span class="signal-pill">automation_bias_warning.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">ACC-04</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>User comprehension validation</strong><p>Evidence that real users were tested and confirmed to understand notices, explanations, and key interactions.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: comprehension validation</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">ACC-05</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Vulnerable user protections — code enforcement + documentation</strong><p>If children or elderly are in user base — both a protection document AND working code enforcement must exist.</p></div></td><td><div class="signals"><span class="signal-pill">minor_safeguarding.*</span><span class="signal-pill">age_verification code</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">ACC-06</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Human alternative route — mandatory, not optional</strong><p>For consequential outcomes — a working code route AND documentation stating it is mandatory.</p></div></td><td><div class="signals"><span class="signal-pill">fallback_to_human route</span><span class="signal-pill">escalate_to_human endpoint</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">ACC-07</span></td><td><span class="badge b-t1">T1</span></td><td><div class="ctrl-what"><strong>No dark patterns — no pre-ticked boxes, no coercive consent</strong><p>Scans for ABSENCE of manipulative UI patterns. Pre-ticked consent, asymmetric buttons, buried disclosures = MISSING.</p></div></td><td><div class="signals"><span class="signal-pill">consent code without pre-ticked boxes</span><span class="signal-pill">absence of dark_pattern anti-patterns</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--amber-s);color:var(--amber)">ACC-08</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Support channel doc + accessible contact endpoint</strong><p>Both must exist. The support channel itself must be accessible — not just a phone number if users cannot hear.</p></div></td><td><div class="signals"><span class="signal-pill">support_channels.*</span><span class="signal-pill">accessible_contact endpoint</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- P11 -->
+    <div class="pillar" data-p="p11">
+      <div class="pillar-head" onclick="tp('p11')"><div class="p-num" style="background:var(--green-s);color:var(--green);">P11</div><div class="p-title">Societal & Environmental Well-being</div><div class="p-meta"><span class="p-count">8 controls</span></div><span class="p-chevron">▼</span></div>
+      <div class="pillar-body">
+        <p class="pillar-intro">What is the bigger impact on society and the planet? No T1 rules — nothing in this pillar is detectable purely in code. SOC-02/04/05 are T3. All others are T2.</p>
+        <div class="ctrl-table-wrap">
+          <table class="ctrl-table">
+            <thead><tr><th>ID</th><th>Tier</th><th>What it searches for</th><th>Key signals</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SOC-01</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Societal benefit statement — who benefits and how to measure it</strong><p>All 3 parts: benefit type + beneficiary group + recognition criteria (how you'd know it's working).</p></div></td><td><div class="signals"><span class="signal-pill">societal_benefit.*</span><span class="signal-pill">benefit_statement.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">SOC-02</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Societal harm assessment</strong><p>Broader harms — exclusion, misinformation, surveillance — identified and assessed. societal_impact_scanner also checks; if file found automatically, status = PARTIAL.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: harm_assessment.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SOC-03</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Carbon tracking + compute budget + environmental impact doc</strong><p>All 3 required. codecarbon import alone = PARTIAL. Need implementation + budget config + impact document for PASS.</p></div></td><td><div class="signals"><span class="signal-pill">codecarbon import</span><span class="signal-pill">compute_budget.*</span><span class="signal-pill">environmental_impact.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">SOC-04</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Cultural and contextual appropriateness review</strong><p>Has the system been reviewed for local language, norms, and context-specific harms in the region it operates?</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: cultural review doc</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--red-s);color:var(--red)">SOC-05</span></td><td><span class="badge b-t3">T3</span></td><td><div class="ctrl-what"><strong>Workforce and labor impact assessment</strong><p>Does this AI displace workers, enable unfair monitoring, or create safety risks? Someone must have assessed this.</p></div></td><td><div class="signals"><span class="signal-pill">Supplement: workforce_impact.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SOC-06</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Dual-use / misuse assessment — repurposing scenarios</strong><p>How could this AI be weaponised or repurposed for harm? Scenarios and risk levels documented.</p></div></td><td><div class="signals"><span class="signal-pill">dual_use_assessment.*</span><span class="signal-pill">abuse_scenarios.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SOC-07</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Harm reporting endpoint + public disclosure commitment</strong><p>A working endpoint where anyone can report harmful outputs. Plus a public disclosure document.</p></div></td><td><div class="signals"><span class="signal-pill">POST /report-harm</span><span class="signal-pill">public_disclosure.*</span></div></td></tr>
+              <tr><td><span class="ctrl-id" style="background:var(--green-s);color:var(--green)">SOC-08</span></td><td><span class="badge b-t2">T2</span></td><td><div class="ctrl-what"><strong>Equity of access — all 4 barrier types assessed</strong><p>Cost + language + literacy + infrastructure barriers all considered. Missing even one barrier type = PARTIAL.</p></div></td><td><div class="signals"><span class="signal-pill">equity_of_access.*</span><span class="signal-pill">access_barrier_assessment.*</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end pillar stack -->
+</div>
+</section>
+
+<!-- ══ SECTION 8: PLUGINS ══ -->
+<section class="page-section" id="plugins">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 8 · 31 Plugins</div>
+    <h2 class="section-title">Complete Plugin Catalogue</h2>
+    <p class="section-sub">All 31 plugins — grouped, typed, and cross-referenced. DET = fully automatic. HYB = automatic detection + LLM content check. All run in parallel at S5.</p>
+  </div>
+  <div class="callout blue" style="margin-bottom:1.5rem;">
+    <div class="callout-icon">💡</div>
+    <p><strong>Not all 31 plugins run for every scan.</strong> Each control is routed only to its registered plugins at S4. A plugin only runs if at least one of its registered controls is active. The full 31 only run if all controls are active and no filter removes any.</p>
+  </div>
+
+  <div class="plugin-group"><div class="pg-header">Group 1 — Core Security & Privacy · Plugins 01–08</div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Plugin</th><th>Type</th><th>Controls</th><th>What it looks for</th></tr></thead><tbody>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">01</td><td><span class="plugin-name">secrets_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">SEC-01</span><span class="signal-pill">SEC-03</span><span class="signal-pill">SEC-06</span></td><td style="font-size:.835rem;color:var(--fog);">Hardcoded API keys, tokens, passwords, connection strings. Env var references vs inline values.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">02</td><td><span class="plugin-name">authz_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">HUMO-02</span><span class="signal-pill">HUMO-07</span><span class="signal-pill">SEC-01</span></td><td style="font-size:.835rem;color:var(--fog);">Auth/authz decorators on endpoints. Missing auth on sensitive routes. Admin override. Absence of HITL gate on consequential endpoints.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">03</td><td><span class="plugin-name">input_validation_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">SAFE-01</span><span class="signal-pill">SEC-01</span><span class="signal-pill">SEC-02</span></td><td style="font-size:.835rem;color:var(--fog);">Input schema validation on API handlers. Schema library usage — Pydantic, Zod, Joi.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">04</td><td><span class="plugin-name">rate_limit_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">SEC-04</span><span class="signal-pill">SAFE-04</span></td><td style="font-size:.835rem;color:var(--fog);">Rate limiting middleware, throttle decorators, API gateway config.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">05</td><td><span class="plugin-name">privacy_log_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">PRIV-01</span><span class="signal-pill">PRIV-03</span><span class="signal-pill">PRIV-04</span></td><td style="font-size:.835rem;color:var(--fog);">Log statements near sensitive field names — email, phone, name. PII proximity scoring per line.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">06</td><td><span class="plugin-name">retention_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">PRIV-04</span></td><td style="font-size:.835rem;color:var(--fog);">TTL config values, deletion endpoints, deletion cron jobs, retention policy file references.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">07</td><td><span class="plugin-name">access_control_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">PRIV-05</span><span class="signal-pill">SEC-01</span></td><td style="font-size:.835rem;color:var(--fog);">RBAC decorators, least-privilege patterns, credential scope review.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">08</td><td><span class="plugin-name">pii_classifier</span></td><td><span class="badge b-hyb">HYB</span></td><td><span class="signal-pill">PRIV-01</span><span class="signal-pill">PRIV-03</span><span class="signal-pill">DOC-04</span></td><td style="font-size:.835rem;color:var(--fog);">PII field detection from schema definitions. LLM classifies ambiguous field names — "passenger_ref": personal data or order number?</td></tr>
+  </tbody></table></div></div>
+
+  <div class="plugin-group"><div class="pg-header">Group 2 — GenAI & Transparency · Plugins 09–12</div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Plugin</th><th>Type</th><th>Controls</th><th>What it looks for</th></tr></thead><tbody>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">09</td><td><span class="plugin-name">prompt_injection_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">SEC-02</span></td><td style="font-size:.835rem;color:var(--fog);">Prompt templates, system prompts, injection test cases, agent orchestration, tool permission constraints.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">10</td><td><span class="plugin-name">moderation_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">TRAN-01</span></td><td style="font-size:.835rem;color:var(--fog);">Content moderation API calls, refusal policy code, output filtering logic.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">11</td><td><span class="plugin-name">grounding_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">TRAN-02</span><span class="signal-pill">TRAN-03</span></td><td style="font-size:.835rem;color:var(--fog);">RAG retrieval integration, citation formatters, source attribution, hallucination evaluation scripts.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">12</td><td><span class="plugin-name">disclosure_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">TRAN-01</span><span class="signal-pill">TRAN-07</span><span class="signal-pill">ACC-07</span></td><td style="font-size:.835rem;color:var(--fog);">AI disclosure text in UI. Identity truthfulness logic. Sincerity-check conditions. Dark pattern detection.</td></tr>
+  </tbody></table></div></div>
+
+  <div class="plugin-group"><div class="pg-header">Group 3 — Dependency & Supply Chain · Plugins 13–15</div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Plugin</th><th>Type</th><th>Controls</th><th>What it looks for</th></tr></thead><tbody>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">13</td><td><span class="plugin-name">dependency_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">SEC-03</span><span class="signal-pill">SEC-06</span><span class="signal-pill">DOC-05</span></td><td style="font-size:.835rem;color:var(--fog);">Lockfiles, dependency manifests, LLM/AI vendor imports, unpinned dependencies.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">14</td><td><span class="plugin-name">sbom_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">SEC-03</span></td><td style="font-size:.835rem;color:var(--fog);">SBOM artefact presence — CycloneDX, SPDX formats. Provenance attestation. SLSA artefact.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">15</td><td><span class="plugin-name">ci_security_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">GOV-01</span><span class="signal-pill">GOV-09</span><span class="signal-pill">SEC-03</span><span class="signal-pill">SEC-05</span></td><td style="font-size:.835rem;color:var(--fog);">Branch protection, release approval gates, dependency scan workflow, secrets scanning step in CI YAML.</td></tr>
+  </tbody></table></div></div>
+
+  <div class="plugin-group"><div class="pg-header">Group 4 — Fairness, Safety & Robustness · Plugins 16–18</div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Plugin</th><th>Type</th><th>Controls</th><th>What it looks for</th></tr></thead><tbody>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">16</td><td><span class="plugin-name">fairness_artifact_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">FAIR-01</span><span class="signal-pill">FAIR-02</span><span class="signal-pill">FAIR-03</span></td><td style="font-size:.835rem;color:var(--fog);">Fairness evaluation notebooks, subgroup metrics scripts, bias mitigation experiments, protected attribute configs.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">17</td><td><span class="plugin-name">robustness_test_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">SAFE-02</span><span class="signal-pill">SAFE-03</span><span class="signal-pill">SAFE-05</span></td><td style="font-size:.835rem;color:var(--fog);">Edge-case tests, adversarial test suites, robustness eval scripts, red-team artefacts.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">18</td><td><span class="plugin-name">fallback_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">SAFE-04</span><span class="signal-pill">HUMO-04</span></td><td style="font-size:.835rem;color:var(--fog);">Timeout + retry + fallback chains, abstention thresholds, graceful degradation, circuit breakers. All 4 must be linked together.</td></tr>
+  </tbody></table></div></div>
+
+  <div class="plugin-group"><div class="pg-header">Group 5 — Documentation & Governance · Plugins 19–22</div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Plugin</th><th>Type</th><th>Controls</th><th>What it looks for</th></tr></thead><tbody>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">19</td><td><span class="plugin-name">docs_scanner</span></td><td><span class="badge b-hyb">HYB</span></td><td><span class="signal-pill">GOV-01–04</span><span class="signal-pill">GOV-10</span><span class="signal-pill">RISK-01–03</span><span class="signal-pill">TRAN-02–04</span><span class="signal-pill">DOC-01</span><span class="signal-pill">SOC-01/06/08</span></td><td style="font-size:.835rem;color:var(--fog);">Model cards, system descriptions, risk registers, impact statements, regulatory mapping. LLM classifies ambiguous doc types.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">20</td><td><span class="plugin-name">traceability_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">DOC-04</span><span class="signal-pill">DOC-05</span><span class="signal-pill">TRAN-05</span><span class="signal-pill">TRAN-06</span></td><td style="font-size:.835rem;color:var(--fog);">Trace ID injection, audit log writes, decision log fields with rationale, version pin discipline.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">21</td><td><span class="plugin-name">governance_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">GOV-01</span><span class="signal-pill">GOV-05–07</span><span class="signal-pill">GOV-09/10</span></td><td style="font-size:.835rem;color:var(--fog);">CODEOWNERS, PR templates, incident response runbooks, monitoring schedule, re-evaluation trigger config.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">22</td><td><span class="plugin-name">oversight_code_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">HUMO-01–04</span><span class="signal-pill">HUMO-07</span></td><td style="font-size:.835rem;color:var(--fog);">Manual review queues, admin override functions, kill switches, escalation hooks, HITL gates, autonomous decision anti-patterns.</td></tr>
+  </tbody></table></div></div>
+
+  <div class="plugin-group"><div class="pg-header">Group 6 — Specialist Privacy & Security · Plugins 23–27</div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Plugin</th><th>Type</th><th>Controls</th><th>What it looks for</th></tr></thead><tbody>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">23</td><td><span class="plugin-name">synthetic_data_scanner</span></td><td><span class="badge b-hyb">HYB</span></td><td><span class="signal-pill">PRIV-09</span></td><td style="font-size:.835rem;color:var(--fog);">Synthetic data generation config, provenance files, bias amplification assessment. LLM checks content quality.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">24</td><td><span class="plugin-name">pre_trained_model_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">SEC-06</span></td><td style="font-size:.835rem;color:var(--fog);">Pre-trained model references, HuggingFace model card URLs, licensing notes, safety assessments.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">25</td><td><span class="plugin-name">inference_privacy_scanner</span></td><td><span class="badge b-hyb">HYB</span></td><td><span class="signal-pill">SEC-07</span></td><td style="font-size:.835rem;color:var(--fog);">Membership inference assessment, model inversion analysis, privacy attack evaluation. LLM checks risk and mitigation documented.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">26</td><td><span class="plugin-name">ui_accessibility_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">ACC-01</span><span class="signal-pill">ACC-03</span><span class="signal-pill">ACC-05</span><span class="signal-pill">ACC-07</span></td><td style="font-size:.835rem;color:var(--fog);">WCAG lint config, ARIA attributes, alt text, human alternative paths, dark pattern detection.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">27</td><td><span class="plugin-name">content_provenance_scanner</span></td><td><span class="badge b-det">DET</span></td><td><span class="signal-pill">TRAN-08</span></td><td style="font-size:.835rem;color:var(--fog);">C2PA library imports, watermarking config, provenance metadata fields, SynthID patterns.</td></tr>
+  </tbody></table></div></div>
+
+  <div class="plugin-group"><div class="pg-header">Group 7 — New Mandatory Plugins · 28–31 · Required from Capstone / Industrial</div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Plugin</th><th>Type</th><th>Controls</th><th>What it looks for</th></tr></thead><tbody>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">28</td><td><span class="plugin-name">risk_document_scanner</span></td><td><span class="badge b-hyb">HYB</span></td><td><span class="signal-pill">RISK-01–06</span></td><td style="font-size:.835rem;color:var(--fog);">Risk registers, threat models, ethical impact assessments, residual risk acceptance (LLM checks for owner signature field), reassessment trigger policies.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">29</td><td><span class="plugin-name">societal_impact_scanner</span></td><td><span class="badge b-hyb">HYB</span></td><td><span class="signal-pill">SOC-02/03/06/07/08</span></td><td style="font-size:.835rem;color:var(--fog);">Societal harm assessment files, carbon tracking imports, dual-use assessment docs, harm reporting endpoints, equity of access docs.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">30</td><td><span class="plugin-name">doc_completeness_scanner</span></td><td><span class="badge b-hyb">HYB</span></td><td><span class="signal-pill">DOC-02/03/06/07/08</span></td><td style="font-size:.835rem;color:var(--fog);">Dataset docs, model cards, evidence retention policy, audit trail integrity controls, certification-trace design spec. LLM checks completeness of each.</td></tr>
+    <tr><td class="mono" style="color:var(--fog2);font-size:.72rem;">31</td><td><span class="plugin-name">recourse_fairness_scanner</span></td><td><span class="badge b-hyb">HYB</span></td><td><span class="signal-pill">FAIR-04–07</span><span class="signal-pill">HUMO-03</span><span class="signal-pill">ACC-06</span><span class="signal-pill">ACC-08</span></td><td style="font-size:.835rem;color:var(--fog);">Fairness mitigation imports, parity threshold configs, fairness monitoring cron jobs, appeal endpoints, human alternative routes, support channel docs.</td></tr>
+  </tbody></table></div></div>
+
+</div>
+</section>
+
+<!-- ══ SECTION 9: STATUSES ══ -->
+<section class="page-section" id="statuses">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 9 · Status Definitions</div>
+    <h2 class="section-title">The 5 CER Statuses</h2>
+    <p class="section-sub">Every active control gets exactly one status after S7. Assigned by the Evidence Mapper — never by the LLM. These are the only values the CER ever uses.</p>
+  </div>
+  <div class="status-grid">
+    <div class="status-card" style="border-color:var(--green-b);"><div class="sc-icon">✅</div><div class="sc-name" style="color:var(--green);">PASS</div><p class="sc-desc">All required evidence found at this assurance level. Control is fully covered. No gaps.</p></div>
+    <div class="status-card" style="border-color:var(--amber-b);"><div class="sc-icon">⚠️</div><div class="sc-name" style="color:var(--amber);">PARTIAL</div><p class="sc-desc">Some evidence found but not all required. Example: retention policy doc exists but deletion cron job missing.</p></div>
+    <div class="status-card" style="border-color:var(--red-b);"><div class="sc-icon">❌</div><div class="sc-name" style="color:var(--red);">MISSING</div><p class="sc-desc">No evidence at all. Required files or code patterns don't exist. Must be built before proceeding to Reviewer.</p></div>
+    <div class="status-card" style="border-color:var(--line2);"><div class="sc-icon">⚙️</div><div class="sc-name" style="color:var(--fog);">NOT TRIGGERED</div><p class="sc-desc">Rule does not apply to this project. TRAN-08 only applies to GenAI. Not shown in report. No supplement sent.</p></div>
+    <div class="status-card" style="border-color:var(--violet-b);"><div class="sc-icon">🧠</div><div class="sc-name" style="color:var(--violet);">NOT EVALUABLE</div><p class="sc-desc">T3 rule needing human input — supplement form sent. Or T1/T2 where no files were accessible in the repo.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SECTION 10: S8 DEEP DIVE ══ -->
+<section class="page-section" id="s8">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 10 · S8 Deep Dive</div>
+    <h2 class="section-title">Step 8 — The Escalation Check</h2>
+    <p class="section-sub">The CER's lie detector. Compares what was declared against what was found. Three checks — only two can block progress.</p>
+  </div>
+
+  <div class="analogy" style="margin-bottom:1.5rem;">
+    <span class="analogy-emoji">🛂</span>
+    <h3>The Customs Officer Analogy</h3>
+    <p><strong>You filled a declaration form before landing</strong> (intake questionnaire). The officer checks your bags (S3 signals + plugin findings). Then compares:<br><br>
+    "You declared nothing to declare — but your bag has 3 bottles of wine." → CONFLICT → flagged.<br>
+    "You declared professional equipment — bag matches." → No flag.<br><br>
+    <strong>The officer does not confiscate anything. They just flag conflicts and say "sort these out before you proceed."</strong></p>
+  </div>
+
+  <div class="table-wrap" style="margin-bottom:1rem;">
+    <table>
+      <thead><tr><th>Check</th><th>What it compares</th><th>Produces</th><th>Sets escalation_required?</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;">Check 1<br><span style="font-weight:400;color:var(--fog);font-size:.78rem;">Declaration vs Reality</span></td><td style="font-size:.835rem;color:var(--fog);">Intake fields vs code-detected signals. Undeclared GenAI, undeclared minor users, undeclared cross-border transfers.</td><td><span class="badge b-partial">escalation_hints[]</span></td><td style="font-size:.835rem;color:var(--green);font-weight:700;">NO — informational only. Scan can proceed.</td></tr>
+        <tr><td style="font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;">Check 2<br><span style="font-weight:400;color:var(--fog);font-size:.78rem;">Level Override</span></td><td style="font-size:.835rem;color:var(--fog);">Declared assurance level vs override triggers. rights_affecting endpoint? → min Capstone. Minor users? → min Capstone. Regulated sector? → min Industrial.</td><td><span class="badge b-partial">escalation_hints[]</span></td><td style="font-size:.835rem;color:var(--red);font-weight:700;">YES — hard blocker. Must correct intake and re-run.</td></tr>
+        <tr><td style="font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;">Check 3<br><span style="font-weight:400;color:var(--fog);font-size:.78rem;">T3 Completeness</span></td><td style="font-size:.835rem;color:var(--fog);">All active T3 controls vs supplement submissions. If supplement not submitted at all → NOT_EVALUABLE + blocker. If submitted but file missing → MISSING (not a blocker).</td><td><span class="badge b-partial">escalation_hints[]</span></td><td style="font-size:.835rem;color:var(--red);font-weight:700;">YES — hard blocker. Must submit supplement before proceeding.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout red">
+    <div class="callout-icon">🚫</div>
+    <p><strong>S8 does not change any statuses. Does not re-run plugins. Does not cancel the scan.</strong> It only produces hints and flags. The developer sees these in their S10 report. If escalation_required = true, the developer corrects their intake and re-runs. The CER waits.</p>
+  </div>
+</div>
+</section>
+
+<!-- ══ SECTION 11: OUTPUTS ══ -->
+<section class="page-section" id="s10">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 11 · S10 Outputs</div>
+    <h2 class="section-title">The 6 Outputs — Who Gets What</h2>
+    <p class="section-sub">Same underlying data. 6 different views. Each shaped for its audience. S10 makes no decisions — it is a post office, not a decision-maker.</p>
+  </div>
+  <div class="handoff-grid" style="margin-bottom:1.25rem;">
+    <div class="handoff-card">
+      <div class="hc-dest">Output 05 — Goes to ADR human reviewer</div>
+      <div class="hc-title">📬 Reviewer Handoff Package</div>
+      <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-bottom:1rem;">Pre-fills the human reviewer's ADR workspace. Reviewer does not start from scratch. Every gap, every hint, every overlay tag already populated.</p>
+      <div class="field-row"><span class="fk">scan_id</span><span class="fv">UUID for this scan — like a receipt number</span></div>
+      <div class="field-row"><span class="fk">registry_version</span><span class="fv">Which rulebook version was used — must match project</span></div>
+      <div class="field-row"><span class="fk">commit_sha</span><span class="fv">Exact Git commit scanned — proves which code version</span></div>
+      <div class="field-row"><span class="fk">assurance_level</span><span class="fv">UG / PG / Capstone / Industrial</span></div>
+      <div class="field-row"><span class="fk">escalation_hints[]</span><span class="fv">All conflicts from S8 — intake vs code reality</span></div>
+      <div class="field-row"><span class="fk">gen_signals_detected</span><span class="fv">True if OpenAI/Anthropic imports found</span></div>
+      <div class="field-row"><span class="fk">metadata_supplement[]</span><span class="fv">One form entry per active T3 control</span></div>
+      <div class="field-row"><span class="fk">control_records[]</span><span class="fv">Per-control: status + confidence + severity + evidence_found + gaps + recommended_next_artifact + GEN/REL anchor tags</span></div>
+    </div>
+    <div class="handoff-card">
+      <div class="hc-dest">Output 06 — Goes to AI Certifier (automated)</div>
+      <div class="hc-title">🗂️ Certifier Pre-Registration Package</div>
+      <p style="font-size:.845rem;color:var(--fog);line-height:1.75;margin-bottom:1rem;">Like checking luggage at the airport — evidence registered before arrival. Certifier already knows what to verify. SHA-256 hashes prove files haven't changed.</p>
+      <div class="field-row"><span class="fk">control_id</span><span class="fv">Which rule this evidence relates to (e.g. PRIV-01)</span></div>
+      <div class="field-row"><span class="fk">file_path</span><span class="fv">Where the evidence file lives in the repo</span></div>
+      <div class="field-row"><span class="fk">sha256</span><span class="fv">Fingerprint — proves file unchanged since scan</span></div>
+      <div class="field-row"><span class="fk">artifact_type</span><span class="fv">source_file / test_file / config_file / doc_file / notebook / report</span></div>
+      <div class="field-row"><span class="fk">e_type_candidates[]</span><span class="fv">Advisory only — CER suggests, developer must declare, Certifier verifies</span></div>
+      <div class="field-row"><span class="fk">confidence</span><span class="fv">high / medium / low</span></div>
+      <div class="field-row"><span class="fk">plugin_id</span><span class="fv">Which plugin found this evidence file</span></div>
+      <div class="callout amber" style="margin-top:1rem;margin-bottom:0;"><div class="callout-icon">⚠️</div><p><strong>e_type_candidates is advisory only.</strong> CER suggests — developer must declare E-type at Certifier submission. Certifier then verifies sufficiency.</p></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SECTION 12: AUDIT ══ -->
+<section class="page-section" id="s11">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 12 · S11 Deep Dive</div>
+    <h2 class="section-title">Step 11 — Sealing the Audit Record</h2>
+    <p class="section-sub">Every other step produces something new. S11 preserves what was produced and removes what is no longer needed. The only immutable step in the entire pipeline.</p>
+  </div>
+  <div class="analogy" style="margin-bottom:1.5rem;">
+    <span class="analogy-emoji">⚖️</span>
+    <h3>The Court Reporter Analogy</h3>
+    <p>Everything that happened in court has been recorded verbatim — every witness statement (raw_findings), every expert opinion (LLM calls), every judge's ruling (statuses), which version of the law was used (registry_version). <strong>The reporter seals the transcript. It becomes the permanent official record. Nobody can alter it after sealing.</strong> Then the courtroom is cleared — exhibits returned or destroyed. Only the sealed transcript remains.</p>
+  </div>
+  <div class="codeblock">
+<span class="cb-label">what gets sealed — verbatim, complete, immutable</span>
+<span class="c-key">scan_id</span>               <span class="c-val">unique UUID for this exact scan</span>
+<span class="c-key">registry_version</span>      <span class="c-val">exact rulebook version used — proves which rules applied</span>
+<span class="c-key">commit_sha</span>            <span class="c-val">exact Git commit scanned — proves which version of code</span>
+<span class="c-key">workspace_hash</span>        <span class="c-val">SHA-256 of entire codebase at scan time</span>
+<span class="c-key">plugin_versions_used</span>  <span class="c-val">exact version of every plugin that ran</span>
+<span class="c-key">raw_findings</span>          <span class="c-val">every plugin output VERBATIM — nothing summarised, nothing edited</span>
+<span class="c-key">llm_call_log</span>          <span class="c-val">every S9 prompt sent + every response received VERBATIM</span>
+<span class="c-key">escalation_hints</span>      <span class="c-val">from S8</span>
+<span class="c-key">final_statuses</span>        <span class="c-val">all control statuses from S7</span>
+
+<span class="c-comment"># Hard deadline order — never reversed:</span>
+1. <span class="c-val">Audit record SEALED</span>           <span class="c-dim">← always first</span>
+2. <span class="c-op">Workspace DELETED</span> ≤60 seconds  <span class="c-dim">← always second</span>
+
+<span class="c-comment"># What remains after deletion:</span>
+<span class="c-val">KEPT:</span> file manifest (paths + SHA-256 hashes — no file content)
+<span class="c-val">KEPT:</span> raw findings (what was found / not found)
+<span class="c-val">KEPT:</span> sealed audit record
+<span class="c-val">KEPT:</span> all 6 outputs from S10
+<span class="c-op">GONE:</span> all source code file contents</div>
+</div>
+</section>
+
+<!-- ══ SECTION 13: LEVELS ══ -->
+<section class="page-section" id="levels">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 13 · Assurance Levels</div>
+    <h2 class="section-title">4 Risk Levels — How Strict is the Check?</h2>
+    <p class="section-sub">The assurance level determines how much evidence is required at each control. Level can only go up — never down after it's set. Override rules apply before developer preference.</p>
+  </div>
+  <div class="level-grid">
+    <div class="level-card" style="border-color:var(--line2);"><div class="lv-name">🎓 UG</div><div class="lv-range">Score 0–34 · Awareness</div><p class="lv-desc">Educational or experimental AI. Internal tools. Most things get PARTIAL if basic scaffolding exists. Just show awareness of each concern.</p><div class="lv-bar" style="background:var(--line2);width:25%;"></div></div>
+    <div class="level-card" style="border-color:var(--amber-b);"><div class="lv-name">📚 PG</div><div class="lv-range">Score 35–54 · Substantiation</div><p class="lv-desc">Real users with real data, limited impact. Need at least one reproducible test artefact per applicable area and basic logging.</p><div class="lv-bar" style="background:var(--amber-b);width:50%;"></div></div>
+    <div class="level-card" style="border-color:#93c5fd;"><div class="lv-name">🏢 Capstone</div><div class="lv-range">Score 55–74 · Operational</div><p class="lv-desc">Public-facing with significant societal impact. Real technical controls required — redaction, injection tests, subgroup fairness metrics.</p><div class="lv-bar" style="background:#93c5fd;width:75%;"></div></div>
+    <div class="level-card" style="border-color:var(--violet-b);"><div class="lv-name">🏭 Industrial</div><div class="lv-range">Score 75–100 · Audit-grade</div><p class="lv-desc">Rights-affecting or regulated systems — loan, hiring, medical AI. Full audit-grade evidence required. SEC-07 only active here.</p><div class="lv-bar" style="background:var(--violet-b);width:100%;"></div></div>
+  </div>
+  <div class="analogy" style="margin-top:1.5rem;">
+    <span class="analogy-emoji">🚦</span>
+    <h3>Safety Floor Overrides — Level Can Only Go Up</h3>
+    <p><strong>Users include children or minors</strong> → minimum Capstone, regardless of what was declared.<br>
+    <strong>AI makes rights-affecting decisions</strong> (loans, hiring, benefits) → minimum Capstone.<br>
+    <strong>Regulated industry</strong> (healthcare, finance, legal) → minimum Industrial.<br><br>
+    If the code reveals an override condition and the declared level is too low → S8 sets escalation_required = true → developer must correct intake and re-run at the correct level.</p>
+  </div>
+</div>
+</section>
+
+<!-- ══ SECTION 14: GLOSSARY ══ -->
+<section class="page-section" id="glossary">
+<div class="container">
+  <div class="section-header">
+    <div class="section-kicker">Section 14 · Glossary</div>
+    <h2 class="section-title">Every Term — Explained Once, Plainly</h2>
+    <p class="section-sub">Every piece of jargon from the CER architecture and our full conversation — in two sentences or fewer.</p>
+  </div>
+  <div class="gloss-grid">
+    <div class="gloss-item"><div class="gloss-term">Control</div><p class="gloss-def">One of the 78 ethical rules — e.g. "PRIV-01: don't leak PII into logs." Each has a tier, registered plugins, and required evidence artefacts.</p></div>
+    <div class="gloss-item"><div class="gloss-term">Tier (T1/T2/T3)</div><p class="gloss-def">Where the evidence for a rule lives. T1 = in code. T2 = in a document. T3 = in a human governance decision. Determines what happens next — not whether the rule applies.</p></div>
+    <div class="gloss-item"><div class="gloss-term">Plugin</div><p class="gloss-def">A specialist scanner registered to one or more controls. Runs in parallel with all others at S5. Reads files as data only — never executes code. Produces RawFindings, never statuses.</p></div>
+    <div class="gloss-item"><div class="gloss-term">RawFinding</div><p class="gloss-def">The structured JSON output a plugin produces. Contains: what was found, what was not found, file paths, line numbers, confidence level. The Evidence Mapper at S7 reads these to assign statuses.</p></div>
+    <div class="gloss-item"><div class="gloss-term">Evidence Mapper</div><p class="gloss-def">The S7 component that reads RawFindings + the registry requirements and assigns PASS/PARTIAL/MISSING. 100% deterministic — same input always gives same output. No AI involved.</p></div>
+    <div class="gloss-item"><div class="gloss-term">Canonical Registry</div><p class="gloss-def">The single master list of all 78 controls. All four AIGAP tools use the exact same list. Includes the GEN/REL anchor mapping table and the required evidence per control per assurance level.</p></div>
+    <div class="gloss-item"><div class="gloss-term">Project Profile</div><p class="gloss-def">The structured data object produced from the intake questionnaire. Filled before the scan. CER reads it at S1, S3, S4, and S8 to set context, filter controls, and verify honesty.</p></div>
+    <div class="gloss-item"><div class="gloss-term">Code Import Pattern</div><p class="gloss-def">Specific lines of code — like <code>import openai</code> — that reveal which libraries the project uses. Read by S3 as text only. Never executed. Used to set gen_triggered and rel_triggered flags.</p></div>
+    <div class="gloss-item"><div class="gloss-term">gen_triggered</div><p class="gloss-def">A boolean flag set by S3 when GenAI import patterns are detected in the code. When true — GEN overlay controls activate and GEN-conditional controls like TRAN-08 and SEC-02 enter the pipeline.</p></div>
+    <div class="gloss-item"><div class="gloss-term">rel_triggered</div><p class="gloss-def">A boolean flag set by S3 when third-party pre-trained model patterns are detected. When true — REL overlay controls activate and SEC-06, DOC-03, RISK-01 get REL anchor tags at S6.</p></div>
+    <div class="gloss-item"><div class="gloss-term">GEN / REL Overlay</div><p class="gloss-def">Extra rules that activate only for specific AI types. They are anchored to PRIMARY controls — they cannot have their own independent status from the CER. Only the Reviewer assigns GEN/REL status.</p></div>
+    <div class="gloss-item"><div class="gloss-term">Anchored By</div><p class="gloss-def">"GEN-04 anchored by TRAN-08" means GEN-04 is the dependent control — the coat. TRAN-08 is the foundation — the hook. GEN-04 cannot exist without TRAN-08. The CER's question for TRAN-08 does not change when GEN-04 is anchored.</p></div>
+    <div class="gloss-item"><div class="gloss-term">overlay_relevance</div><p class="gloss-def">A field added by S6 to qualifying RawFindings. Tells the Reviewer which GEN or REL rule this PRIMARY control result is also relevant to. A signal — not a status change.</p></div>
+    <div class="gloss-item"><div class="gloss-term">anchoring_primary</div><p class="gloss-def">A field added by S6 alongside overlay_relevance. Confirms which PRIMARY control the tagged finding lives under in the report. Ensures GEN/REL findings don't appear as free-floating entries.</p></div>
+    <div class="gloss-item"><div class="gloss-term">Metadata Supplement</div><p class="gloss-def">The form the CER generates for each active T3 control. Asks: "Where is this document? Give us the file path." Developer fills it in. CER checks if the file exists in the manifest.</p></div>
+    <div class="gloss-item"><div class="gloss-term">escalation_hints[]</div><p class="gloss-def">A list produced by S8 containing all conflicts found across its 3 checks. Appears in the Developer Report and Reviewer Handoff Package. All 3 checks can produce hints.</p></div>
+    <div class="gloss-item"><div class="gloss-term">escalation_required</div><p class="gloss-def">A boolean set to true by S8 Check 2 (level override) or Check 3 (T3 supplement missing). Hard blocker — developer cannot proceed to Reviewer phase until resolved. Check 1 never sets this.</p></div>
+    <div class="gloss-item"><div class="gloss-term">workspace_hash</div><p class="gloss-def">SHA-256 fingerprint of the entire codebase computed at S2. Stored verbatim in the S11 audit record. Proves exactly which version of code was scanned.</p></div>
+    <div class="gloss-item"><div class="gloss-term">HITL</div><p class="gloss-def">Human-in-the-Loop. A code pattern where a human must approve the AI's decision before it takes effect. Required by HUMO-06 on high-stakes decision endpoints.</p></div>
+    <div class="gloss-item"><div class="gloss-term">SBOM</div><p class="gloss-def">Software Bill of Materials — a complete ingredient list of every library your project uses with exact versions. Required by SEC-03. CycloneDX or SPDX format. Like a food label for software.</p></div>
+    <div class="gloss-item"><div class="gloss-term">SARIF</div><p class="gloss-def">Static Analysis Results Interchange Format. GitHub-compatible output from S10. Upload it and GitHub shows ethics findings as inline annotations in pull requests — like lint errors for ethics.</p></div>
+    <div class="gloss-item"><div class="gloss-term">DET Plugin</div><p class="gloss-def">Deterministic plugin type. Finds files or code patterns using regex or AST parsing. Same input always gives same output. No LLM involved. Runs fully automatically.</p></div>
+    <div class="gloss-item"><div class="gloss-term">HYB Plugin</div><p class="gloss-def">Hybrid plugin type. First finds files automatically (the DET part), then an LLM reads the content to assess quality — not just that a file exists. LLM checks completeness and adequacy.</p></div>
+    <div class="gloss-item"><div class="gloss-term">e_type_candidates</div><p class="gloss-def">Advisory field in the Certifier Pre-Registration Package. CER suggests which evidence type (E1, E3, E5...) a found file could be. Developer must confirm. Certifier then verifies sufficiency.</p></div>
+    <div class="gloss-item"><div class="gloss-term">Dark Pattern</div><p class="gloss-def">A UI design trick that manipulates users — pre-ticked consent boxes, asymmetric buttons, buried disclosures. ACC-07 checks for their ABSENCE. Any dark pattern found = MISSING status.</p></div>
+    <div class="gloss-item"><div class="gloss-term">Red-Teaming</div><p class="gloss-def">Deliberately trying to break or manipulate your own AI before launch. Required for SAFE-05. A report must exist with attack scenarios, what was found, and what was fixed.</p></div>
+    <div class="gloss-item"><div class="gloss-term">CODEOWNERS</div><p class="gloss-def">A GitHub file assigning named people as responsible owners of different parts of the codebase. Required for GOV-01 — along with enforced PR approval gates in CI.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div>AIGAP · Code Ethics Reviewer · Complete Reference Guide · v4</div>
+  <div>Ethiksa (Pvt) Ltd · <span>Confidential — Internal Use Only</span></div>
+  <div style="margin-top:.5rem;color:#374151;">78 controls · 11 pillars · 31 plugins · 11 pipeline steps · 6 outputs · Built from full architecture conversation</div>
+</footer>
+
+<script>
+function tp(id){
+  const el=document.querySelector('[data-p="'+id+'"]');
+  const isOpen=el.classList.contains('open');
+  document.querySelectorAll('.pillar.open').forEach(p=>p.classList.remove('open'));
+  if(!isOpen)el.classList.add('open');
+}
+</script>
+</body>
+</html>

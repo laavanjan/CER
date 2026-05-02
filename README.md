@@ -310,6 +310,30 @@ pytest tests/ -v
 
 ---
 
+## Pushing Changes to All Remotes
+
+After making changes, use the following commands to commit and push to all three remotes at once:
+
+```bash
+git add frontend/src/app/page.tsx
+git commit -m "add Info button linking to AIGAP reference doc"
+git push origin main
+git push laavan main
+git push hfspace main
+```
+
+---
+
+## Reference Documentation (Info Button)
+
+The home page includes an **Info** button that opens the full AIGAP · Code Ethics Reviewer reference guide.
+
+This reference is served as a static HTML file at `index.html` in the root of the repository. It covers the complete control registry, pipeline architecture, output package definitions, and auditor guidance.
+
+To ensure the Info button works correctly, `index.html` must be present at the repository root. When the app is running, clicking **Info** on the home page will open this file.
+
+---
+
 ## License
 
 Proprietary — Ethiksa (Pvt) Ltd. Distribution restricted. See `LICENSE`.
