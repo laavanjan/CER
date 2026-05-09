@@ -21,6 +21,7 @@ For full architecture, pipeline details, control registry, and output package do
 | API docs (Swagger) | https://laavanjan-ethiksa-cer.hf.space/docs |
 | ReDoc | https://laavanjan-ethiksa-cer.hf.space/redoc |
 | Hugging Face Space | https://huggingface.co/spaces/Laavanjan/ethiksa-cer |
+| Database | https://console.neon.tech/app/projects/summer-truth-32467950/branches/br-dry-glitter-anp4drrz |
 
 ---
 
