@@ -13,10 +13,12 @@ IMPORTANT: files are read as text/bytes only — no code execution takes place (
 """
 
 import hashlib
+import io
 import os
 import re
 import subprocess
 import tempfile
+import urllib.request
 import zipfile
 from pathlib import Path
 
@@ -54,31 +56,67 @@ def _compute_workspace_hash(entries: list[ManifestEntry]) -> str:
     return h.hexdigest()
 
 
-def _git_env() -> dict:
-    """Environment vars that prevent git from prompting for credentials."""
-    env = os.environ.copy()
-    env["GIT_TERMINAL_PROMPT"] = "0"   # never prompt for credentials
-    env["GIT_ASKPASS"] = "echo"        # return empty string if asked for password
-    return env
+def _parse_github_url(github_url: str) -> tuple[str, str]:
+    """Extract (owner, repo) from a GitHub URL. Returns ('', '') on failure."""
+    # Handles: https://github.com/owner/repo and https://github.com/owner/repo.git
+    parts = github_url.rstrip("/").rstrip(".git").split("/")
+    if len(parts) >= 2:
+        return parts[-2], parts[-1]
+    return "", ""
 
 
-def _build_clone_url(github_url: str, token: str) -> str:
-    """Embed token into HTTPS URL for private repo access."""
-    if not token:
-        return github_url
-    # https://github.com/org/repo → https://<token>@github.com/org/repo
-    return github_url.replace("https://", f"https://{token}@", 1)
+def _download_github_zip(github_url: str, token: str, dest_dir: str) -> str:
+    """Download repo as a ZIP via GitHub API and extract to dest_dir.
 
+    Returns the commit SHA from the redirect URL, or 'unknown'.
+    Works for public repos (no token) and private repos (token required).
+    Does NOT invoke git — avoids all credential/TTY issues.
+    """
+    owner, repo = _parse_github_url(github_url)
+    if not owner or not repo:
+        raise ValueError(f"Cannot parse GitHub URL: {github_url}")
 
-def _get_commit_sha(repo_root: Path) -> str:
-    result = subprocess.run(
-        ["git", "-C", str(repo_root), "-c", "credential.helper=", "rev-parse", "HEAD"],
-        capture_output=True,
-        env=_git_env(),
-    )
-    if result.returncode == 0:
-        return result.stdout.decode().strip()
-    return "unknown"
+    # GitHub archive URL — follows redirect to the actual zip
+    url = f"https://github.com/{owner}/{repo}/archive/refs/heads/main.zip"
+    api_url = f"https://api.github.com/repos/{owner}/{repo}/zipball"
+
+    commit_sha = "unknown"
+
+    req = urllib.request.Request(api_url)
+    req.add_header("Accept", "application/vnd.github+json")
+    req.add_header("X-GitHub-Api-Version", "2022-11-28")
+    if token:
+        req.add_header("Authorization", f"Bearer {token}")
+
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            # The final URL after redirects contains the commit SHA
+            final_url = resp.geturl()
+            # e.g. https://codeload.github.com/owner/repo/legacy.zip/refs/heads/main?...
+            # or   .../archive/{sha}.zip
+            zip_data = resp.read()
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(
+            f"GitHub download failed ({exc.code}): {exc.reason}. "
+            "If the repo is private, set the GITHUB_TOKEN environment variable."
+        ) from exc
+
+    with zipfile.ZipFile(io.BytesIO(zip_data)) as zf:
+        zf.extractall(dest_dir)
+
+    # GitHub zips extract to a single top-level folder like owner-repo-{sha}/
+    extracted = [d for d in Path(dest_dir).iterdir() if d.is_dir()]
+    if len(extracted) == 1:
+        # Try to get commit SHA from folder name: owner-repo-abc1234
+        parts = extracted[0].name.rsplit("-", 1)
+        if len(parts) == 2 and len(parts[1]) >= 7:
+            commit_sha = parts[1]
+        # Move contents up one level so repo_root is dest_dir, not the subfolder
+        for item in extracted[0].iterdir():
+            item.rename(Path(dest_dir) / item.name)
+        extracted[0].rmdir()
+
+    return commit_sha
 
 
 def build_manifest(root: Path) -> list[ManifestEntry]:
@@ -126,30 +164,12 @@ def run(profile: ProjectProfile) -> tuple[Path, list[ManifestEntry], str, str]:
         commit_sha = "zip-upload"
     elif profile.github_url:
         from app.core.config import settings
-        clone_url = _build_clone_url(str(profile.github_url), settings.github_token)
         tmp = tempfile.mkdtemp(prefix="ethiksa_")
-        result = subprocess.run(
-            [
-                "git",
-                "-c", "credential.helper=",   # disable any system credential helper
-                "-c", "core.askPass=",         # disable askpass program
-                "clone",
-                "--depth", "1",
-                "--single-branch",
-                clone_url,
-                tmp,
-            ],
-            capture_output=True,
-            env=_git_env(),
+        # Use GitHub API zip download — avoids all git credential/TTY issues (§13)
+        commit_sha = _download_github_zip(
+            str(profile.github_url), settings.github_token, tmp
         )
-        if result.returncode != 0:
-            stderr = result.stderr.decode("utf-8", errors="replace")
-            # Scrub token from error message before raising
-            if settings.github_token:
-                stderr = stderr.replace(settings.github_token, "***")
-            raise RuntimeError(stderr)
         repo_root = Path(tmp)
-        commit_sha = _get_commit_sha(repo_root)
     else:
         raise ValueError("No source provided — should have been caught by S1.")
 
