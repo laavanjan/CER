@@ -221,6 +221,7 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         d = round(time.perf_counter() - t, 2)
 
         # Persist ControlResult rows
+        import json as _json
         from app.models.control_result import ControlResult
         ann_map = {a.control_id: a for a in annotations}
         for result in evidence_results:
@@ -231,7 +232,7 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
                 outcome=result.outcome,
                 evidence={"paths": result.evidence_paths, "gaps": result.gaps},
                 explanation=a.developer_explanation if a else None,
-                remediation=str(a.remediation_steps) if a else None,
+                remediation=_json.dumps(a.remediation_steps) if a else None,
             ))
 
         # Persist handoff exports

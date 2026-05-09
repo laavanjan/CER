@@ -53,22 +53,38 @@ type RemediationStep = {
 
 function parseRemediation(raw: string | null | undefined): RemediationStep[] | null {
   if (!raw) return null;
-  // Try JSON parse first
+
+  // 1. Try clean JSON parse first (new format from backend)
   try {
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) return parsed;
-    if (parsed.remediation_steps) return parsed.remediation_steps;
+    if (parsed?.remediation_steps) return parsed.remediation_steps;
   } catch {}
-  // Try Python repr → JSON (replace single quotes, True/False/None)
+
+  // 2. Python repr with apostrophes in values — extract each step with regex
+  // Matches: {'step_number': N, 'action': '...', 'artifact_to_produce': '...', ...}
   try {
-    const jsonLike = raw
-      .replace(/'/g, '"')
-      .replace(/\bTrue\b/g, "true")
-      .replace(/\bFalse\b/g, "false")
-      .replace(/\bNone\b/g, "null");
-    const parsed = JSON.parse(jsonLike);
-    if (Array.isArray(parsed)) return parsed;
+    const steps: RemediationStep[] = [];
+    // Split on dict boundaries: look for }, { pattern
+    const dictPattern = /\{[^{}]+\}/g;
+    const matches = raw.match(dictPattern);
+    if (matches) {
+      for (const dictStr of matches) {
+        const step: RemediationStep = {};
+        // Extract each key-value pair carefully
+        const kvPattern = /'(\w+)':\s*(?:'((?:[^'\\]|\\.|'')*)'|(\d+))/g;
+        let m: RegExpExecArray | null;
+        while ((m = kvPattern.exec(dictStr)) !== null) {
+          const key = m[1];
+          const val = m[2] !== undefined ? m[2] : m[3] !== undefined ? parseInt(m[3]) : "";
+          (step as Record<string, unknown>)[key] = val;
+        }
+        if (step.action) steps.push(step);
+      }
+      if (steps.length > 0) return steps;
+    }
   } catch {}
+
   return null;
 }
 
