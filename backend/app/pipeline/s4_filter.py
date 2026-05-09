@@ -1,27 +1,29 @@
-"""S4 — Filter: filter controls by project profile, queue T3 controls for supplement.
+"""S4 — Control Activation & Routing.
+
+Responsibilities
+----------------
+1. Select applicable controls from the canonical registry.
+2. Read cer_observability field per control (T1 | T2 | T3).
+3. Route T1/T2 controls to the S5 plugin queue.
+4. Route T3 controls to the Metadata Supplement path (status = not_evaluable).
+5. Apply profile-driven applicability rules (assurance level, GEN/REL, PRV-07, ACC).
+6. Apply mandatory override rules that can only raise, never lower, the assurance level.
 
 Assurance level hierarchy (AIGAP):
-  UG        → Tier 1 controls only  (undergraduate project, lowest scrutiny)
-  PG        → Tier 1–2 controls     (postgraduate project)
-  Capstone  → All tiers             (vulnerable users or rights-affecting decisions)
-  Industrial → All tiers            (regulated sector — healthcare, finance, legal)
+  UG        → Tier 1 controls only
+  PG        → Tier 1–2 controls
+  Capstone  → All tiers
+  Industrial → All tiers (highest scrutiny)
 
 Override rules (profile flags can only raise the level, never lower it):
   vulnerable_users or rights_affecting → minimum Capstone
   regulated_sector                     → minimum Industrial
-
-Other profile-driven rules:
-  cross_border_transfer=False → PRV-07 skipped (not applicable)
-  user_facing=False           → ACC-02, ACC-04 skipped (internal tool)
-  uses_genai=False            → GEN overlay controls skipped
-  uses_rel_ai=False           → REL overlay controls skipped
 """
 
 from typing import Any
 
-from app.pipeline.models import ProjectProfile
+from app.pipeline.models import ProjectProfile, SupplementEntry
 
-# AIGAP assurance level hierarchy — higher rank = stricter scrutiny
 _LEVEL_RANK: dict[str, int] = {
     "ug": 1,
     "pg": 2,
@@ -29,33 +31,23 @@ _LEVEL_RANK: dict[str, int] = {
     "industrial": 4,
 }
 
-# Max tier included per level rank
 _TIER_THRESHOLD: dict[int, int] = {
-    1: 1,   # UG: tier 1 only
-    2: 2,   # PG: tier 1–2
+    1: 1,   # UG: assurance tier 1 only
+    2: 2,   # PG: assurance tiers 1–2
     3: 99,  # Capstone: all tiers
     4: 99,  # Industrial: all tiers
 }
 
-# Controls that are only relevant when personal data crosses borders
 _CROSS_BORDER_CONTROLS = {"PRV-07"}
-
-# Controls that only apply to public-facing systems (not internal tools)
 _USER_FACING_CONTROLS = {"ACC-02", "ACC-04"}
 
 
 def _effective_level_rank(profile: ProjectProfile) -> int:
-    """Compute the minimum assurance rank required by the profile.
-
-    Override rules can only raise the declared level — never lower it.
-    """
     declared = _LEVEL_RANK.get(profile.assurance_level, 1)
     required = declared
-    # vulnerable_users or rights_affecting → minimum Capstone (rank 3)
-    if getattr(profile, "vulnerable_users", False) or getattr(profile, "rights_affecting", False):
+    if profile.vulnerable_users or profile.rights_affecting:
         required = max(required, 3)
-    # regulated_sector → minimum Industrial (rank 4, highest)
-    if getattr(profile, "regulated_sector", False):
+    if profile.regulated_sector:
         required = max(required, 4)
     return required
 
@@ -63,54 +55,65 @@ def _effective_level_rank(profile: ProjectProfile) -> int:
 def run(
     profile: ProjectProfile,
     all_controls: list[dict[str, Any]],
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    """Filter registry controls for this project.
-
-    Parameters
-    ----------
-    profile:      Project profile with all intake fields set.
-    all_controls: Full list of control dicts (loaded from the database by the caller).
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[SupplementEntry]]:
+    """Filter and route registry controls for this project.
 
     Returns
     -------
-    (active_controls, t3_supplement_queue) — both are lists of control dicts.
+    (active_controls, t3_queue, supplement_entries)
+      active_controls    — T1/T2 controls that passed all filters → go to S5
+      t3_queue           — T3 controls that are in scope (kept for reference)
+      supplement_entries — SupplementEntry per active T3 control (status=not_evaluable)
     """
     active: list[dict[str, Any]] = []
     t3_queue: list[dict[str, Any]] = []
+    supplement_entries: list[SupplementEntry] = []
 
     effective_rank = _effective_level_rank(profile)
     tier_limit = _TIER_THRESHOLD.get(effective_rank, 1)
-    cross_border = getattr(profile, "cross_border_transfer", False)
-    user_facing = getattr(profile, "user_facing", True)
+    cross_border = profile.cross_border_transfer
+    user_facing = profile.user_facing
 
     for control in all_controls:
-        control_id: str = control.get("control_id", control.get("id", ""))
-        tier = control.get("tier", 1)
+        control_id: str = control.get("id", control.get("control_id", ""))
+        assurance_tier = int(control.get("tier", 1))
+        cer_obs: str = control.get("cer_observability", "T2")
 
-        # Tier gate — UG sees tier 1 only, PG sees tier 1–2, Capstone/Industrial see all
-        if tier > tier_limit:
+        # Assurance-tier gate
+        if assurance_tier > tier_limit:
             continue
 
-        # GEN overlay: skip GEN-specific controls if project doesn't use generative AI
+        # GEN overlay — skip if project has no generative AI
         if control_id.startswith("GEN") and not profile.uses_genai:
             continue
 
-        # REL overlay: skip REL-specific controls if project doesn't use reliability/classical AI
+        # REL overlay — skip if project has no classical AI
         if control_id.startswith("REL") and not profile.uses_rel_ai:
             continue
 
-        # PRV-07: only active when cross-border data transfer is declared
+        # PRV-07 only active when cross-border transfer declared
         if control_id in _CROSS_BORDER_CONTROLS and not cross_border:
             continue
 
-        # ACC-02, ACC-04: only active for public-facing systems
+        # ACC-02, ACC-04 only active for public-facing systems
         if control_id in _USER_FACING_CONTROLS and not user_facing:
             continue
 
-        if tier == 3:
-            # T3 controls require a human supplement — queue separately
+        # T3 — design-only, no plugins run, emit Metadata Supplement (I-03, I-04)
+        if cer_obs == "T3":
             t3_queue.append(control)
+            supplement_entries.append(
+                SupplementEntry(
+                    control_id=control_id,
+                    supplement_prompt=control.get(
+                        "supplement_prompt",
+                        f"Please declare the artefact path for {control_id}.",
+                    ),
+                    artefact_type_expected=control.get("artefact_type_expected", "E4"),
+                )
+            )
         else:
+            # T1 or T2 — goes to S5 plugin queue
             active.append(control)
 
-    return active, t3_queue
+    return active, t3_queue, supplement_entries

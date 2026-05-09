@@ -1,112 +1,170 @@
-"""S7 — Evidence: map RawFindings to PASS/PARTIAL/MISSING/ISSUE outcomes (deterministic, no AI).
+"""S7 — Evidence Mapping: apply the full scoring decision tree per control (§10).
 
-Responsibilities
-----------------
-1. Group RawFindings by control_id.
-2. Apply deterministic scoring rules from the registry pass/partial/missing criteria.
-3. Aggregate evidence_locations and issue_locations from all findings.
-4. Return a list of EvidenceResult objects — one per control.
+Decision tree (first matching rule wins):
+  Step 1  not_triggered — control applicability rule not satisfied (filtered by S4)
+  Step 2  not_evaluable — T3 control (no plugins run, supplement pending)
+  Step 3  not_evaluable — T1/T2 but plugins found no files in scope
+  Step 4  missing       — files in scope, no expected evidence artefacts found
+  Step 5  partial       — some expected evidence exists but not all required
+  Step 6  pass          — all expected evidence present with sufficient confidence
 
-IMPORTANT: This stage is fully deterministic — no randomness, no LLM calls.
-The outcome depends only on evidence_found / missing counts and confidence scores.
-
-Outcomes
---------
-PASS    : At least one finding has evidence AND confidence >= PASS threshold.
-PARTIAL : At least one finding has some evidence OR confidence >= PARTIAL threshold.
-ISSUE   : Active problems were detected (issue_locations populated), regardless of evidence.
-MISSING : No evidence found across all findings.
+LLM is NEVER involved in status assignment (I-07).
+Severity is calibrated to assurance level and control tier (§10.1).
 """
 
 from typing import Any
 
-from app.pipeline.models import EvidenceLocation, EvidenceResult, RawFinding
+from app.pipeline.models import (
+    EvidenceLocation,
+    EvidenceResult,
+    RawFinding,
+    SupplementEntry,
+)
 
-# Threshold above which a single finding is considered "passing"
-_PASS_CONFIDENCE_THRESHOLD = 0.75
-# Threshold above which a finding is considered "partial"
-_PARTIAL_CONFIDENCE_THRESHOLD = 0.40
+_PASS_CONFIDENCE = 0.75
+_PARTIAL_CONFIDENCE = 0.40
+
+# Artefact types to recommend when evidence is missing (advisory, not authoritative)
+_RECOMMENDED_ARTIFACTS: dict[str, list[str]] = {
+    "T1": ["source_file", "test_file", "config_file"],
+    "T2": ["doc_file", "notebook", "report"],
+    "T3": [],  # Handled by supplement
+}
 
 
-def _score(findings: list[RawFinding]) -> str:
-    """Return PASS / PARTIAL / ISSUE / MISSING for a group of findings for one control.
-
-    Rules (deterministic, evaluated in priority order):
-    - PASS   : At least one finding has evidence AND confidence >= PASS threshold.
-    - ISSUE  : Any finding has issue_locations populated (active problems detected).
-               An ISSUE can co-exist with evidence — it means something was found but
-               there are also active problems that need remediation.
-    - PARTIAL: At least one finding has some evidence OR confidence >= PARTIAL threshold.
-    - MISSING: No evidence found across all findings.
-    """
+def _score_findings(findings: list[RawFinding]) -> str:
+    """Steps 3–6 of the decision tree applied to a group of plugin findings."""
     if not findings:
-        return "MISSING"
+        # Step 3: plugins ran but found no files in scope
+        return "not_evaluable"
+
+    has_timed_out_only = all(f.timed_out for f in findings)
+    if has_timed_out_only:
+        return "not_evaluable"
 
     has_pass = any(
-        f.evidence_found and f.confidence >= _PASS_CONFIDENCE_THRESHOLD
+        f.evidence_found and f.confidence >= _PASS_CONFIDENCE
         for f in findings
+        if not f.timed_out
     )
-    has_issues = any(f.issue_locations for f in findings)
+    has_partial = any(
+        f.evidence_found or f.confidence >= _PARTIAL_CONFIDENCE
+        for f in findings
+        if not f.timed_out
+    )
 
-    if has_pass and not has_issues:
-        return "PASS"
+    if has_pass:
+        return "pass"
+    if has_partial:
+        return "partial"
+    return "missing"
 
-    if has_issues:
-        return "ISSUE"
 
-    for f in findings:
-        if f.evidence_found or f.confidence >= _PARTIAL_CONFIDENCE_THRESHOLD:
-            return "PARTIAL"
-
-    return "MISSING"
+def _compute_severity(
+    outcome: str,
+    cer_obs: str,
+    assurance_tier: int,
+    user_facing: bool,
+    has_overlay: bool,
+) -> str:
+    """Severity calibration per §10.1."""
+    if outcome == "not_triggered":
+        return "none"
+    if outcome in ("not_evaluable",):
+        if cer_obs == "T3":
+            return "action_required"
+        return "info"
+    if outcome == "pass":
+        return "none"
+    # missing or partial
+    is_high_tier = assurance_tier >= 2
+    if outcome == "missing" and is_high_tier and user_facing:
+        return "critical"
+    if outcome == "missing" and is_high_tier:
+        return "major"
+    if outcome == "partial" and has_overlay:
+        return "major"
+    if outcome == "missing":
+        return "minor"
+    if outcome == "partial":
+        return "minor"
+    return "info"
 
 
 def run(
     findings: list[RawFinding],
     active_controls: list[dict[str, Any]],
+    supplement_entries: list[SupplementEntry],
+    profile_user_facing: bool = True,
 ) -> list[EvidenceResult]:
     """Map findings to per-control outcomes.
 
     Parameters
     ----------
-    findings:        Tagged RawFindings from S6.
-    active_controls: Active controls list from S4 (used to ensure every control
-                     has an outcome even if no plugin produced a finding).
+    findings:          Tagged RawFindings from S6.
+    active_controls:   T1/T2 active controls from S4.
+    supplement_entries: T3 supplement entries from S4.
+    profile_user_facing: Whether project is public-facing (for severity).
 
     Returns
     -------
-    List of EvidenceResult, one per active control.
+    List of EvidenceResult — one per active T1/T2 control + one per T3 supplement.
     """
-    # Group findings by control_id
     grouped: dict[str, list[RawFinding]] = {}
     for finding in findings:
         grouped.setdefault(finding.control_id, []).append(finding)
 
     results: list[EvidenceResult] = []
-    for control in active_controls:
-        cid = control["id"]
-        tier = int(control.get("tier", 1))
-        group = grouped.get(cid, [])
-        outcome = _score(group)
-        evidence_paths = [p for f in group for p in f.evidence_found]
 
-        # Aggregate line-level locations from all findings for this control
-        ev_locs: list[EvidenceLocation] = [
-            loc for f in group for loc in f.evidence_locations
-        ]
-        issue_locs: list[EvidenceLocation] = [
-            loc for f in group for loc in f.issue_locations
-        ]
+    # T1/T2 controls
+    for control in active_controls:
+        cid = control.get("id", control.get("control_id", ""))
+        cer_obs: str = control.get("cer_observability", "T2")
+        assurance_tier = int(control.get("tier", 1))
+
+        group = grouped.get(cid, [])
+        outcome = _score_findings(group)
+
+        ev_paths = [p for f in group for p in f.evidence_found]
+        ev_locs: list[EvidenceLocation] = [loc for f in group for loc in f.evidence_locations]
+        issue_locs: list[EvidenceLocation] = [loc for f in group for loc in f.issue_locations]
+        overlay_relevance = list({tag for f in group for tag in f.overlay_relevance})
+        gaps = [m for f in group for m in f.missing]
+
+        severity = _compute_severity(
+            outcome, cer_obs, assurance_tier, profile_user_facing, bool(overlay_relevance)
+        )
+
+        recommended = _RECOMMENDED_ARTIFACTS.get(cer_obs, []) if outcome != "pass" else []
 
         results.append(
             EvidenceResult(
                 control_id=cid,
                 outcome=outcome,
-                tier=tier,
+                cer_observability=cer_obs,
+                assurance_tier=assurance_tier,
+                severity=severity,
                 raw_findings=group,
-                evidence_paths=evidence_paths,
+                evidence_paths=ev_paths,
                 evidence_locations=ev_locs,
                 issue_locations=issue_locs,
+                overlay_relevance=overlay_relevance,
+                recommended_next_artifact=recommended,
+                gaps=gaps,
+            )
+        )
+
+    # T3 controls — always not_evaluable until supplement completed (I-03)
+    for entry in supplement_entries:
+        results.append(
+            EvidenceResult(
+                control_id=entry.control_id,
+                outcome="not_evaluable",
+                cer_observability="T3",
+                assurance_tier=1,
+                severity="action_required",
+                recommended_next_artifact=[entry.artefact_type_expected],
+                gaps=[f"Supplement required: {entry.supplement_prompt}"],
             )
         )
 

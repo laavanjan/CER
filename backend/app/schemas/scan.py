@@ -7,21 +7,38 @@ from pydantic import BaseModel
 
 
 class ScanCreate(BaseModel):
-    """Payload to kick off a new scan for an existing project."""
-
     project_id: uuid.UUID
 
 
 class ScanRead(BaseModel):
-    """Scan status returned from the API — polled by the frontend stage progress page."""
-
     id: uuid.UUID
     project_id: uuid.UUID
-    # Current pipeline stage, e.g. "S3_AI_DETECT", "COMPLETE", "FAILED"
     status: str
     celery_task_id: str | None
+    commit_sha: str | None = None
+    workspace_hash: str | None = None
+    cer_observability_summary: dict | None = None
     started_at: datetime | None
     completed_at: datetime | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class SupplementRead(BaseModel):
+    id: uuid.UUID
+    scan_id: uuid.UUID
+    control_id: str
+    supplement_prompt: str
+    artefact_type_expected: str
+    declared_path: str | None
+    existence_check_result: str
+    status_after_supplement: str
+    completed_at: datetime | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class SupplementPatch(BaseModel):
+    declared_path: str

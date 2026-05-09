@@ -70,7 +70,7 @@ class ApiKeyMiddleware(BaseHTTPMiddleware):
                     status_code=401,
                     content={"detail": "Invalid or missing API key"},
                 )
-        return await call_next(request)  # type: ignore[arg-type]
+        return await call_next(request)  # type: ignore[operator]
 
 
 app.add_middleware(ApiKeyMiddleware)

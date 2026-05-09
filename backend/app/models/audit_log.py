@@ -1,13 +1,19 @@
 """AuditLog model — append-only WORM log of every pipeline decision (S11)."""
 
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.scan import Scan
 
 
 class AuditLog(Base):
@@ -29,6 +35,6 @@ class AuditLog(Base):
         DateTime(timezone=True), server_default=func.now()
     )
 
-    scan: Mapped["Scan"] = relationship("Scan", back_populates="audit_logs")  # noqa: F821
+    scan: Mapped[Scan] = relationship("Scan", back_populates="audit_logs")
 
     # NOTE: This table is insert-only.  No UPDATE or DELETE routes exist for AuditLog.

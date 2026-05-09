@@ -1,13 +1,19 @@
 """Project model — represents a submitted AI system repository for review."""
 
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.scan import Scan
 
 
 class Project(Base):
@@ -47,6 +53,4 @@ class Project(Base):
     )
 
     # One project may have many scans over time
-    scans: Mapped[list["Scan"]] = relationship(  # noqa: F821
-        "Scan", back_populates="project"
-    )
+    scans: Mapped[list[Scan]] = relationship("Scan", back_populates="project")

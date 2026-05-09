@@ -42,6 +42,9 @@ def _load_plugins() -> list[type[BasePlugin]]:
     return plugin_classes
 
 
+_PLUGIN_TIMEOUT_S = 30  # §13: per-plugin timeout
+
+
 def _run_one(
     plugin_cls: type[BasePlugin],
     control: dict[str, Any],
@@ -50,7 +53,6 @@ def _run_one(
 ) -> list[RawFinding]:
     """Instantiate a plugin and run it against a single control."""
     plugin = plugin_cls()
-    # Only invoke the plugin if it declares support for this control's plugins list
     if plugin.plugin_id not in control.get("plugins", []):
         return []
     return plugin.run(control_id=control["id"], manifest=manifest, repo_root=repo_root)
@@ -89,17 +91,29 @@ def run(
             )
             for plugin_cls, control in tasks
         }
-        for future in concurrent.futures.as_completed(futures):
+        for future in concurrent.futures.as_completed(futures, timeout=None):
+            plugin_cls, control = futures[future]
+            cid = control.get("id", "unknown")
+            pid = getattr(plugin_cls, "plugin_id", "unknown")
             try:
-                findings.extend(future.result())
-            except Exception as exc:  # noqa: BLE001
-                plugin_cls, control = futures[future]
-                # Log but do not abort — record a zero-confidence finding
+                # Enforce per-plugin timeout (§13)
+                result = future.result(timeout=_PLUGIN_TIMEOUT_S)
+                findings.extend(result)
+            except concurrent.futures.TimeoutError:
                 findings.append(
                     RawFinding(
-                        plugin_id=getattr(plugin_cls, "plugin_id", "unknown"),
-                        control_id=control.get("id", "unknown"),
-                        evidence_found=[],
+                        plugin_id=pid,
+                        control_id=cid,
+                        missing=[f"plugin_timeout: exceeded {_PLUGIN_TIMEOUT_S}s"],
+                        confidence=0.0,
+                        timed_out=True,
+                    )
+                )
+            except Exception as exc:  # noqa: BLE001
+                findings.append(
+                    RawFinding(
+                        plugin_id=pid,
+                        control_id=cid,
                         missing=[f"Plugin error: {exc}"],
                         confidence=0.0,
                     )

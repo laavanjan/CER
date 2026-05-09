@@ -76,7 +76,7 @@ def run(
     # A user ticking the checkbox OR detection finding the pattern both count.
     profile.uses_genai = profile.uses_genai or gen_triggered
     profile.uses_rel_ai = profile.uses_rel_ai or rel_triggered
-    # Store raw detection flags as extra attributes for S8 honesty check.
+    # Store raw detection flags for S8 honesty check.
     profile.gen_triggered = gen_triggered
     profile.rel_triggered = rel_triggered
 

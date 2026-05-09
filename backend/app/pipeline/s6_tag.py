@@ -1,55 +1,68 @@
-"""S6 — Tag: tag GEN/REL overlay findings from the registry anchor map.
+"""S6 — GEN/REL Signal Routing: tag PRIMARY control findings with overlay relevance.
 
-Responsibilities
-----------------
-1. Accept the flat list of RawFindings from S5.
-2. Build the registry anchor map (pillar → GEN/REL overlay tags) from the
-   pre-loaded controls list passed by the caller.
-3. Annotate each finding with appropriate overlay tags.
-4. Return the tagged findings list.
+AIGAP Architectural constraint
+-------------------------------
+GEN and REL are *derived* overlays — they never receive direct status assignments
+from the CER.  Their status is derived by the Reviewer/Certifier from the outcomes
+of anchoring PRIMARY controls.
+
+What this stage does
+--------------------
+1. Build a reverse anchor map: PRIMARY control → list of GEN/REL overlays it informs.
+   (Forward map defined in architecture section 8.2 / 8.3 — GEN/REL → PRIMARY controls.)
+2. For every RawFinding produced by S5 (all of which belong to PRIMARY controls),
+   look up which GEN/REL overlays that PRIMARY control informs and stamp
+   finding.overlay_relevance accordingly.
+3. Return the annotated findings unchanged in structure — control_id is never altered.
+
+Anchor map (architecture §8.2 / §8.3)
+--------------------------------------
+GEN-01  Prompt Safety            → SAFE-01, SAFE-04
+GEN-02  AI Disclosure            → TRAN-01, TRAN-06
+GEN-03  Hallucination/Grounding  → TRAN-02, SAFE-06, TRAN-04
+GEN-04  Content Moderation       → TRAN-01, SAFE-02
+REL-01  Supply Chain Security    → SEC-01,  SEC-03
+REL-02  Third-Party Data Prov.   → PRIV-06, DOC-01
+REL-03  Model Supply Chain       → SEC-06
 """
-
-from typing import Any
 
 from app.pipeline.models import RawFinding
 
-
-def _build_anchor_map(registry: list[dict[str, Any]]) -> dict[str, list[str]]:
-    """Build control_id → list-of-tags mapping from the registry."""
-    anchor: dict[str, list[str]] = {}
-    for control in registry:
-        tags: list[str] = []
-        cid: str = control.get("id", "")
-        pillar: str = control.get("pillar", "")
-        if cid.startswith("GEN") or pillar.upper() == "GENERATIVE":
-            tags.append("GEN_OVERLAY")
-        if cid.startswith("REL") or pillar.upper() == "RELIABILITY":
-            tags.append("REL_OVERLAY")
-        if tags:
-            anchor[cid] = tags
-    return anchor
+# Forward map: GEN/REL overlay → anchoring PRIMARY controls (source of truth)
+_FORWARD_ANCHOR: dict[str, list[str]] = {
+    "GEN-01": ["SAFE-01", "SAFE-04"],
+    "GEN-02": ["TRAN-01", "TRAN-06"],
+    "GEN-03": ["TRAN-02", "SAFE-06", "TRAN-04"],
+    "GEN-04": ["TRAN-01", "SAFE-02"],
+    "REL-01": ["SEC-01",  "SEC-03"],
+    "REL-02": ["PRIV-06", "DOC-01"],
+    "REL-03": ["SEC-06"],
+}
 
 
-def run(
-    findings: list[RawFinding],
-    registry: list[dict[str, Any]],
-) -> list[RawFinding]:
-    """Tag each RawFinding with overlay labels derived from the registry.
+def _build_reverse_map() -> dict[str, list[str]]:
+    """Invert _FORWARD_ANCHOR → PRIMARY control: [GEN/REL overlays it informs]."""
+    reverse: dict[str, list[str]] = {}
+    for overlay, primaries in _FORWARD_ANCHOR.items():
+        for primary in primaries:
+            reverse.setdefault(primary, []).append(overlay)
+    return reverse
+
+
+_REVERSE_ANCHOR: dict[str, list[str]] = _build_reverse_map()
+
+
+def run(findings: list[RawFinding]) -> list[RawFinding]:
+    """Stamp each PRIMARY control finding with the GEN/REL overlays it informs.
 
     Parameters
     ----------
-    findings: List of RawFindings from S5.
-    registry: Full list of control dicts (pre-loaded from the database by the caller).
+    findings: Flat list of RawFindings from S5 (all belong to PRIMARY controls).
 
     Returns
     -------
-    Same list of findings, each annotated with a ``tags`` attribute.
+    Same list with overlay_relevance populated on each finding.
     """
-    anchor_map = _build_anchor_map(registry)
-
     for finding in findings:
-        tags = anchor_map.get(finding.control_id, [])
-        # Attach tags as an ad-hoc attribute (pipeline convention)
-        finding.tags = tags
-
+        finding.overlay_relevance = _REVERSE_ANCHOR.get(finding.control_id, [])
     return findings
