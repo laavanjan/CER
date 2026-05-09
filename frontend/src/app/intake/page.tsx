@@ -217,18 +217,47 @@ export default function IntakePage() {
 
         {/* Jurisdiction */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Jurisdiction(s)
+            <span className="ml-1 text-xs font-normal text-gray-500">— select all that apply</span>
           </label>
-          <input
-            type="text"
-            value={form.jurisdiction ?? ""}
-            onChange={(e) => setForm({ ...form, jurisdiction: e.target.value || undefined })}
-            placeholder="e.g. EU, LK, US"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-          />
-          <p className="mt-1 text-xs text-gray-500">
-            Operating country or region(s). Used for regulation mapping (EU AI Act, NIST RMF, ISO 42001). Separate multiple with commas.
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { code: "EU",  label: "🇪🇺 EU / EEA",         note: "EU AI Act" },
+              { code: "UK",  label: "🇬🇧 United Kingdom",    note: "UK AI Framework" },
+              { code: "US",  label: "🇺🇸 United States",     note: "NIST RMF" },
+              { code: "CA",  label: "🇨🇦 Canada",            note: "AIDA / PIPEDA" },
+              { code: "AU",  label: "🇦🇺 Australia",         note: "AI Ethics Framework" },
+              { code: "SG",  label: "🇸🇬 Singapore",         note: "PDPA / AI Gov Framework" },
+              { code: "IN",  label: "🇮🇳 India",             note: "DPDP Act" },
+              { code: "LK",  label: "🇱🇰 Sri Lanka",         note: "PDP Act" },
+              { code: "AE",  label: "🇦🇪 UAE",               note: "AI Strategy 2031" },
+              { code: "CN",  label: "🇨🇳 China",             note: "AIGC Regulations" },
+              { code: "JP",  label: "🇯🇵 Japan",             note: "AI Guidelines" },
+              { code: "BR",  label: "🇧🇷 Brazil",            note: "LGPD / AI Bill" },
+            ].map(({ code, label, note }) => {
+              const selected = (form.jurisdiction ?? "").split(",").map(s => s.trim()).filter(Boolean);
+              const isChecked = selected.includes(code);
+              const toggle = () => {
+                const next = isChecked
+                  ? selected.filter(s => s !== code)
+                  : [...selected, code];
+                setForm({ ...form, jurisdiction: next.join(", ") || undefined });
+              };
+              return (
+                <label key={code} className={`flex items-start gap-2 p-2 rounded-md border cursor-pointer text-sm transition-colors ${isChecked ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"}`}>
+                  <input type="checkbox" checked={isChecked} onChange={toggle} className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded" />
+                  <span>
+                    <span className="font-medium text-gray-800">{label}</span>
+                    <br />
+                    <span className="text-xs text-gray-500">{note}</span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-xs text-gray-500">
+            Selected: <span className="font-medium">{form.jurisdiction || "none"}</span>
           </p>
         </div>
 
