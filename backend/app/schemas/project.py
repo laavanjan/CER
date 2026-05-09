@@ -11,7 +11,7 @@ class ProjectCreate(BaseModel):
 
     name: str
     github_url: HttpUrl | None = None
-    assurance_level: str = "standard"
+    assurance_level: str = "ug"
     uses_genai: bool = False
     uses_rel_ai: bool = False
     vulnerable_users: bool = False

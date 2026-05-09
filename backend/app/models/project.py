@@ -19,7 +19,7 @@ class Project(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     github_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
     assurance_level: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="standard"
+        String(50), nullable=False, default="ug"
     )
     # Whether the project declares generative AI usage
     uses_genai: Mapped[bool] = mapped_column(default=False)

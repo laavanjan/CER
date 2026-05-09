@@ -10,7 +10,7 @@ export default function IntakePage() {
   const [form, setForm] = useState<ProjectCreate>({
     name: "",
     github_url: "",
-    assurance_level: "standard",
+    assurance_level: "ug",
     uses_genai: false,
     uses_rel_ai: false,
     vulnerable_users: false,
@@ -97,11 +97,10 @@ export default function IntakePage() {
             onChange={(e) => setForm({ ...form, assurance_level: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           >
-            <option value="basic">Basic (Tier 1 only)</option>
-            <option value="standard">Standard (Tier 1–2)</option>
-            <option value="enhanced">Enhanced (All tiers)</option>
-            <option value="capstone">Capstone (Vulnerable / rights-affecting users)</option>
-            <option value="industrial">Industrial (Regulated sector — highest scrutiny)</option>
+            <option value="ug">UG — Undergraduate (Tier 1 only)</option>
+            <option value="pg">PG — Postgraduate (Tier 1–2)</option>
+            <option value="capstone">Capstone (All tiers · vulnerable / rights-affecting users)</option>
+            <option value="industrial">Industrial (All tiers · regulated sector — highest scrutiny)</option>
           </select>
         </div>
 

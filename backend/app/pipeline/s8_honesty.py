@@ -10,12 +10,12 @@ Responsibilities
 
 from app.pipeline.models import EscalationHint, ProjectProfile
 
+# AIGAP assurance level hierarchy
 _LEVEL_RANK: dict[str, int] = {
-    "basic": 1,
-    "standard": 2,
-    "enhanced": 3,
-    "capstone": 4,
-    "industrial": 5,
+    "ug": 1,
+    "pg": 2,
+    "capstone": 3,
+    "industrial": 4,
 }
 
 # Cross-border transfer patterns detectable in code
@@ -44,7 +44,7 @@ def run(profile: ProjectProfile) -> list[EscalationHint]:
 
     gen_triggered: bool = getattr(profile, "gen_triggered", False)
     rel_triggered: bool = getattr(profile, "rel_triggered", False)
-    declared_rank = _LEVEL_RANK.get(profile.assurance_level, 2)
+    declared_rank = _LEVEL_RANK.get(profile.assurance_level, 1)
 
     # ── AI type honesty checks ────────────────────────────────────────────────
 
@@ -91,22 +91,22 @@ def run(profile: ProjectProfile) -> list[EscalationHint]:
 
     # ── Assurance level adequacy checks ──────────────────────────────────────
 
-    # Basic assurance but reliance-critical AI declared or detected
-    if profile.assurance_level == "basic" and (profile.uses_rel_ai or rel_triggered):
+    # UG assurance but reliance-critical AI declared or detected
+    if profile.assurance_level == "ug" and (profile.uses_rel_ai or rel_triggered):
         hints.append(
             EscalationHint(
                 control_id="GOV-02",
                 hint=(
-                    "assurance_level='basic' is insufficient for reliance-critical AI systems. "
-                    "Consider upgrading to 'standard' or 'enhanced'."
+                    "assurance_level='UG' is insufficient for reliance-critical AI systems. "
+                    "Consider upgrading to 'PG', 'Capstone', or 'Industrial'."
                 ),
                 severity="CRITICAL",
             )
         )
 
-    # vulnerable_users or rights_affecting require at least capstone
+    # vulnerable_users or rights_affecting require at least Capstone (rank 3)
     if (getattr(profile, "vulnerable_users", False) or getattr(profile, "rights_affecting", False)) \
-            and declared_rank < 4:
+            and declared_rank < 3:
         context = []
         if getattr(profile, "vulnerable_users", False):
             context.append("vulnerable users declared")
@@ -117,23 +117,23 @@ def run(profile: ProjectProfile) -> list[EscalationHint]:
                 control_id="GOV-05",
                 hint=(
                     f"Profile flags ({', '.join(context)}) require a minimum assurance level of "
-                    f"'capstone', but '{profile.assurance_level}' was declared. "
-                    "Upgrade assurance level or remove the flag if incorrectly set."
+                    f"'Capstone', but '{profile.assurance_level.upper()}' was declared. "
+                    "Upgrade to Capstone or Industrial."
                 ),
                 severity="CRITICAL",
             )
         )
 
-    # regulated_sector requires industrial level
-    if getattr(profile, "regulated_sector", False) and declared_rank < 5:
+    # regulated_sector requires Industrial (rank 4, highest)
+    if getattr(profile, "regulated_sector", False) and declared_rank < 4:
         hints.append(
             EscalationHint(
                 control_id="GOV-08",
                 hint=(
-                    "regulated_sector=True requires assurance_level='industrial', "
-                    f"but '{profile.assurance_level}' was declared. "
+                    "regulated_sector=True requires assurance_level='Industrial', "
+                    f"but '{profile.assurance_level.upper()}' was declared. "
                     "Regulated deployments (healthcare, finance, insurance, legal) must meet "
-                    "the highest scrutiny bar."
+                    "the highest AIGAP scrutiny bar."
                 ),
                 severity="CRITICAL",
             )
