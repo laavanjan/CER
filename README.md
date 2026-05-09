@@ -9,9 +9,20 @@ pinned: false
 
 # ethiksa-cer
 
+![Ethiksa CER logo](https://raw.githubusercontent.com/Ethiksa/ethiksa-cer/main/docs/ethiksa-logo.png.png)
+
 > **AIGAP · Code Ethics Reviewer** — Automated pipeline that scans AI system repositories against ethical controls, producing structured findings, remediation guidance, and handoff packages for human reviewers.
 
 For full architecture, pipeline details, control registry, and output package documentation see [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+| Link | URL |
+|------|-----|
+| Live deployment | https://ethiksa.vercel.app/?_vercel_share=7arWvJ205BQ58YBCrBTigXs9V2ZKPnm2 |
+| CER-INFo | https://ethiksa.vercel.app/info/ |
+| Health check | https://laavanjan-ethiksa-cer.hf.space/healthz |
+| API docs (Swagger) | https://laavanjan-ethiksa-cer.hf.space/docs |
+| ReDoc | https://laavanjan-ethiksa-cer.hf.space/redoc |
+| Hugging Face Space | https://huggingface.co/spaces/Laavanjan/ethiksa-cer |
 
 ---
 
@@ -336,4 +347,4 @@ To ensure the Info button works correctly, `index.html` must be present at the r
 
 ## License
 
-Proprietary — Ethiksa (Pvt) Ltd. Distribution restricted. See `LICENSE`.
+Proprietary - Ethiksa (Pvt) Ltd. Distribution restricted. See `LICENSE`.
