@@ -9,8 +9,6 @@ pinned: false
 
 # ethiksa-cer
 
-![Ethiksa CER logo](https://raw.githubusercontent.com/Ethiksa/ethiksa-cer/main/docs/ethiksa-logo.png.png)
-
 > **AIGAP · Code Ethics Reviewer** — Automated pipeline that scans AI system repositories against ethical controls, producing structured findings, remediation guidance, and handoff packages for human reviewers.
 
 For full architecture, pipeline details, control registry, and output package documentation see [ARCHITECTURE.md](./ARCHITECTURE.md).
@@ -281,18 +279,14 @@ Set these in **Settings → Variables and secrets** of your HF Space:
 
 ```bash
 # Build the image locally (requires Docker)
-docker build -t ethiksa-cer:hf .
-
-# Run with external services already running
+docker build -t ethiksa-cer:SECRETf
+unning
 docker run --rm -p 7860:7860 \
   -e DATABASE_URL=postgresql://ethiksa:ethiksa@localhost:5432/ethiksa \
   -e REDIS_URL=redis://localhost:6379/0 \
   -e S3_ENDPOINT_URL=http://localhost:9000 \
   -e S3_ACCESS_KEY=minioadmin \
-  -e S3_SECRET_KEY=minioadmin \
-  ethiksa-cer:hf
-```
-
+  -e S3_SECRETf
 Open `http://localhost:7860` to verify the frontend is served and
 `http://localhost:7860/healthz` for the API health check.
 
@@ -305,11 +299,7 @@ Open `http://localhost:7860` to verify the frontend is served and
 cd docker
 docker compose down
 
-# Wipe all data (database + MinIO volumes)
-docker compose down -v
-```
-
----
+# Wipe all data (database + MinIf
 
 ## Running tests
 
@@ -327,7 +317,7 @@ After making changes, use the following commands to commit and push to all three
 
 ```bash
 git add .
-git commit -m "add Info button linking to AIGAP reference doc"
+git commit -m "fix"
 git push origin main
 git push laavan main
 git push hfspace main

@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     s3_secret_key: str = "minioadmin"
     s3_bucket: str = "ethiksa-cer"
 
+    # GitHub token for cloning private repos (optional — public repos work without it)
+    github_token: str = ""
+
     # Anthropic (used by S9, primary LLM)
     anthropic_api_key: str = ""
 

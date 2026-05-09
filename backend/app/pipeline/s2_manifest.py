@@ -13,6 +13,7 @@ IMPORTANT: files are read as text/bytes only — no code execution takes place (
 """
 
 import hashlib
+import os
 import re
 import subprocess
 import tempfile
@@ -53,10 +54,27 @@ def _compute_workspace_hash(entries: list[ManifestEntry]) -> str:
     return h.hexdigest()
 
 
+def _git_env() -> dict:
+    """Environment vars that prevent git from prompting for credentials."""
+    env = os.environ.copy()
+    env["GIT_TERMINAL_PROMPT"] = "0"   # never prompt for credentials
+    env["GIT_ASKPASS"] = "echo"        # return empty string if asked for password
+    return env
+
+
+def _build_clone_url(github_url: str, token: str) -> str:
+    """Embed token into HTTPS URL for private repo access."""
+    if not token:
+        return github_url
+    # https://github.com/org/repo → https://<token>@github.com/org/repo
+    return github_url.replace("https://", f"https://{token}@", 1)
+
+
 def _get_commit_sha(repo_root: Path) -> str:
     result = subprocess.run(
-        ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+        ["git", "-C", str(repo_root), "-c", "credential.helper=", "rev-parse", "HEAD"],
         capture_output=True,
+        env=_git_env(),
     )
     if result.returncode == 0:
         return result.stdout.decode().strip()
@@ -107,14 +125,29 @@ def run(profile: ProjectProfile) -> tuple[Path, list[ManifestEntry], str, str]:
         repo_root = Path(tmp)
         commit_sha = "zip-upload"
     elif profile.github_url:
+        from app.core.config import settings
+        clone_url = _build_clone_url(str(profile.github_url), settings.github_token)
         tmp = tempfile.mkdtemp(prefix="ethiksa_")
         result = subprocess.run(
-            ["git", "clone", "--depth", "1", "--single-branch",
-             str(profile.github_url), tmp],
+            [
+                "git",
+                "-c", "credential.helper=",   # disable any system credential helper
+                "-c", "core.askPass=",         # disable askpass program
+                "clone",
+                "--depth", "1",
+                "--single-branch",
+                clone_url,
+                tmp,
+            ],
             capture_output=True,
+            env=_git_env(),
         )
         if result.returncode != 0:
-            raise RuntimeError(result.stderr.decode("utf-8", errors="replace"))
+            stderr = result.stderr.decode("utf-8", errors="replace")
+            # Scrub token from error message before raising
+            if settings.github_token:
+                stderr = stderr.replace(settings.github_token, "***")
+            raise RuntimeError(stderr)
         repo_root = Path(tmp)
         commit_sha = _get_commit_sha(repo_root)
     else:
