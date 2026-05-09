@@ -94,7 +94,8 @@ const PRIORITY_COLORS: Record<string, string> = {
   before_certifier: "bg-blue-50 text-blue-700 border-blue-200",
 };
 
-function FindingCard({ finding }: { finding: ControlResultRead }) {
+function FindingCard({ finding, scanId }: { finding: ControlResultRead; scanId: string }) {
+  const router = useRouter();
   const [expanded, setExpanded] = useState(false);
   const outcome = (finding.outcome ?? "").toLowerCase();
   const cfg = OUTCOME_CONFIG[finding.outcome] ?? OUTCOME_CONFIG[outcome] ?? {
@@ -129,16 +130,24 @@ function FindingCard({ finding }: { finding: ControlResultRead }) {
 
       {expanded && (
         <div className="border-t border-gray-100 px-5 py-4 space-y-5 bg-white">
-          {/* Not evaluable notice */}
+          {/* Not evaluable notice — T3 controls only */}
           {isNotEvaluable && (
-            <div className="flex gap-3 p-3 bg-purple-50 border border-purple-100 rounded-lg">
-              <span className="text-purple-500 text-lg leading-none">📋</span>
-              <div>
-                <p className="text-sm font-semibold text-purple-800">Design-only control — supplement required</p>
-                <p className="text-xs text-purple-600 mt-0.5">
-                  This control cannot be assessed from code alone. A human must declare the artefact path via the supplement form.
-                </p>
+            <div className="flex items-start justify-between gap-3 p-3 bg-purple-50 border border-purple-100 rounded-lg">
+              <div className="flex gap-3">
+                <span className="text-purple-500 text-lg leading-none flex-shrink-0">📋</span>
+                <div>
+                  <p className="text-sm font-semibold text-purple-800">Design-only control — supplement required</p>
+                  <p className="text-xs text-purple-600 mt-0.5">
+                    This control cannot be assessed from code alone. Declare the artefact path via the supplement form.
+                  </p>
+                </div>
               </div>
+              <button
+                onClick={() => router.push(`/supplement/${scanId}`)}
+                className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                Fill in →
+              </button>
             </div>
           )}
 
@@ -365,7 +374,7 @@ export default function ReportPageClient() {
                 </div>
                 <div className="space-y-2">
                   {items.map((finding) => (
-                    <FindingCard key={finding.control_id} finding={finding} />
+                    <FindingCard key={finding.control_id} finding={finding} scanId={scanId} />
                   ))}
                 </div>
               </div>

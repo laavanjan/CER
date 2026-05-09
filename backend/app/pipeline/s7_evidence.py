@@ -2,11 +2,15 @@
 
 Decision tree (first matching rule wins):
   Step 1  not_triggered — control applicability rule not satisfied (filtered by S4)
-  Step 2  not_evaluable — T3 control (no plugins run, supplement pending)
-  Step 3  not_evaluable — T1/T2 but plugins found no files in scope
-  Step 4  missing       — files in scope, no expected evidence artefacts found
-  Step 5  partial       — some expected evidence exists but not all required
-  Step 6  pass          — all expected evidence present with sufficient confidence
+  Step 2  not_evaluable — T3 control ONLY (no plugins run, supplement pending)
+  Step 3  missing       — T1/T2: plugins ran but found no files in scope
+  Step 4  partial       — T1/T2: all plugins timed out (inconclusive)
+  Step 5  missing       — files in scope, no expected evidence artefacts found
+  Step 6  partial       — some expected evidence exists but not all required
+  Step 7  pass          — all expected evidence present with sufficient confidence
+
+`not_evaluable` is EXCLUSIVELY for T3 controls. T1/T2 controls with no
+files in scope → missing. Timed-out T1/T2 → partial (inconclusive).
 
 LLM is NEVER involved in status assignment (I-07).
 Severity is calibrated to assurance level and control tier (§10.1).
@@ -33,14 +37,18 @@ _RECOMMENDED_ARTIFACTS: dict[str, list[str]] = {
 
 
 def _score_findings(findings: list[RawFinding]) -> str:
-    """Steps 3–6 of the decision tree applied to a group of plugin findings."""
+    """Steps 3–7 of the decision tree applied to a group of T1/T2 plugin findings.
+
+    not_evaluable is NEVER returned here — it is exclusively for T3 controls.
+    """
     if not findings:
-        # Step 3: plugins ran but found no files in scope
-        return "not_evaluable"
+        # Step 3: plugins ran but found no files in scope → treat as missing
+        return "missing"
 
     has_timed_out_only = all(f.timed_out for f in findings)
     if has_timed_out_only:
-        return "not_evaluable"
+        # Step 4: all plugins timed out — inconclusive, report as partial
+        return "partial"
 
     has_pass = any(
         f.evidence_found and f.confidence >= _PASS_CONFIDENCE
@@ -70,10 +78,9 @@ def _compute_severity(
     """Severity calibration per §10.1."""
     if outcome == "not_triggered":
         return "none"
-    if outcome in ("not_evaluable",):
-        if cer_obs == "T3":
-            return "action_required"
-        return "info"
+    if outcome == "not_evaluable":
+        # Only T3 controls reach here — supplement pending
+        return "action_required"
     if outcome == "pass":
         return "none"
     # missing or partial
