@@ -27,6 +27,12 @@ def create_project(request: Request, payload: ProjectCreate, db: Session = Depen
         assurance_level=payload.assurance_level,
         uses_genai=payload.uses_genai,
         uses_rel_ai=payload.uses_rel_ai,
+        vulnerable_users=payload.vulnerable_users,
+        rights_affecting=payload.rights_affecting,
+        regulated_sector=payload.regulated_sector,
+        cross_border_transfer=payload.cross_border_transfer,
+        jurisdiction=payload.jurisdiction,
+        user_facing=payload.user_facing,
         registry_version=settings.registry_version,
     )
     db.add(project)

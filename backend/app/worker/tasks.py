@@ -80,6 +80,12 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
             uses_genai=project_data.get("uses_genai", False),
             registry_version=project_data.get("registry_version", settings.registry_version),
             uses_rel_ai=project_data.get("uses_rel_ai", False),
+            vulnerable_users=project_data.get("vulnerable_users", False),
+            rights_affecting=project_data.get("rights_affecting", False),
+            regulated_sector=project_data.get("regulated_sector", False),
+            cross_border_transfer=project_data.get("cross_border_transfer", False),
+            jurisdiction=project_data.get("jurisdiction"),
+            user_facing=project_data.get("user_facing", True),
         )
 
         def _timed(label: str):

@@ -57,6 +57,18 @@ class ProjectProfile:
     uses_genai: bool
     registry_version: str
     uses_rel_ai: bool = False
+    # Vulnerable user base → triggers ACC-05 + minimum capstone level at S4
+    vulnerable_users: bool = False
+    # Rights-affecting decisions → minimum capstone level at S4; S8 escalates if level too low
+    rights_affecting: bool = False
+    # Regulated sector (health/finance/legal) → minimum industrial level at S4
+    regulated_sector: bool = False
+    # Cross-border personal data transfer → activates PRV-07 at S4; mismatch checked at S8
+    cross_border_transfer: bool = False
+    # Operating jurisdiction(s) e.g. "EU,LK" — stored for regulation mapping
+    jurisdiction: str | None = None
+    # Public-facing system → ACC-02, ACC-04 active; internal tool → those controls skipped
+    user_facing: bool = True
 
 
 @dataclass

@@ -2,13 +2,31 @@
 
 Responsibilities
 ----------------
-1. Compare what the user declared at intake (profile.uses_genai, assurance_level)
-   against what S3 detected in the repository.
-2. Produce EscalationHint objects where discrepancies exist.
-3. These hints are later embedded in the S10 output packages.
+1. Compare what the user declared at intake against what S3 detected in the repository.
+2. Check that the declared assurance_level meets the minimum required by the risk profile.
+3. Produce EscalationHint objects where discrepancies exist.
+4. These hints are later embedded in the S10 output packages.
 """
 
 from app.pipeline.models import EscalationHint, ProjectProfile
+
+_LEVEL_RANK: dict[str, int] = {
+    "basic": 1,
+    "standard": 2,
+    "enhanced": 3,
+    "capstone": 4,
+    "industrial": 5,
+}
+
+# Cross-border transfer patterns detectable in code
+import re as _re
+_CROSS_BORDER_PATTERNS = _re.compile(
+    r"""(?ix)\b(
+        cross[-_]border | data[-_]transfer | gdpr | adequacy[-_]decision |
+        standard[-_]contractual[-_]clauses | scc | binding[-_]corporate[-_]rules |
+        international[-_]transfer | data[-_]export
+    )\b"""
+)
 
 
 def run(profile: ProjectProfile) -> list[EscalationHint]:
@@ -26,6 +44,9 @@ def run(profile: ProjectProfile) -> list[EscalationHint]:
 
     gen_triggered: bool = getattr(profile, "gen_triggered", False)
     rel_triggered: bool = getattr(profile, "rel_triggered", False)
+    declared_rank = _LEVEL_RANK.get(profile.assurance_level, 2)
+
+    # ── AI type honesty checks ────────────────────────────────────────────────
 
     # Declared no genAI but we found generative-AI indicators in the code
     if not profile.uses_genai and gen_triggered:
@@ -68,6 +89,8 @@ def run(profile: ProjectProfile) -> list[EscalationHint]:
             )
         )
 
+    # ── Assurance level adequacy checks ──────────────────────────────────────
+
     # Basic assurance but reliance-critical AI declared or detected
     if profile.assurance_level == "basic" and (profile.uses_rel_ai or rel_triggered):
         hints.append(
@@ -78,6 +101,77 @@ def run(profile: ProjectProfile) -> list[EscalationHint]:
                     "Consider upgrading to 'standard' or 'enhanced'."
                 ),
                 severity="CRITICAL",
+            )
+        )
+
+    # vulnerable_users or rights_affecting require at least capstone
+    if (getattr(profile, "vulnerable_users", False) or getattr(profile, "rights_affecting", False)) \
+            and declared_rank < 4:
+        context = []
+        if getattr(profile, "vulnerable_users", False):
+            context.append("vulnerable users declared")
+        if getattr(profile, "rights_affecting", False):
+            context.append("rights-affecting decisions declared")
+        hints.append(
+            EscalationHint(
+                control_id="GOV-05",
+                hint=(
+                    f"Profile flags ({', '.join(context)}) require a minimum assurance level of "
+                    f"'capstone', but '{profile.assurance_level}' was declared. "
+                    "Upgrade assurance level or remove the flag if incorrectly set."
+                ),
+                severity="CRITICAL",
+            )
+        )
+
+    # regulated_sector requires industrial level
+    if getattr(profile, "regulated_sector", False) and declared_rank < 5:
+        hints.append(
+            EscalationHint(
+                control_id="GOV-08",
+                hint=(
+                    "regulated_sector=True requires assurance_level='industrial', "
+                    f"but '{profile.assurance_level}' was declared. "
+                    "Regulated deployments (healthcare, finance, insurance, legal) must meet "
+                    "the highest scrutiny bar."
+                ),
+                severity="CRITICAL",
+            )
+        )
+
+    # ── Cross-border transfer honesty check ───────────────────────────────────
+
+    # Declared no cross-border transfer — S3 cannot reliably detect this in code,
+    # but if cross_border_transfer=False and jurisdiction spans multiple regions, flag it.
+    jurisdiction = getattr(profile, "jurisdiction", None) or ""
+    cross_border = getattr(profile, "cross_border_transfer", False)
+    multi_jurisdiction = "," in jurisdiction or len(jurisdiction.split()) > 1
+
+    if not cross_border and multi_jurisdiction:
+        hints.append(
+            EscalationHint(
+                control_id="PRV-07",
+                hint=(
+                    "cross_border_transfer=False but multiple jurisdictions were declared "
+                    f"({jurisdiction!r}). If personal data flows between these regions, "
+                    "PRV-07 must be activated and re-scan triggered."
+                ),
+                severity="WARNING",
+            )
+        )
+
+    # ── Jurisdiction check ────────────────────────────────────────────────────
+
+    if not jurisdiction:
+        hints.append(
+            EscalationHint(
+                control_id="GOV-03",
+                hint=(
+                    "No jurisdiction declared at intake. Jurisdiction-specific regulation "
+                    "mapping (EU AI Act, NIST RMF, ISO 42001) could not be applied. "
+                    "Re-declare with a jurisdiction for accurate regulatory alignment."
+                ),
+                severity="INFO",
             )
         )
 

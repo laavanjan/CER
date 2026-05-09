@@ -54,6 +54,12 @@ export interface ProjectCreate {
   assurance_level: string;
   uses_genai: boolean;
   uses_rel_ai: boolean;
+  vulnerable_users: boolean;
+  rights_affecting: boolean;
+  regulated_sector: boolean;
+  cross_border_transfer: boolean;
+  jurisdiction?: string;
+  user_facing: boolean;
   registry_version: string;
 }
 
@@ -64,6 +70,12 @@ export interface ProjectRead {
   assurance_level: string;
   uses_genai: boolean;
   uses_rel_ai: boolean;
+  vulnerable_users: boolean;
+  rights_affecting: boolean;
+  regulated_sector: boolean;
+  cross_border_transfer: boolean;
+  jurisdiction: string | null;
+  user_facing: boolean;
   registry_version: string;
   created_at: string;
   updated_at: string;
