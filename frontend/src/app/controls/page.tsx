@@ -309,7 +309,7 @@ export default function ControlsPage() {
     <div className="flex gap-6 min-h-[calc(100vh-7rem)]">
 
       {/* ── Sidebar ── */}
-      <aside className="w-56 flex-shrink-0 space-y-6">
+      <aside className="w-56 flex-shrink-0 space-y-6 sticky top-6 h-fit self-start">
 
         {/* Identity */}
         <div>
