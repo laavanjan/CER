@@ -10,11 +10,14 @@ logger = logging.getLogger(__name__)
 
 
 def _log_stage(stage: str, summary: str, details: dict[str, Any] | None = None) -> None:
-    logger.info("=== %s ===", stage)
+    logger.info("")
+    logger.info("======== %s ========", stage)
+    logger.info("")
     logger.info("%s", summary)
     if details:
         for key, value in details.items():
             logger.info("- %s: %s", key, value)
+    logger.info("")
 
 from app import registry_loader
 from app.core.config import settings
