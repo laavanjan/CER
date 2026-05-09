@@ -18,7 +18,6 @@ from typing import Any
 from app.pipeline.models import ManifestEntry, RawFinding
 from app.pipeline.s5_plugins.base import BasePlugin
 
-# Maximum threads for the parallel plugin runner
 _MAX_WORKERS = 8
 
 
@@ -40,9 +39,6 @@ def _load_plugins() -> list[type[BasePlugin]]:
             ):
                 plugin_classes.append(attr)
     return plugin_classes
-
-
-_PLUGIN_TIMEOUT_S = 30  # §13: per-plugin timeout
 
 
 def _run_one(
@@ -91,24 +87,12 @@ def run(
             )
             for plugin_cls, control in tasks
         }
-        for future in concurrent.futures.as_completed(futures, timeout=None):
+        for future in concurrent.futures.as_completed(futures):
             plugin_cls, control = futures[future]
             cid = control.get("id", "unknown")
             pid = getattr(plugin_cls, "plugin_id", "unknown")
             try:
-                # Enforce per-plugin timeout (§13)
-                result = future.result(timeout=_PLUGIN_TIMEOUT_S)
-                findings.extend(result)
-            except concurrent.futures.TimeoutError:
-                findings.append(
-                    RawFinding(
-                        plugin_id=pid,
-                        control_id=cid,
-                        missing=[f"plugin_timeout: exceeded {_PLUGIN_TIMEOUT_S}s"],
-                        confidence=0.0,
-                        timed_out=True,
-                    )
-                )
+                findings.extend(future.result())
             except Exception as exc:  # noqa: BLE001
                 findings.append(
                     RawFinding(

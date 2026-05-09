@@ -8,6 +8,14 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
+def _log_stage(stage: str, summary: str, details: dict[str, Any] | None = None) -> None:
+    logger.info("=== %s ===", stage)
+    logger.info("%s", summary)
+    if details:
+        for key, value in details.items():
+            logger.info("- %s: %s", key, value)
+
 from app import registry_loader
 from app.core.config import settings
 from app.core.database import SessionLocal
@@ -69,6 +77,7 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         d = round(time.perf_counter() - t, 2)
         s11_audit.record(db, scan_uuid, "S1_INTAKE", "Intake validated",
                          payload={"profile": project_data, "duration_s": d})
+        _log_stage("S1_INTAKE", "Intake validated", {"duration_s": d})
 
         # S2 — Repository ingestion (now returns commit_sha + workspace_hash)
         scan.status = "S2_MANIFEST"
@@ -82,6 +91,8 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         s11_audit.record(db, scan_uuid, "S2_MANIFEST",
                          f"Manifest built: {len(manifest)} files",
                          payload={"commit_sha": commit_sha, "workspace_hash": workspace_hash, "duration_s": d})
+        _log_stage("S2_MANIFEST", f"Manifest built: {len(manifest)} files",
+               {"commit_sha": commit_sha, "workspace_hash": workspace_hash, "duration_s": d})
 
         # S3 — AI detection
         scan.status = "S3_AI_DETECT"
@@ -92,6 +103,8 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         s11_audit.record(db, scan_uuid, "S3_AI_DETECT", "AI signals detected",
                          payload={"gen_triggered": profile.gen_triggered,
                                   "rel_triggered": profile.rel_triggered, "duration_s": d})
+        _log_stage("S3_AI_DETECT", "AI signals detected",
+               {"gen_triggered": profile.gen_triggered, "rel_triggered": profile.rel_triggered, "duration_s": d})
 
         # S4 — Control activation & routing (now returns supplement_entries)
         scan.status = "S4_FILTER"
@@ -121,6 +134,9 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         s11_audit.record(db, scan_uuid, "S4_FILTER",
                          f"{len(active_controls)} active (T1/T2), {len(t3_queue)} T3 supplement queued",
                          payload={"duration_s": d})
+        _log_stage("S4_FILTER",
+               f"{len(active_controls)} active (T1/T2), {len(t3_queue)} T3 supplement queued",
+               {"duration_s": d})
 
         # S5 — Plugin runner (30s timeouts per plugin)
         scan.status = "S5_RUNNER"
@@ -132,6 +148,8 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         s11_audit.record(db, scan_uuid, "S5_RUNNER",
                          f"{len(raw_findings)} raw findings ({timed_out} timed out)",
                          payload={"duration_s": d})
+        _log_stage("S5_RUNNER", f"{len(raw_findings)} raw findings ({timed_out} timed out)",
+               {"duration_s": d})
 
         # S6 — GEN/REL signal routing
         scan.status = "S6_TAG"
@@ -140,6 +158,7 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         tagged_findings = s6_tag.run(raw_findings)
         d = round(time.perf_counter() - t, 2)
         s11_audit.record(db, scan_uuid, "S6_TAG", "Overlay tags applied", payload={"duration_s": d})
+        _log_stage("S6_TAG", "Overlay tags applied", {"duration_s": d})
 
         # S7 — Evidence mapping (full decision tree)
         scan.status = "S7_EVIDENCE"
@@ -152,6 +171,8 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         d = round(time.perf_counter() - t, 2)
         s11_audit.record(db, scan_uuid, "S7_EVIDENCE", "Evidence outcomes determined",
                          payload={r.control_id: r.outcome for r in evidence_results} | {"duration_s": d})
+        _log_stage("S7_EVIDENCE", "Evidence outcomes determined",
+               {"results": len(evidence_results), "duration_s": d})
 
         # S8 — Escalation check
         scan.status = "S8_HONESTY"
@@ -167,6 +188,7 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         s11_audit.record(db, scan_uuid, "S8_HONESTY",
                          f"{len(escalation_hints)} escalation hints",
                          payload={"duration_s": d})
+        _log_stage("S8_HONESTY", f"{len(escalation_hints)} escalation hints", {"duration_s": d})
 
         # S9 — LLM explanation (structured JSON, temperature=0)
         scan.status = "S9_LLM"
@@ -182,6 +204,8 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         d = round(time.perf_counter() - t, 2)
         s11_audit.record(db, scan_uuid, "S9_LLM", "LLM annotations generated",
                          payload={"count": len(annotations), "duration_s": d})
+        _log_stage("S9_LLM", "LLM annotations generated",
+               {"count": len(annotations), "duration_s": d})
 
         # S10 — Assemble all packages (P1–P10)
         scan.status = "S10_ASSEMBLE"
@@ -219,6 +243,8 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
                 payload=output_packages[pkg_key],
             ))
 
+        _log_stage("S10_ASSEMBLE", "Output packages assembled", {"duration_s": d})
+
         total = round(time.perf_counter() - pipeline_start, 2)
         scan.status = "COMPLETE"
         scan.completed_at = datetime.now(UTC)
@@ -226,6 +252,9 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
 
         s11_audit.record(db, scan_uuid, "S11_AUDIT", "Scan completed",
                          payload={"total_duration_s": total, "workspace_hash": workspace_hash})
+
+        _log_stage("S11_AUDIT", "Scan completed",
+               {"total_duration_s": total, "workspace_hash": workspace_hash})
 
         return output_packages
 
