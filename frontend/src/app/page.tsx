@@ -233,10 +233,10 @@ export default function HistoryPage() {
               </p>
             </div>
             <button
-              onClick={() => router.push("/intake")}
+              onClick={() => router.push("/info")}
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-teal-600 text-white text-sm font-semibold rounded-xl hover:bg-teal-700 transition-colors shadow-sm"
             >
-              New review
+              Learn more about ethics reviews
             </button>
           </div>
 
