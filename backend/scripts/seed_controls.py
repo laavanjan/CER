@@ -22,7 +22,11 @@ from app.models.control import Control  # noqa: E402
 
 
 def seed(registry_path: str | None = None) -> None:
-    """Load controls from JSON and insert any that are not yet in the database."""
+    """Load controls from JSON and upsert into the database.
+
+    Existing records are updated (not skipped) so that changes to cer_observability,
+    supplement_prompt, artefact_type_expected and other fields are reflected after re-run.
+    """
     path = registry_path or settings.registry_path
 
     if not os.path.exists(path):
@@ -35,34 +39,34 @@ def seed(registry_path: str | None = None) -> None:
     db = SessionLocal()
     try:
         inserted = 0
-        skipped = 0
+        updated = 0
         for rec in records:
             cid = rec.get("id", "")
             if not cid:
                 print(f"Skipping record with missing id: {rec}", file=sys.stderr)
                 continue
 
-            exists = db.query(Control).filter(Control.control_id == cid).first()
-            if exists:
-                skipped += 1
-                continue
+            control = db.query(Control).filter(Control.control_id == cid).first()
+            if control is None:
+                control = Control(id=uuid.uuid4(), control_id=cid)
+                db.add(control)
+                inserted += 1
+            else:
+                updated += 1
 
-            control = Control(
-                id=uuid.uuid4(),
-                control_id=cid,
-                pillar=rec.get("pillar", ""),
-                tier=int(rec.get("tier", 1)),
-                auto=bool(rec.get("auto", False)),
-                plugins=rec.get("plugins", []),
-                pass_criteria=rec.get("pass_criteria", ""),
-                partial_criteria=rec.get("partial_criteria", ""),
-                missing_criteria=rec.get("missing_criteria", ""),
-            )
-            db.add(control)
-            inserted += 1
+            control.pillar = rec.get("pillar", "")
+            control.tier = int(rec.get("tier", 1))
+            control.auto = bool(rec.get("auto", False))
+            control.plugins = rec.get("plugins", [])
+            control.pass_criteria = rec.get("pass_criteria", "")
+            control.partial_criteria = rec.get("partial_criteria", "")
+            control.missing_criteria = rec.get("missing_criteria", "")
+            control.cer_observability = rec.get("cer_observability", "T1")
+            control.supplement_prompt = rec.get("supplement_prompt", "")
+            control.artefact_type_expected = rec.get("artefact_type_expected", "")
 
         db.commit()
-        print(f"Seed complete: {inserted} inserted, {skipped} skipped.")
+        print(f"Seed complete: {inserted} inserted, {updated} updated.")
     except Exception as exc:
         db.rollback()
         print(f"Seed failed: {exc}", file=sys.stderr)

@@ -30,6 +30,9 @@ def _to_dict(row: Control) -> dict[str, Any]:
         "pass_criteria": row.pass_criteria,
         "partial_criteria": row.partial_criteria,
         "missing_criteria": row.missing_criteria,
+        "cer_observability": row.cer_observability,
+        "supplement_prompt": row.supplement_prompt,
+        "artefact_type_expected": row.artefact_type_expected,
     }
 
 
@@ -78,6 +81,9 @@ def upsert_control(
     row.pass_criteria = data.get("pass_criteria", "")
     row.partial_criteria = data.get("partial_criteria", "")
     row.missing_criteria = data.get("missing_criteria", "")
+    row.cer_observability = data.get("cer_observability", "T1")
+    row.supplement_prompt = data.get("supplement_prompt", "")
+    row.artefact_type_expected = data.get("artefact_type_expected", "")
 
     db.flush()
     return _to_dict(row)

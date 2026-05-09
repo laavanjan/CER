@@ -28,3 +28,7 @@ class Control(Base):
     pass_criteria: Mapped[str] = mapped_column(Text, nullable=False, default="")
     partial_criteria: Mapped[str] = mapped_column(Text, nullable=False, default="")
     missing_criteria: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    # CER observability tier: "T1" (code), "T2" (document), "T3" (design/supplement)
+    cer_observability: Mapped[str] = mapped_column(String(10), nullable=False, default="T1")
+    supplement_prompt: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    artefact_type_expected: Mapped[str] = mapped_column(String(100), nullable=False, default="")
