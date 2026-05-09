@@ -313,9 +313,9 @@ export default function ControlsPage() {
 
         {/* Identity */}
         <div>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Registry</p>
-          <p className="text-xs font-mono text-gray-500">{registryInfo?.file ?? "—"}</p>
-          <p className="text-[10px] text-gray-400 mt-0.5">{controls.length} controls · {uniquePillars.length} pillars</p>
+          {/* <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Registry</p> */}
+          {/* <p className="text-xs font-mono text-gray-500">{registryInfo?.file ?? "—"}</p> */}
+          <p className="text-[10px] text-gray-400 mt-0.5">Registry {controls.length} controls · {uniquePillars.length} pillars</p>
         </div>
 
         {/* Search */}
