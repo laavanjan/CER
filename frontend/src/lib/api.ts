@@ -111,6 +111,19 @@ export interface AuditLogRead {
   recorded_at: string;
 }
 
+export interface SupplementRead {
+  id: string;
+  scan_id: string;
+  control_id: string;
+  supplement_prompt: string;
+  artefact_type_expected: string;
+  declared_path: string | null;
+  existence_check_result: string;
+  status_after_supplement: string;
+  completed_at: string | null;
+  created_at: string;
+}
+
 export interface ControlRead {
   id: string;
   control_id: string;
@@ -188,4 +201,18 @@ export const apiClient = {
 
   getRegistryInfo: (): Promise<{ file: string; version: string }> =>
     apiFetch("/api/v1/controls/registry-info"),
+
+  // All scans (no filter = all projects)
+  listAllScans: (): Promise<ScanRead[]> =>
+    apiFetch("/api/v1/scans/"),
+
+  // Supplement
+  getSupplements: (scanId: string): Promise<SupplementRead[]> =>
+    apiFetch(`/api/v1/scans/${scanId}/supplement`),
+
+  submitSupplement: (scanId: string, controlId: string, declaredPath: string | null): Promise<SupplementRead> =>
+    apiFetch(`/api/v1/scans/${scanId}/supplement/${controlId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ declared_path: declaredPath || null }),
+    }),
 };

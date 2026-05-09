@@ -3,297 +3,170 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient, type ControlRead, type ControlWrite } from "@/lib/api";
-import { Pencil, Trash2, Plus, X, Check, Search, ChevronUp, ChevronDown } from "lucide-react";
+import { X, Check, Search } from "lucide-react";
 
 // ---------------------------------------------------------------------------
-// Pillar color palette
+// Pillar colours — keyed on exact DB names
 // ---------------------------------------------------------------------------
 
-const PILLAR_STYLES: Record<string, { bg: string; text: string; border: string; dot: string }> = {
-  Governance:       { bg: "bg-violet-100",  text: "text-violet-800",  border: "border-violet-300",  dot: "bg-violet-500"  },
-  Documentation:    { bg: "bg-blue-100",    text: "text-blue-800",    border: "border-blue-300",    dot: "bg-blue-500"    },
-  Privacy:          { bg: "bg-teal-100",    text: "text-teal-800",    border: "border-teal-300",    dot: "bg-teal-500"    },
-  Fairness:         { bg: "bg-pink-100",    text: "text-pink-800",    border: "border-pink-300",    dot: "bg-pink-500"    },
-  Transparency:     { bg: "bg-amber-100",   text: "text-amber-800",   border: "border-amber-300",   dot: "bg-amber-500"   },
-  Accountability:   { bg: "bg-red-100",     text: "text-red-800",     border: "border-red-300",     dot: "bg-red-500"     },
-  Safety:           { bg: "bg-green-100",   text: "text-green-800",   border: "border-green-300",   dot: "bg-green-500"   },
-  Security:         { bg: "bg-slate-100",   text: "text-slate-800",   border: "border-slate-300",   dot: "bg-slate-500"   },
-  Explainability:   { bg: "bg-purple-100",  text: "text-purple-800",  border: "border-purple-300",  dot: "bg-purple-500"  },
-  "Human Oversight":{ bg: "bg-yellow-100",  text: "text-yellow-800",  border: "border-yellow-300",  dot: "bg-yellow-500"  },
-  Sustainability:   { bg: "bg-emerald-100", text: "text-emerald-800", border: "border-emerald-300", dot: "bg-emerald-500" },
+const PILLAR_DOT: Record<string, string> = {
+  "Governance & Accountability":               "bg-violet-500",
+  "Data Governance & Privacy":                 "bg-teal-500",
+  "Transparency & Explainability":             "bg-amber-500",
+  "Safety & Robustness":                       "bg-green-500",
+  "Fairness & Non-Discrimination":             "bg-pink-500",
+  "Security, Misuse Prevention & Resilience":  "bg-slate-500",
+  "Accessibility, Inclusion & Human Factors":  "bg-sky-500",
+  "Human Oversight & Recourse":                "bg-yellow-500",
+  "Documentation & Traceability":              "bg-blue-500",
+  "Generative AI Overlay":                     "bg-purple-500",
+  "Reliability AI Overlay":                    "bg-indigo-500",
 };
 
-const DEFAULT_PILLAR_STYLE = { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-300", dot: "bg-gray-400" };
-
-function PillarBadge({ pillar }: { pillar: string }) {
-  const s = PILLAR_STYLES[pillar] ?? DEFAULT_PILLAR_STYLE;
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${s.bg} ${s.text} ${s.border}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-      {pillar}
-    </span>
-  );
-}
-
-const TIER_STYLES: Record<number, string> = {
-  1: "bg-green-100 text-green-800 border-green-300",
-  2: "bg-blue-100  text-blue-800  border-blue-300",
-  3: "bg-orange-100 text-orange-800 border-orange-300",
+const PILLAR_TEXT: Record<string, string> = {
+  "Governance & Accountability":               "text-violet-600",
+  "Data Governance & Privacy":                 "text-teal-600",
+  "Transparency & Explainability":             "text-amber-600",
+  "Safety & Robustness":                       "text-green-600",
+  "Fairness & Non-Discrimination":             "text-pink-600",
+  "Security, Misuse Prevention & Resilience":  "text-slate-600",
+  "Accessibility, Inclusion & Human Factors":  "text-sky-600",
+  "Human Oversight & Recourse":                "text-yellow-600",
+  "Documentation & Traceability":              "text-blue-600",
+  "Generative AI Overlay":                     "text-purple-600",
+  "Reliability AI Overlay":                    "text-indigo-600",
 };
 
-function TierBadge({ tier }: { tier: number }) {
-  const cls = TIER_STYLES[tier] ?? "bg-gray-100 text-gray-700 border-gray-300";
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border ${cls}`}>
-      T{tier}
-    </span>
-  );
-}
+const TIER_CONFIG = {
+  1: { label: "T1", bg: "bg-green-50",  text: "text-green-700",  border: "border-green-200",  title: "Code-observable" },
+  2: { label: "T2", bg: "bg-blue-50",   text: "text-blue-700",   border: "border-blue-200",   title: "Document-observable" },
+  3: { label: "T3", bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200", title: "Design supplement" },
+} as const;
 
 // ---------------------------------------------------------------------------
-// Known pillars for the select dropdown
+// Pillars for the form dropdown
 // ---------------------------------------------------------------------------
 
 const PILLARS = [
-  "Governance", "Documentation", "Privacy", "Fairness", "Transparency",
-  "Accountability", "Safety", "Security", "Explainability", "Human Oversight", "Sustainability",
+  "Governance & Accountability",
+  "Data Governance & Privacy",
+  "Transparency & Explainability",
+  "Safety & Robustness",
+  "Fairness & Non-Discrimination",
+  "Security, Misuse Prevention & Resilience",
+  "Accessibility, Inclusion & Human Factors",
+  "Human Oversight & Recourse",
+  "Documentation & Traceability",
+  "Generative AI Overlay",
+  "Reliability AI Overlay",
 ];
 
 // ---------------------------------------------------------------------------
-// Pillar → control-ID prefix mapping
-// ---------------------------------------------------------------------------
-
-const PILLAR_PREFIX_MAP: Record<string, string> = {
-  Governance:        "GOV",
-  Transparency:      "TRAN",
-  Fairness:          "FAIR",
-  Privacy:           "PRIV",
-  Security:          "SEC",
-  "Human Oversight": "HUMO",
-  Safety:            "SAFE",
-  Documentation:     "DOC",
-  Accessibility:     "ACC",
-  Risk:              "RISK",
-  "Societal Impact": "SOC",
-  // Pillars present in the registry not covered above
-  Accountability:    "ACCT",
-  Explainability:    "EXPL",
-  Sustainability:    "SUST",
-};
-
-// ---------------------------------------------------------------------------
-// Auto-ID generator
-// ---------------------------------------------------------------------------
-
-/**
- * Given a pillar name and the current list of controls, return the next
- * control ID for that pillar, e.g. "GOV-07".
- *
- * Rules:
- *  1. Look up the pillar's prefix in PILLAR_PREFIX_MAP.
- *  2. Find all existing control IDs that start with "<prefix>-".
- *  3. Parse the numeric suffix of each match.
- *  4. Return "<prefix>-<max+1>" zero-padded to 2 digits.
- *  5. If no matches exist, start at 01.
- */
-function generateNextId(pillar: string, controls: ControlRead[]): string {
-  const prefix = PILLAR_PREFIX_MAP[pillar];
-  if (!prefix) return "";
-
-  const prefixDash = `${prefix}-`;
-  let max = 0;
-  for (const c of controls) {
-    if (c.id.startsWith(prefixDash)) {
-      const suffix = c.id.slice(prefixDash.length);
-      const n = parseInt(suffix, 10);
-      if (!isNaN(n) && n > max) max = n;
-    }
-  }
-  const next = (max + 1).toString().padStart(2, "0");
-  return `${prefix}-${next}`;
-}
-
-// ---------------------------------------------------------------------------
-// Empty form template
+// Edit / Create Modal (unchanged functionality, minimal look)
 // ---------------------------------------------------------------------------
 
 const EMPTY_FORM: ControlWrite = {
-  title: "",
-  pillar: "Governance",
-  tier: 1,
-  applies_to_genai: false,
-  applies_to_reliability: false,
-  auto: false,
-  plugins: [],
-  pass_criteria: "",
-  partial_criteria: "",
-  missing_criteria: "",
+  title: "", pillar: PILLARS[0], tier: 1,
+  applies_to_genai: false, applies_to_reliability: false,
+  auto: false, plugins: [],
+  pass_criteria: "", partial_criteria: "", missing_criteria: "",
 };
 
-// ---------------------------------------------------------------------------
-// Edit / Create Modal
-// ---------------------------------------------------------------------------
-
-interface ModalProps {
-  initialId?: string;
-  initialData?: ControlWrite;
-  mode: "create" | "edit";
-  existingControls: ControlRead[];
-  onSave: (id: string, data: ControlWrite) => void;
-  onClose: () => void;
-  isSaving: boolean;
-}
-
-function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, existingControls, onSave, onClose, isSaving }: ModalProps) {
+function ControlModal({
+  initialId = "", initialData = EMPTY_FORM, mode, existingControls, onSave, onClose, isSaving,
+}: {
+  initialId?: string; initialData?: ControlWrite; mode: "create" | "edit";
+  existingControls: ControlRead[]; onSave: (id: string, data: ControlWrite) => void;
+  onClose: () => void; isSaving: boolean;
+}) {
   const [controlId, setControlId] = useState(initialId);
   const [form, setForm] = useState<ControlWrite>(initialData);
   const [pluginInput, setPluginInput] = useState(initialData.plugins.join(", "));
 
-  // Auto-generate the control ID whenever the pillar changes in create mode.
-  useEffect(() => {
-    if (mode !== "create") return;
-    const generated = generateNextId(form.pillar, existingControls);
-    if (generated) setControlId(generated);
-  }, [form.pillar, mode, existingControls]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const plugins = pluginInput.split(",").map((p: string) => p.trim()).filter(Boolean);
+    const plugins = pluginInput.split(",").map((p) => p.trim()).filter(Boolean);
     onSave(controlId, { ...form, plugins });
   };
 
-  const field = (
-    label: string,
-    key: keyof ControlWrite,
-    placeholder?: string,
-    multiline?: boolean
-  ) => (
-    <div>
-      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-        {label}
-      </label>
-      {multiline ? (
-        <textarea
-          rows={2}
-          required
-          value={form[key] as string}
-          onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-          placeholder={placeholder}
-          className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
-        />
-      ) : (
-        <input
-          type="text"
-          required
-          value={form[key] as string}
-          onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-          placeholder={placeholder}
-          className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        />
-      )}
-    </div>
-  );
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-t-2xl">
-          <h2 className="text-lg font-bold text-white">
-            {mode === "create" ? "➕ Add New Control" : `✏️ Edit Control — ${initialId}`}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto border border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h2 className="text-sm font-bold text-gray-900">
+            {mode === "create" ? "New control" : `Edit — ${initialId}`}
           </h2>
-          <button onClick={onClose} className="text-white/80 hover:text-white transition-colors">
-            <X size={20} />
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <X size={16} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Control ID */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-              Control ID <span className="text-red-500">*</span>
-            </label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Control ID</label>
             <input
-              type="text"
-              required
-              disabled={mode === "edit"}
-              value={controlId}
+              type="text" required disabled={mode === "edit"} value={controlId}
               onChange={(e) => setControlId(e.target.value.toUpperCase())}
               placeholder="GOV-03"
-              className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full px-3 py-2 text-sm font-mono border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-50 disabled:text-gray-400"
             />
           </div>
 
-          {/* Pillar + Tier + Auto row */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Pillar</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Pillar</label>
               <select
-                value={form.pillar}
-                onChange={(e) => setForm({ ...form, pillar: e.target.value })}
-                className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                value={form.pillar} onChange={(e) => setForm({ ...form, pillar: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
               >
                 {PILLARS.map((p) => <option key={p}>{p}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Tier</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Tier</label>
               <select
-                value={form.tier}
-                onChange={(e) => setForm({ ...form, tier: Number(e.target.value) })}
-                className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                value={form.tier} onChange={(e) => setForm({ ...form, tier: Number(e.target.value) })}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
               >
-                {[1, 2, 3].map((t) => <option key={t} value={t}>Tier {t}</option>)}
+                <option value={1}>T1 — Code-observable</option>
+                <option value={2}>T2 — Document-observable</option>
+                <option value={3}>T3 — Design supplement</option>
               </select>
-            </div>
-            <div className="flex flex-col justify-end">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <div
-                  onClick={() => setForm({ ...form, auto: !form.auto })}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${form.auto ? "bg-indigo-500" : "bg-gray-300"}`}
-                >
-                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.auto ? "translate-x-5" : "translate-x-0.5"}`} />
-                </div>
-                <span className="text-sm font-medium text-gray-700">Auto scan</span>
-              </label>
             </div>
           </div>
 
-          {/* Plugins */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-              Plugins <span className="text-gray-400">(comma-separated)</span>
-            </label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Plugins <span className="font-normal text-gray-400">(comma-separated)</span></label>
             <input
-              type="text"
-              value={pluginInput}
-              onChange={(e) => setPluginInput(e.target.value)}
+              type="text" value={pluginInput} onChange={(e) => setPluginInput(e.target.value)}
               placeholder="governance_scanner, docs_scanner"
-              className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono"
+              className="w-full px-3 py-2 text-sm font-mono border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
           </div>
 
-          {/* Criteria */}
-          {field("Pass criteria", "pass_criteria", "When is this control fully met?", true)}
-          {field("Partial criteria", "partial_criteria", "When is it partially met?", true)}
-          {field("Missing criteria", "missing_criteria", "When is it not met at all?", true)}
+          {(["pass_criteria", "partial_criteria", "missing_criteria"] as const).map((key) => (
+            <div key={key}>
+              <label className="block text-xs font-medium text-gray-500 mb-1 capitalize">
+                {key.replace(/_/g, " ")}
+              </label>
+              <textarea
+                rows={2} required value={form[key]}
+                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+              />
+            </div>
+          ))}
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-            >
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               Cancel
             </button>
             <button
-              type="submit"
-              disabled={isSaving}
-              className="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-lg transition-colors"
+              type="submit" disabled={isSaving}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-lg transition-colors"
             >
-              <Check size={15} />
-              {isSaving ? "Saving…" : "Save Control"}
+              <Check size={14} />
+              {isSaving ? "Saving…" : "Save"}
             </button>
           </div>
         </form>
@@ -303,39 +176,20 @@ function ControlModal({ initialId = "", initialData = EMPTY_FORM, mode, existing
 }
 
 // ---------------------------------------------------------------------------
-// Delete confirmation dialog
+// Delete dialog
 // ---------------------------------------------------------------------------
 
 function DeleteDialog({ controlId, onConfirm, onCancel, isDeleting }: {
-  controlId: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  isDeleting: boolean;
+  controlId: string; onConfirm: () => void; onCancel: () => void; isDeleting: boolean;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-            <Trash2 size={18} className="text-red-600" />
-          </div>
-          <div>
-            <h3 className="font-bold text-gray-900">Delete control</h3>
-            <p className="text-sm text-gray-500">This cannot be undone.</p>
-          </div>
-        </div>
-        <p className="text-sm text-gray-700 mb-6">
-          Are you sure you want to delete <span className="font-mono font-semibold text-red-700">{controlId}</span>?
-        </p>
-        <div className="flex justify-end gap-3">
-          <button onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={isDeleting}
-            className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 rounded-lg transition-colors"
-          >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 border border-gray-100">
+        <h3 className="font-bold text-gray-900 mb-1">Delete <span className="font-mono text-red-600">{controlId}</span>?</h3>
+        <p className="text-sm text-gray-400 mb-5">This cannot be undone.</p>
+        <div className="flex justify-end gap-2">
+          <button onClick={onCancel} className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+          <button onClick={onConfirm} disabled={isDeleting} className="px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 rounded-lg transition-colors">
             {isDeleting ? "Deleting…" : "Delete"}
           </button>
         </div>
@@ -345,18 +199,73 @@ function DeleteDialog({ controlId, onConfirm, onCancel, isDeleting }: {
 }
 
 // ---------------------------------------------------------------------------
-// Main page
+// Control card
 // ---------------------------------------------------------------------------
 
-type SortKey = "id" | "pillar" | "tier" | "auto";
+function ControlCard({ control, onEdit, onDelete }: {
+  control: ControlRead;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const dot = PILLAR_DOT[control.pillar] ?? "bg-gray-400";
+  const pillarText = PILLAR_TEXT[control.pillar] ?? "text-gray-500";
+  const tier = TIER_CONFIG[control.tier as 1 | 2 | 3] ?? TIER_CONFIG[1];
+
+  return (
+    <div className="group bg-white border border-gray-100 rounded-xl p-4 hover:border-indigo-200 hover:shadow-sm transition-all flex flex-col gap-3">
+      {/* Top row */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dot}`} />
+          <span className="font-mono text-sm font-bold text-gray-900">{control.id}</span>
+          <span className={`text-xs font-bold px-1.5 py-0.5 rounded border ${tier.bg} ${tier.text} ${tier.border}`} title={tier.title}>
+            {tier.label}
+          </span>
+        </div>
+        {/* Actions — show on hover */}
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+          <button onClick={onEdit} className="p-1 text-gray-400 hover:text-indigo-600 transition-colors" title="Edit">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+            </svg>
+          </button>
+          <button onClick={onDelete} className="p-1 text-gray-400 hover:text-red-500 transition-colors" title="Delete">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Pillar */}
+      <p className={`text-xs font-medium ${pillarText} leading-none`}>{control.pillar}</p>
+
+      {/* Pass criteria */}
+      <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{control.pass_criteria}</p>
+
+      {/* Plugins */}
+      {control.plugins.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {control.plugins.map((p) => (
+            <span key={p} className="text-[10px] font-mono bg-gray-50 text-gray-500 border border-gray-100 px-1.5 py-0.5 rounded">
+              {p}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main page
+// ---------------------------------------------------------------------------
 
 export default function ControlsPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [pillarFilter, setPillarFilter] = useState<string>("All");
-  const [sortKey, setSortKey] = useState<SortKey>("id");
-  const [sortAsc, setSortAsc] = useState(true);
-
+  const [pillarFilter, setPillarFilter] = useState("All");
+  const [tierFilter, setTierFilter] = useState(0);
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [editTarget, setEditTarget] = useState<ControlRead | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -364,13 +273,10 @@ export default function ControlsPage() {
   const { data: registryInfo } = useQuery({
     queryKey: ["registry-info"],
     queryFn: () => apiClient.getRegistryInfo(),
-    staleTime: Infinity, // registry metadata never changes at runtime
+    staleTime: Infinity,
   });
 
-  const registryFile    = registryInfo?.file    ?? "—";
-  const registryVersion = registryInfo?.version ?? "—";
-
-  const { data: controls = [], isLoading, isError } = useQuery({
+  const { data: controls = [], isLoading } = useQuery({
     queryKey: ["controls"],
     queryFn: () => apiClient.listControls(),
   });
@@ -378,324 +284,179 @@ export default function ControlsPage() {
   const saveMutation = useMutation({
     mutationFn: ({ id, data, isNew }: { id: string; data: ControlWrite; isNew: boolean }) =>
       isNew ? apiClient.createControl(id, data) : apiClient.updateControl(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["controls"] });
-      setModalMode(null);
-      setEditTarget(null);
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["controls"] }); setModalMode(null); setEditTarget(null); },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiClient.deleteControl(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["controls"] });
-      setDeleteTarget(null);
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["controls"] }); setDeleteTarget(null); },
   });
-
-  // Sorting
-  const toggleSort = (key: SortKey) => {
-    if (sortKey === key) setSortAsc((a) => !a);
-    else { setSortKey(key); setSortAsc(true); }
-  };
-
-  const SortIcon = ({ k }: { k: SortKey }) =>
-    sortKey === k
-      ? (sortAsc ? <ChevronUp size={13} className="text-indigo-500" /> : <ChevronDown size={13} className="text-indigo-500" />)
-      : <ChevronUp size={13} className="text-gray-300" />;
-
-  // Filter + sort
-  const visible = controls
-    .filter((c) => {
-      const q = search.toLowerCase();
-      const matchSearch =
-        !q ||
-        c.id.toLowerCase().includes(q) ||
-        c.pillar.toLowerCase().includes(q) ||
-        c.pass_criteria.toLowerCase().includes(q) ||
-        c.plugins.some((p) => p.toLowerCase().includes(q));
-      const matchPillar = pillarFilter === "All" || c.pillar === pillarFilter;
-      return matchSearch && matchPillar;
-    })
-    .sort((a, b) => {
-      let cmp = 0;
-      if (sortKey === "id")     cmp = a.id.localeCompare(b.id);
-      if (sortKey === "pillar") cmp = a.pillar.localeCompare(b.pillar);
-      if (sortKey === "tier")   cmp = a.tier - b.tier;
-      if (sortKey === "auto")   cmp = Number(b.auto) - Number(a.auto);
-      return sortAsc ? cmp : -cmp;
-    });
 
   const uniquePillars = Array.from(new Set(controls.map((c) => c.pillar))).sort();
 
-  const openCreate = () => { setEditTarget(null); setModalMode("create"); };
-  const openEdit = (c: ControlRead) => { setEditTarget(c); setModalMode("edit"); };
+  const tierCounts = { 1: 0, 2: 0, 3: 0 } as Record<number, number>;
+  for (const c of controls) tierCounts[c.tier] = (tierCounts[c.tier] ?? 0) + 1;
+
+  const visible = controls.filter((c) => {
+    const q = search.toLowerCase();
+    const matchSearch = !q || c.id.toLowerCase().includes(q) || c.pillar.toLowerCase().includes(q) || c.pass_criteria.toLowerCase().includes(q) || c.plugins.some((p) => p.toLowerCase().includes(q));
+    const matchPillar = pillarFilter === "All" || c.pillar === pillarFilter;
+    const matchTier = tierFilter === 0 || c.tier === tierFilter;
+    return matchSearch && matchPillar && matchTier;
+  }).sort((a, b) => a.id.localeCompare(b.id));
 
   return (
-    <div className="space-y-5">
-      {/* ── Registry banner card ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        {/* Header strip */}
-        <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-700 px-8 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-            {/* Left — title block */}
-            <div className="flex items-center gap-5">
-              {/* Icon block */}
-              <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center shadow-inner">
-                <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
-                </svg>
-              </div>
-              {/* Text */}
-              <div>
-                <p className="text-indigo-200/80 text-[11px] font-mono uppercase tracking-[0.18em] mb-1">
-                  AIGAP · Tool 02 · CER
-                </p>
-                <h1 className="text-3xl font-black text-white tracking-tight leading-none">
-                  Control Registry
-                </h1>
-                {/* Stat pills */}
-                <div className="flex items-center gap-2 mt-2.5">
-                  <span className="inline-flex items-center gap-1.5 bg-white/15 border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" />
-                    {controls.length} controls
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 bg-white/15 border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-300" />
-                    {uniquePillars.length} pillars
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-indigo-200 text-[11px] font-mono px-2.5 py-1 rounded-full">
-                    {registryFile}
-                  </span>
-                </div>
-              </div>
-            </div>
+    <div className="flex gap-6 min-h-[calc(100vh-7rem)]">
 
-            {/* Right — Add Control button */}
-            <button
-              onClick={openCreate}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-indigo-700 text-sm font-bold rounded-xl shadow-lg hover:shadow-xl hover:bg-indigo-50 active:scale-95 transition-all self-start sm:self-auto"
-            >
-              <Plus size={16} />
-              Add Control
-            </button>
-          </div>
+      {/* ── Sidebar ── */}
+      <aside className="w-56 flex-shrink-0 space-y-6">
+
+        {/* Identity */}
+        <div>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Registry</p>
+          <p className="text-xs font-mono text-gray-500">{registryInfo?.file ?? "—"}</p>
+          <p className="text-[10px] text-gray-400 mt-0.5">{controls.length} controls · {uniquePillars.length} pillars</p>
         </div>
 
-        {/* ── Pillar tab bar ── */}
-        <div className="border-b border-gray-100">
-          <div className="flex overflow-x-auto scrollbar-none">
-            {/* "All" tab */}
-            <button
-              onClick={() => setPillarFilter("All")}
-              className={`flex-shrink-0 inline-flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                pillarFilter === "All"
-                  ? "border-indigo-600 text-indigo-700 bg-indigo-50/60"
-                  : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50"
-              }`}
-            >
-              All pillars
-              <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md ${
-                pillarFilter === "All" ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-500"
-              }`}>
-                {controls.length}
-              </span>
+        {/* Search */}
+        <div className="relative">
+          <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search…"
+            className="w-full pl-7 pr-7 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <X size={11} />
             </button>
+          )}
+        </div>
 
-            {/* Per-pillar tabs */}
-            {uniquePillars.map((pillar) => {
-              const s = PILLAR_STYLES[pillar] ?? DEFAULT_PILLAR_STYLE;
-              const count = controls.filter((c) => c.pillar === pillar).length;
-              const isActive = pillarFilter === pillar;
+        {/* Tier filter */}
+        <div>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Tier</p>
+          <div className="space-y-1">
+            <button
+              onClick={() => setTierFilter(0)}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${tierFilter === 0 ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"}`}
+            >
+              All <span className="float-right text-gray-400 font-normal">{controls.length}</span>
+            </button>
+            {([1, 2, 3] as const).map((t) => {
+              const cfg = TIER_CONFIG[t];
               return (
                 <button
-                  key={pillar}
-                  onClick={() => setPillarFilter(isActive ? "All" : pillar)}
-                  className={`flex-shrink-0 inline-flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                    isActive
-                      ? "border-indigo-600 text-indigo-700 bg-indigo-50/60"
-                      : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50"
+                  key={t}
+                  onClick={() => setTierFilter(tierFilter === t ? 0 : t)}
+                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    tierFilter === t ? `${cfg.bg} ${cfg.text} font-semibold` : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${s.dot}`} />
-                  {pillar}
-                  <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md ${
-                    isActive ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-500"
-                  }`}>
-                    {count}
-                  </span>
+                  {cfg.label} <span className="text-[10px] font-normal text-gray-400 ml-1">{cfg.title}</span>
+                  <span className="float-right text-gray-400 font-normal">{tierCounts[t] ?? 0}</span>
                 </button>
               );
             })}
           </div>
         </div>
-      </div>
 
-      {/* ── Search bar ── */}
-      <div className="flex items-center gap-3">
-        <div className="relative max-w-sm w-full">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by ID, pillar, or criteria…"
-            className="w-full pl-9 pr-9 py-2 text-sm text-gray-900 border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          />
-          {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-              <X size={13} />
+        {/* Pillar filter */}
+        <div>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Pillar</p>
+          <div className="space-y-0.5">
+            <button
+              onClick={() => setPillarFilter("All")}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${pillarFilter === "All" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"}`}
+            >
+              All pillars
             </button>
-          )}
+            {uniquePillars.map((p) => {
+              const dot = PILLAR_DOT[p] ?? "bg-gray-400";
+              const count = controls.filter((c) => c.pillar === p).length;
+              return (
+                <button
+                  key={p}
+                  onClick={() => setPillarFilter(pillarFilter === p ? "All" : p)}
+                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-2 ${
+                    pillarFilter === p ? "bg-indigo-50 text-indigo-700 font-semibold" : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dot}`} />
+                  <span className="truncate flex-1">{p}</span>
+                  <span className="text-[10px] text-gray-400 flex-shrink-0">{count}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-        {(search || pillarFilter !== "All") && (
-          <span className="text-sm text-gray-500 whitespace-nowrap">
-            {visible.length} result{visible.length !== 1 ? "s" : ""}
-          </span>
+
+        {/* New control */}
+        <button
+          onClick={() => { setEditTarget(null); setModalMode("create"); }}
+          className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Add control
+        </button>
+      </aside>
+
+      {/* ── Main grid ── */}
+      <div className="flex-1 min-w-0">
+        {/* Result count */}
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-xs text-gray-400">
+            {visible.length === controls.length
+              ? `${controls.length} controls`
+              : `${visible.length} of ${controls.length} controls`}
+            {(search || pillarFilter !== "All" || tierFilter !== 0) && (
+              <button
+                onClick={() => { setSearch(""); setPillarFilter("All"); setTierFilter(0); }}
+                className="ml-2 text-indigo-500 hover:underline"
+              >
+                clear filters
+              </button>
+            )}
+          </p>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-32 text-gray-300">
+            <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            </svg>
+          </div>
+        ) : visible.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-32 text-gray-400">
+            <p className="text-sm">No controls match your filters.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {visible.map((c) => (
+              <ControlCard
+                key={c.id}
+                control={c}
+                onEdit={() => { setEditTarget(c); setModalMode("edit"); }}
+                onDelete={() => setDeleteTarget(c.id)}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Table */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-20 text-gray-400">
-          <svg className="animate-spin w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-          </svg>
-          Loading controls…
-        </div>
-      ) : isError ? (
-        <div className="py-12 text-center text-red-600 font-medium">Failed to load controls.</div>
-      ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div>
-            <table className="w-full text-sm">
-              <thead className="sticky top-14 z-20">
-                <tr className="bg-gray-50 border-b-2 border-indigo-100 shadow-sm">
-                  {([ ["id", "ID"], ["pillar", "Pillar"], ["tier", "Tier"], ["auto", "Auto"] ] as [SortKey, string][]).map(([k, label]) => (
-                    <th
-                      key={k}
-                      onClick={() => toggleSort(k)}
-                      className="bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-indigo-50 hover:text-indigo-700 transition-colors select-none whitespace-nowrap"
-                    >
-                      <span className="inline-flex items-center gap-1">
-                        {label} <SortIcon k={k} />
-                      </span>
-                    </th>
-                  ))}
-                  <th className="bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap w-48">Plugins</th>
-                  <th className="bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pass Criteria</th>
-                  <th className="bg-gray-50 px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {visible.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-16 text-center">
-                      <p className="text-gray-400 text-sm">No controls match your filter.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  visible.map((c) => (
-                    <tr
-                      key={c.id}
-                      className="hover:bg-indigo-50/30 transition-colors group"
-                    >
-                      {/* ID */}
-                      <td className="px-4 py-3.5 font-mono font-bold text-indigo-700 whitespace-nowrap">
-                        {c.id}
-                      </td>
-                      {/* Pillar */}
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <PillarBadge pillar={c.pillar} />
-                      </td>
-                      {/* Tier */}
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <TierBadge tier={c.tier} />
-                      </td>
-                      {/* Auto */}
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        {c.auto ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Yes
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-full">
-                            <span className="w-1.5 h-1.5 rounded-full bg-gray-400" /> Manual
-                          </span>
-                        )}
-                      </td>
-                      {/* Plugins */}
-                      <td className="px-4 py-3.5">
-                        <div className="flex flex-wrap gap-1">
-                          {c.plugins.length > 0 ? c.plugins.map((p) => (
-                            <span key={p} className="text-xs font-mono bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded">
-                              {p}
-                            </span>
-                          )) : (
-                            <span className="text-xs text-gray-400 italic">—</span>
-                          )}
-                        </div>
-                      </td>
-                      {/* Pass criteria — takes all remaining space */}
-                      <td className="px-4 py-3.5">
-                        <p className="text-xs text-gray-700 leading-relaxed line-clamp-3">{c.pass_criteria}</p>
-                      </td>
-                      {/* Actions — fade in on row hover */}
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => openEdit(c)}
-                            title="Edit"
-                            className="p-1.5 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors"
-                          >
-                            <Pencil size={14} />
-                          </button>
-                          <button
-                            onClick={() => setDeleteTarget(c.id)}
-                            title="Delete"
-                            className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Footer */}
-          <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-400 flex items-center justify-between">
-            <span>
-              Showing{" "}
-              <span className="font-semibold text-gray-600">{visible.length}</span>
-              {" "}of{" "}
-              <span className="font-semibold text-gray-600">{controls.length}</span>
-              {" "}controls
-            </span>
-            <span className="font-mono">{registryFile} · {registryVersion}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Create / Edit modal */}
+      {/* Modals */}
       {modalMode && (
         <ControlModal
           mode={modalMode}
           initialId={editTarget?.id ?? ""}
           initialData={editTarget ? {
-            title: editTarget.title,
-            pillar: editTarget.pillar,
-            tier: editTarget.tier,
-            applies_to_genai: editTarget.applies_to_genai,
-            applies_to_reliability: editTarget.applies_to_reliability,
-            auto: editTarget.auto,
-            plugins: editTarget.plugins,
-            pass_criteria: editTarget.pass_criteria,
-            partial_criteria: editTarget.partial_criteria,
+            title: editTarget.title, pillar: editTarget.pillar, tier: editTarget.tier,
+            applies_to_genai: editTarget.applies_to_genai, applies_to_reliability: editTarget.applies_to_reliability,
+            auto: editTarget.auto, plugins: editTarget.plugins,
+            pass_criteria: editTarget.pass_criteria, partial_criteria: editTarget.partial_criteria,
             missing_criteria: editTarget.missing_criteria,
           } : EMPTY_FORM}
           existingControls={controls}
@@ -704,8 +465,6 @@ export default function ControlsPage() {
           isSaving={saveMutation.isPending}
         />
       )}
-
-      {/* Delete confirmation */}
       {deleteTarget && (
         <DeleteDialog
           controlId={deleteTarget}

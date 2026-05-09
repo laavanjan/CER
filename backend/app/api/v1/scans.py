@@ -1,7 +1,6 @@
 """Scans router — endpoints to start and poll ethics review scans (§14.3, §14.4)."""
 
 import json
-import os
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -261,14 +260,17 @@ def patch_supplement(
     if not entry:
         raise HTTPException(status_code=404, detail="Supplement entry not found")
 
-    entry.declared_path = payload.declared_path
-
-    # File-existence re-check (§6.1)
-    if os.path.exists(payload.declared_path):
-        entry.existence_check_result = "found"
+    # Attestation model: temp workspace is gone after scan, so we trust the declaration.
+    # Non-empty path = developer attests artefact exists → partial.
+    # Empty / None = developer has no artefact → missing.
+    declared = (payload.declared_path or "").strip()
+    if declared:
+        entry.declared_path = declared
+        entry.existence_check_result = "declared"
         entry.status_after_supplement = "partial"
     else:
-        entry.existence_check_result = "not_found"
+        entry.declared_path = None
+        entry.existence_check_result = "not_declared"
         entry.status_after_supplement = "missing"
 
     entry.completed_at = datetime.now(UTC)

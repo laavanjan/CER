@@ -51,6 +51,15 @@ export default function RootLayout({
                 {/* Right nav */}
                 <nav className="flex items-center gap-1 ml-auto">
                   <a
+                    href="/"
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-gray-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    History
+                  </a>
+                  <a
                     href="/info"
                     target="_blank"
                     rel="noopener noreferrer"

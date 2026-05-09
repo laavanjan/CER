@@ -41,4 +41,4 @@ class SupplementRead(BaseModel):
 
 
 class SupplementPatch(BaseModel):
-    declared_path: str
+    declared_path: str | None = None

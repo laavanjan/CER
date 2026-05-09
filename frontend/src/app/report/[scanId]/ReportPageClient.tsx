@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { apiClient, type ControlResultRead } from "@/lib/api";
 
 // Outcome styles — lowercase values from the new pipeline
@@ -221,6 +221,7 @@ const FILTER_TABS: { key: Filter; label: string; color: string; activeColor: str
 
 export default function ReportPageClient() {
   const params = useParams();
+  const router = useRouter();
   const scanId = params.scanId as string;
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -271,6 +272,26 @@ export default function ReportPageClient() {
         <h1 className="text-2xl font-bold text-gray-900">Ethics Review Report</h1>
         <p className="text-xs text-gray-400 font-mono mt-1 break-all">Scan ID: {scanId}</p>
       </div>
+
+      {/* Supplement action banner */}
+      {counts.not_evaluable > 0 && (
+        <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-xl flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <p className="text-sm font-semibold text-purple-800">
+              {counts.not_evaluable} control{counts.not_evaluable !== 1 ? "s" : ""} need your input
+            </p>
+            <p className="text-xs text-purple-600 mt-0.5">
+              Declare artefact paths for design-only controls to complete the review.
+            </p>
+          </div>
+          <button
+            onClick={() => router.push(`/supplement/${scanId}`)}
+            className="flex-shrink-0 px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            Fill in now →
+          </button>
+        </div>
+      )}
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

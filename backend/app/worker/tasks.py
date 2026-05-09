@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def _log_stage(stage: str, summary: str, details: dict[str, Any] | None = None) -> None:
     logger.info("")
-    logger.info("======== %s ========", stage)
+    logger.info("============================== %s ==============================", stage)
     logger.info("")
     logger.info("%s", summary)
     if details:
@@ -233,6 +233,10 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
                 evidence={"paths": result.evidence_paths, "gaps": result.gaps},
                 explanation=a.developer_explanation if a else None,
                 remediation=_json.dumps(a.remediation_steps) if a else None,
+                student_summary=a.student_summary if a else None,
+                what_is_present=a.what_is_present if a else None,
+                what_is_missing=a.what_is_missing if a else None,
+                doc_classification=a.doc_classification if a else None,
             ))
 
         # Persist handoff exports

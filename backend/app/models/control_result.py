@@ -31,10 +31,13 @@ class ControlResult(Base):
     outcome: Mapped[str] = mapped_column(String(20), nullable=False)  # PASS/PARTIAL/MISSING
     # Serialised list of evidence file paths / snippets
     evidence: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    # LLM-generated explanation from S9
-    explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
-    # LLM-generated remediation from S9
-    remediation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # LLM-generated fields from S9
+    explanation: Mapped[str | None] = mapped_column(Text, nullable=True)       # developer_explanation
+    remediation: Mapped[str | None] = mapped_column(Text, nullable=True)       # remediation_steps (JSON)
+    student_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    what_is_present: Mapped[str | None] = mapped_column(Text, nullable=True)
+    what_is_missing: Mapped[str | None] = mapped_column(Text, nullable=True)
+    doc_classification: Mapped[str | None] = mapped_column(String(30), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
