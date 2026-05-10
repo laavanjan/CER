@@ -108,7 +108,7 @@ function ControlModal({
               type="text" required disabled={mode === "edit"} value={controlId}
               onChange={(e) => setControlId(e.target.value.toUpperCase())}
               placeholder="GOV-03"
-              className="w-full px-3 py-2 text-sm font-mono border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full px-3 py-2 text-sm font-mono text-gray-900 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-50 disabled:text-gray-400"
             />
           </div>
 
@@ -117,7 +117,7 @@ function ControlModal({
               <label className="block text-xs font-medium text-gray-500 mb-1">Pillar</label>
               <select
                 value={form.pillar} onChange={(e) => setForm({ ...form, pillar: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
               >
                 {PILLARS.map((p) => <option key={p}>{p}</option>)}
               </select>
@@ -126,7 +126,7 @@ function ControlModal({
               <label className="block text-xs font-medium text-gray-500 mb-1">Tier</label>
               <select
                 value={form.tier} onChange={(e) => setForm({ ...form, tier: Number(e.target.value) })}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
               >
                 <option value={1}>T1 — Code-observable</option>
                 <option value={2}>T2 — Document-observable</option>
@@ -140,7 +140,7 @@ function ControlModal({
             <input
               type="text" value={pluginInput} onChange={(e) => setPluginInput(e.target.value)}
               placeholder="governance_scanner, docs_scanner"
-              className="w-full px-3 py-2 text-sm font-mono border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full px-3 py-2 text-sm font-mono text-gray-900 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
           </div>
 
@@ -152,7 +152,7 @@ function ControlModal({
               <textarea
                 rows={2} required value={form[key]}
                 onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+                className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
               />
             </div>
           ))}
