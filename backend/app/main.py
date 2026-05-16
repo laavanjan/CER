@@ -83,6 +83,18 @@ app.include_router(reports.router, prefix="/api/v1/reports", tags=["reports"])
 app.include_router(controls.router, prefix="/api/v1/controls", tags=["controls"])
 
 
+@app.get("/", tags=["health"], include_in_schema=False)
+def root() -> dict:
+    return {
+        'message': 'Good morning'
+        "service": "AIGAP · Code Ethics Reviewer (CER)",
+        "status": "running",
+        "docs": "/docs",
+        "health": "/healthz",
+        "frontend": "https://ethiksa.vercel.app",
+    }
+
+
 @app.get("/healthz", tags=["health"])
 def healthcheck() -> dict:
     """Liveness probe used by Docker / k8s."""

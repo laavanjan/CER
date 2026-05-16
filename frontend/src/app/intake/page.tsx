@@ -6,18 +6,18 @@ import { useMutation } from "@tanstack/react-query";
 import { apiClient, type ProjectCreate, type ScanRead } from "@/lib/api";
 
 const JURISDICTIONS = [
-  { code: "EU", label: "🇪🇺 EU / EEA",       note: "EU AI Act" },
-  { code: "UK", label: "🇬🇧 United Kingdom",  note: "UK AI Framework" },
-  { code: "US", label: "🇺🇸 United States",   note: "NIST RMF" },
-  { code: "CA", label: "🇨🇦 Canada",          note: "AIDA / PIPEDA" },
-  { code: "AU", label: "🇦🇺 Australia",       note: "AI Ethics Framework" },
-  { code: "SG", label: "🇸🇬 Singapore",       note: "PDPA / AI Gov Framework" },
-  { code: "IN", label: "🇮🇳 India",           note: "DPDP Act" },
-  { code: "LK", label: "🇱🇰 Sri Lanka",       note: "PDP Act" },
-  { code: "AE", label: "🇦🇪 UAE",             note: "AI Strategy 2031" },
-  { code: "CN", label: "🇨🇳 China",           note: "AIGC Regulations" },
-  { code: "JP", label: "🇯🇵 Japan",           note: "AI Guidelines" },
-  { code: "BR", label: "🇧🇷 Brazil",          note: "LGPD / AI Bill" },
+  { code: "GLOBAL", label: "🌐 Global",         note: "ISO/IEC 42001 · OECD AI" },
+  { code: "EU",     label: "🇪🇺 EU / EEA",       note: "EU AI Act" },
+  { code: "UK",     label: "🇬🇧 United Kingdom",  note: "UK AI Framework" },
+  { code: "US",     label: "🇺🇸 United States",   note: "NIST RMF" },
+  { code: "CA",     label: "🇨🇦 Canada",          note: "AIDA / PIPEDA" },
+  { code: "AU",     label: "🇦🇺 Australia",       note: "AI Ethics Framework" },
+  { code: "SG",     label: "🇸🇬 Singapore",       note: "PDPA / AI Gov Framework" },
+  { code: "IN",     label: "🇮🇳 India",           note: "DPDP Act" },
+  { code: "LK",     label: "🇱🇰 Sri Lanka",       note: "PDP Act" },
+  { code: "AE",     label: "🇦🇪 UAE",             note: "AI Strategy 2031" },
+  { code: "CN",     label: "🇨🇳 China",           note: "AIGC Regulations" },
+  { code: "JP",     label: "🇯🇵 Japan",           note: "AI Guidelines" },
 ];
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
