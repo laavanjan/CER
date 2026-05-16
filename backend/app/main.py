@@ -86,7 +86,7 @@ app.include_router(controls.router, prefix="/api/v1/controls", tags=["controls"]
 @app.get("/", tags=["health"], include_in_schema=False)
 def root() -> dict:
     return {
-        'message': 'Good morning'
+        "message": "Good morning",
         "service": "AIGAP · Code Ethics Reviewer (CER)",
         "status": "running",
         "docs": "/docs",
