@@ -99,6 +99,10 @@ export interface ControlResultRead {
   evidence: Record<string, unknown> | null;
   explanation: string | null;
   remediation: string | null;
+  student_summary: string | null;
+  what_is_present: string | null;
+  what_is_missing: string | null;
+  deterministic_explanation: string | null;
   created_at: string;
 }
 

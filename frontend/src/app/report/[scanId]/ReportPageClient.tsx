@@ -97,6 +97,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 function FindingCard({ finding, scanId }: { finding: ControlResultRead; scanId: string }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
+  const [showDeterministic, setShowDeterministic] = useState(false);
   const outcome = (finding.outcome ?? "").toLowerCase();
   const cfg = OUTCOME_CONFIG[finding.outcome] ?? OUTCOME_CONFIG[outcome] ?? {
     label: finding.outcome, badge: "bg-gray-100 text-gray-600 border-gray-200", row: "",
@@ -104,6 +105,7 @@ function FindingCard({ finding, scanId }: { finding: ControlResultRead; scanId: 
   const steps = parseRemediation(finding.remediation);
   const evidencePaths: string[] = (finding.evidence as { paths?: string[] } | null)?.paths ?? [];
   const isNotEvaluable = outcome === "not_evaluable";
+  const hasDetExp = !!finding.deterministic_explanation;
 
   return (
     <div className={`rounded-xl border border-gray-200 overflow-hidden transition-shadow hover:shadow-md ${cfg.row}`}>
@@ -151,12 +153,49 @@ function FindingCard({ finding, scanId }: { finding: ControlResultRead; scanId: 
             </div>
           )}
 
-          {/* Explanation */}
-          {finding.explanation && (
+          {/* Explanation toggle — only shown for T1 controls */}
+          {hasDetExp && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-400 uppercase tracking-widest font-bold">Explanation</span>
+              <div className="flex items-center gap-1 ml-auto bg-gray-100 rounded-lg p-0.5">
+                <button
+                  onClick={() => setShowDeterministic(false)}
+                  className={`text-xs px-2.5 py-1 rounded-md font-medium transition-all ${
+                    !showDeterministic
+                      ? "bg-white text-blue-700 shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  LLM
+                </button>
+                <button
+                  onClick={() => setShowDeterministic(true)}
+                  className={`text-xs px-2.5 py-1 rounded-md font-medium transition-all ${
+                    showDeterministic
+                      ? "bg-white text-emerald-700 shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Scanner
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Explanation content */}
+          {!hasDetExp && finding.explanation && (
             <div>
               <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Explanation</h4>
               <p className="text-sm text-gray-700 leading-relaxed">{finding.explanation}</p>
             </div>
+          )}
+          {hasDetExp && !showDeterministic && finding.explanation && (
+            <p className="text-sm text-gray-700 leading-relaxed">{finding.explanation}</p>
+          )}
+          {hasDetExp && showDeterministic && (
+            <p className="text-sm text-emerald-800 leading-relaxed font-mono bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
+              {finding.deterministic_explanation}
+            </p>
           )}
 
           {/* Remediation steps */}

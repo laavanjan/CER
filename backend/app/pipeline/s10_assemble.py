@@ -28,6 +28,56 @@ from app.pipeline.models import (
     SupplementEntry,
 )
 
+
+def build_deterministic_explanation(r: EvidenceResult) -> str:
+    """Build a deterministic explanation for T1 controls from raw scanner output.
+
+    No LLM involved — purely derived from S5/S7 evidence data.
+    Only meaningful for T1 (code-observable) controls.
+    """
+    if r.cer_observability != "T1":
+        return ""
+
+    parts: list[str] = []
+
+    # Outcome summary
+    if r.outcome == "evidence_found":
+        parts.append(f"Scanner found evidence for {r.control_id} in {len(r.evidence_paths)} file(s).")
+    elif r.outcome == "partial":
+        parts.append(f"Scanner found partial evidence for {r.control_id} in {len(r.evidence_paths)} file(s).")
+    elif r.outcome == "missing":
+        parts.append(f"Scanner found no evidence for {r.control_id} after checking all code files.")
+    else:
+        parts.append(f"Control {r.control_id} was not evaluated (outcome: {r.outcome}).")
+
+    # Files with evidence
+    if r.evidence_paths:
+        file_list = ", ".join(f"`{p}`" for p in r.evidence_paths[:5])
+        suffix = f" and {len(r.evidence_paths) - 5} more" if len(r.evidence_paths) > 5 else ""
+        parts.append(f"Evidence files: {file_list}{suffix}.")
+
+    # Line-level matches
+    if r.evidence_locations:
+        sample = r.evidence_locations[:3]
+        loc_strs = [f"`{loc.file}:{loc.line}` — {loc.reason}" for loc in sample]
+        parts.append(f"Matched locations: {'; '.join(loc_strs)}.")
+
+    # Gaps
+    if r.gaps:
+        gap_list = "; ".join(r.gaps[:3])
+        parts.append(f"What was not found: {gap_list}.")
+
+    # Confidence
+    if r.raw_findings:
+        max_conf = max((f.confidence for f in r.raw_findings), default=0.0)
+        parts.append(f"Scanner confidence: {round(max_conf * 100)}%.")
+
+    # Severity
+    if r.severity not in ("none", "info"):
+        parts.append(f"Risk level: {r.severity}.")
+
+    return " ".join(parts)
+
 _SARIF_LEVEL = {
     "critical": "error",
     "major": "error",
@@ -98,6 +148,7 @@ def run(
             "evidence_paths": r.evidence_paths,
             "gaps": r.gaps,
             "recommended_next_artifact": r.recommended_next_artifact,
+            "deterministic_explanation": build_deterministic_explanation(r),
         }
         if a:
             finding["developer_explanation"] = a.developer_explanation

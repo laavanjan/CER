@@ -110,6 +110,10 @@ def get_results(scan_id: uuid.UUID, db: Session = Depends(get_db)) -> Any:
             "evidence": r.evidence,
             "explanation": r.explanation,
             "remediation": r.remediation,
+            "student_summary": r.student_summary,
+            "what_is_present": r.what_is_present,
+            "what_is_missing": r.what_is_missing,
+            "deterministic_explanation": r.deterministic_explanation,
         }
         for r in results
     ]

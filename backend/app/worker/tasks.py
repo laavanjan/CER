@@ -223,6 +223,7 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         # Persist ControlResult rows
         import json as _json
         from app.models.control_result import ControlResult
+        from app.pipeline.s10_assemble import build_deterministic_explanation
         ann_map = {a.control_id: a for a in annotations}
         for result in evidence_results:
             a = ann_map.get(result.control_id)
@@ -237,6 +238,7 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
                 what_is_present=a.what_is_present if a else None,
                 what_is_missing=a.what_is_missing if a else None,
                 doc_classification=a.doc_classification if a else None,
+                deterministic_explanation=build_deterministic_explanation(result),
             ))
 
         # Persist handoff exports

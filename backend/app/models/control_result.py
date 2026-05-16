@@ -38,6 +38,8 @@ class ControlResult(Base):
     what_is_present: Mapped[str | None] = mapped_column(Text, nullable=True)
     what_is_missing: Mapped[str | None] = mapped_column(Text, nullable=True)
     doc_classification: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    # Deterministic scanner-based explanation (T1 controls only, no LLM)
+    deterministic_explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
