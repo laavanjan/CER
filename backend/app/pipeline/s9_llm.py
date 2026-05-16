@@ -124,9 +124,20 @@ def _build_prompts(result: EvidenceResult, assurance_level: str) -> tuple[str, s
     return explain, remediate, classify
 
 
+def _strip_fences(raw: str) -> str:
+    """Remove markdown code fences the model sometimes wraps around JSON."""
+    s = raw.strip()
+    if s.startswith("```"):
+        # Remove opening fence (```json or ```)
+        s = s[s.index("\n") + 1:] if "\n" in s else s[3:]
+    if s.endswith("```"):
+        s = s[: s.rfind("```")]
+    return s.strip()
+
+
 def _parse_explain(raw: str) -> dict:
     try:
-        return json.loads(raw)
+        return json.loads(_strip_fences(raw))
     except Exception:
         return {
             "developer_explanation": raw[:600],
@@ -138,7 +149,7 @@ def _parse_explain(raw: str) -> dict:
 
 def _parse_remediate(raw: str) -> list[dict]:
     try:
-        data = json.loads(raw)
+        data = json.loads(_strip_fences(raw))
         return data.get("remediation_steps", [])
     except Exception:
         return [{"step_number": 1, "action": raw[:300], "artifact_to_produce": "", "example_approach": "", "priority": "before_reviewer"}]
@@ -146,7 +157,7 @@ def _parse_remediate(raw: str) -> list[dict]:
 
 def _parse_classify(raw: str) -> dict:
     try:
-        return json.loads(raw)
+        return json.loads(_strip_fences(raw))
     except Exception:
         return {"doc_classification": "NEEDS_IMPROVEMENT", "best_match": "none", "confidence": "low", "reasoning": ""}
 
