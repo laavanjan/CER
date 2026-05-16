@@ -35,8 +35,33 @@ def _make_celery(url: str) -> Celery:
     return app
 
 
-# Primary Celery app — uses REDIS_URL (Upstash)
-celery_app = _make_celery(settings.redis_url)
+def _resolve_broker_url() -> str:
+    """Ping each Redis URL in order and return the first reachable one.
+
+    Called at worker startup so the worker connects to whichever broker
+    is alive right now — not just whichever was alive when the image was built.
+    """
+    import redis as redis_lib
+
+    candidates = [u for u in [settings.redis_url, settings.redis_fallback_url] if u]
+    for url in candidates:
+        try:
+            ssl_kwargs = {"ssl_cert_reqs": ssl.CERT_NONE} if url.startswith("rediss://") else {}
+            client = redis_lib.from_url(url, socket_connect_timeout=3, **ssl_kwargs)
+            client.ping()
+            if url != candidates[0]:
+                logger.warning("Primary Redis unavailable at startup — worker using fallback: %s", url)
+            return url
+        except Exception as exc:
+            logger.warning("Redis URL unreachable at startup (%s): %s", url, exc)
+            continue
+
+    logger.error("All Redis URLs failed at startup — worker defaulting to primary.")
+    return candidates[0]
+
+
+# Primary Celery app — resolves broker at startup (primary → fallback)
+celery_app = _make_celery(_resolve_broker_url())
 
 # Fallback Celery app — uses REDIS_FALLBACK_URL (Redis Cloud).
 # Built lazily so a missing fallback URL doesn't crash startup.
