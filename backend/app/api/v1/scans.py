@@ -53,9 +53,11 @@ def create_scan(request: Request, payload: ScanCreate, db: Session = Depends(get
     db.commit()
     db.refresh(scan)
 
+    from kombu.exceptions import OperationalError as KombuError
     from app.worker.tasks import run_scan
+    from app.worker.celery_app import get_fallback_app
 
-    task = run_scan.delay(
+    task_args = (
         str(scan.id),
         {
             "project_id": str(project.id),
@@ -74,6 +76,18 @@ def create_scan(request: Request, payload: ScanCreate, db: Session = Depends(get
             "user_facing": project.user_facing,
         },
     )
+
+    try:
+        task = run_scan.delay(*task_args)
+    except (KombuError, Exception) as primary_exc:
+        fallback = get_fallback_app()
+        if fallback is None:
+            raise HTTPException(status_code=503, detail="Redis broker unavailable and no fallback configured.") from primary_exc
+        try:
+            task = fallback.send_task("run_scan", args=task_args)
+        except Exception as fallback_exc:
+            raise HTTPException(status_code=503, detail="Both primary and fallback Redis brokers are unavailable.") from fallback_exc
+
     scan.celery_task_id = task.id
     db.commit()
     db.refresh(scan)
