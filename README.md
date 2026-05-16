@@ -22,6 +22,8 @@ For full architecture, pipeline details, control registry, and output package do
 | ReDoc | https://laavanjan-ethiksa-cer.hf.space/redoc |
 | Hugging Face Space | https://huggingface.co/spaces/Laavanjan/ethiksa-cer |
 | Database | https://console.neon.tech/app/projects/summer-truth-32467950/branches/br-dry-glitter-anp4drrz |
+| Reviewer handoff (sample) | https://laavanjan-ethiksa-cer.hf.space/api/v1/scans/6d5ba10c-739b-4ee4-a091-8074ff6bf8cd/handoff/reviewer |
+| Certifier handoff (sample) | https://laavanjan-ethiksa-cer.hf.space/api/v1/scans/6d5ba10c-739b-4ee4-a091-8074ff6bf8cd/handoff/certifier |
 
 ---
 

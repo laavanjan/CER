@@ -51,6 +51,9 @@ def _run_one(
     plugin = plugin_cls()
     if plugin.plugin_id not in control.get("plugins", []):
         return []
+    # T1 (code-observable) controls must only scan code files — not .md, .txt, etc.
+    if control.get("cer_observability") == "T1":
+        manifest = [e for e in manifest if BasePlugin.is_code_file(e)]
     return plugin.run(control_id=control["id"], manifest=manifest, repo_root=repo_root)
 
 

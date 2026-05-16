@@ -13,6 +13,43 @@ from app.pipeline.models import EvidenceLocation, ManifestEntry, RawFinding
 
 _SNIPPET_MAX = 200  # max chars per snippet to avoid bloated output
 
+# Extensions considered source code for T1 (code-observable) controls.
+# Documentation files (.md, .txt, .rst, .pdf, .docx, .html) are excluded —
+# those belong to T2 (document-observable) controls.
+_CODE_EXTENSIONS: frozenset[str] = frozenset({
+    # Python
+    "py", "pyx", "pxd",
+    # JavaScript / TypeScript
+    "js", "jsx", "ts", "tsx", "mjs", "cjs",
+    # JVM
+    "java", "kt", "kts", "scala", "groovy",
+    # Go / Rust / C / C++
+    "go", "rs", "c", "h", "cpp", "hpp", "cc",
+    # Ruby / PHP / Swift / R
+    "rb", "php", "swift", "r",
+    # C# / F#
+    "cs", "fs", "fsx",
+    # Shell scripts
+    "sh", "bash", "zsh", "ps1",
+    # Config / infra (code-adjacent — parsed by T1 plugins)
+    "yaml", "yml", "toml", "json", "env", "cfg", "ini", "lock",
+    # Notebooks
+    "ipynb",
+})
+
+# Specific filenames allowed for T1 regardless of extension.
+# requirements.txt is a dependency manifest (code-adjacent) not documentation.
+_CODE_FILENAMES: frozenset[str] = frozenset({
+    "requirements.txt",
+    "requirements-dev.txt",
+    "requirements-test.txt",
+    "Pipfile",
+    "Makefile",
+    "Dockerfile",
+    ".env",
+    ".gitignore",
+})
+
 
 class BasePlugin(abc.ABC):
     """Abstract base class every plugin must subclass."""
@@ -42,6 +79,15 @@ class BasePlugin(abc.ABC):
         from fnmatch import fnmatch
 
         return [e for e in manifest if fnmatch(e.path, glob_pattern)]
+
+    @staticmethod
+    def is_code_file(entry: ManifestEntry) -> bool:
+        """Return True if entry is a code or code-adjacent file (for T1 controls)."""
+        filename = entry.path.split("/")[-1].split("\\")[-1]
+        if filename in _CODE_FILENAMES:
+            return True
+        ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+        return ext in _CODE_EXTENSIONS
 
     def scan_lines(
         self,

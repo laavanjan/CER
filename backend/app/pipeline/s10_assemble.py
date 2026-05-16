@@ -15,7 +15,7 @@ Output packages:
 Governing invariants respected:
   I-05: CER produces observations only — no Reviewer/Certifier statuses in any package.
   I-13: Coverage stats reported per tier separately.
-  I-14: Every non-pass finding carries recommended_next_artifact.
+  I-14: Every non-evidence_found finding carries recommended_next_artifact.
 """
 
 from typing import Any
@@ -61,7 +61,7 @@ def run(
     def _counts(results: list[EvidenceResult]) -> dict:
         return {
             "total": len(results),
-            "pass": sum(1 for r in results if r.outcome == "pass"),
+            "evidence_found": sum(1 for r in results if r.outcome == "evidence_found"),
             "partial": sum(1 for r in results if r.outcome == "partial"),
             "missing": sum(1 for r in results if r.outcome == "missing"),
             "not_evaluable": sum(1 for r in results if r.outcome == "not_evaluable"),
@@ -107,7 +107,7 @@ def run(
             finding["doc_classification"] = a.doc_classification
         p2.append(finding)
 
-    # -- P3: Remediation Plan (non-pass controls) --------------------------------
+    # -- P3: Remediation Plan (non-evidence_found controls) ----------------------
     p3 = []
     for r in evidence_results:
         if r.outcome not in ("partial", "missing"):
@@ -181,7 +181,7 @@ def run(
                 "cer_observability": r.cer_observability,
                 "code_status": r.outcome,
                 "severity": r.severity,
-                "confidence": "high" if r.outcome == "pass" else ("medium" if r.outcome == "partial" else "low"),
+                "confidence": "high" if r.outcome == "evidence_found" else ("medium" if r.outcome == "partial" else "low"),
                 "evidence_found": r.evidence_paths,
                 "gaps": r.gaps,
                 "recommended_next_artifact": r.recommended_next_artifact,
@@ -192,39 +192,64 @@ def run(
     }
 
     # -- P8: Certifier Pre-Registration Package (§11.2) -------------------------
+    def _artifact_type(path: str) -> str:
+        lower = path.lower()
+        ext = path.rsplit(".", 1)[-1].lower() if "." in path else ""
+        if "test" in lower:
+            return "test_file"
+        if ext in ("yaml", "yml", "toml", "json", "env", "cfg", "ini", "txt", "lock"):
+            return "config_file"
+        if ext in ("md", "rst", "pdf", "docx", "html"):
+            return "doc_file"
+        if ext == "ipynb":
+            return "notebook"
+        return "source_file"
+
     p8_artefacts = []
     for r in evidence_results:
         for path in r.evidence_paths:
-            ext = path.rsplit(".", 1)[-1].lower() if "." in path else ""
-            art_type = (
-                "test_file" if "test" in path.lower()
-                else "config_file" if ext in ("yaml", "yml", "toml", "json", "env")
-                else "doc_file" if ext in ("md", "rst", "pdf", "docx")
-                else "notebook" if ext == "ipynb"
-                else "source_file"
-            )
             p8_artefacts.append({
                 "control_id": r.control_id,
                 "file_path": path,
                 "sha256": "",  # populated from manifest by caller if needed
-                "artifact_type": art_type,
+                "artifact_type": _artifact_type(path),
                 "e_type_candidates": r.recommended_next_artifact,
-                "confidence": "high" if r.outcome == "pass" else "medium",
-                "plugin_id": r.raw_findings[0].plugin_id if r.raw_findings else "unknown",
             })
 
+    severity_counts: dict[str, int] = {"critical": 0, "major": 0, "minor": 0, "action_required": 0}
+    for r in evidence_results:
+        if r.severity in severity_counts:
+            severity_counts[r.severity] += 1
+
     p8 = {
-        "schema_version": "1.0",
+        "schema_version": "2.0",
         "project_id": profile.project_id,
         "registry_version": profile.registry_version,
         "commit_sha": commit_sha,
-        "artefacts": p8_artefacts,
+        "review_status": "COMPLETE",
+        "assurance_level": profile.assurance_level,
+        "risk_indicators": {
+            "severity_counts": severity_counts,
+            "escalation_hints": p4,
+        },
+        "findings": [
+            {
+                "control_id": r.control_id,
+                "cer_observability": r.cer_observability,
+                "outcome": r.outcome,
+                "severity": r.severity,
+                "gaps": r.gaps,
+                "issue_summary": ann[r.control_id].what_is_missing if r.control_id in ann else "",
+            }
+            for r in evidence_results
+        ],
+        "evidence_artefacts": p8_artefacts,
     }
 
     # -- P9: SARIF 2.1.0 Export -------------------------------------------------
     sarif_results = []
     for r in evidence_results:
-        if r.severity in ("none", "info") or r.outcome in ("pass", "not_triggered"):
+        if r.severity in ("none", "info") or r.outcome in ("evidence_found", "not_triggered"):
             continue
         a = ann.get(r.control_id)
         sarif_results.append({

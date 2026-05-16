@@ -7,8 +7,11 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "postgresql://ethiksa:ethiksa@postgres:5432/ethiksa"
 
-    # Redis / Celery broker
+    # Redis / Celery broker (primary)
     redis_url: str = "redis://redis:6379/0"
+
+    # Redis fallback — used automatically if primary is unreachable or over limit
+    redis_fallback_url: str = ""
 
     # S3 / MinIO
     s3_endpoint_url: str = "http://minio:9000"

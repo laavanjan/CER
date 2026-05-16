@@ -9,7 +9,7 @@ from typing import Literal
 
 # CER observation outcomes (§10, I-05).
 # The CER NEVER produces Reviewer or Certifier statuses.
-Outcome = Literal["pass", "partial", "missing", "not_triggered", "not_evaluable"]
+Outcome = Literal["evidence_found", "partial", "missing", "not_triggered", "not_evaluable"]
 
 # CER severity values (§10.1)
 Severity = Literal["critical", "major", "minor", "action_required", "info", "none"]
@@ -104,7 +104,7 @@ class EvidenceResult:
     """Deterministic per-control outcome produced by S7 (I-05, I-07)."""
 
     control_id: str
-    outcome: str        # pass | partial | missing | not_triggered | not_evaluable
+    outcome: str        # evidence_found | partial | missing | not_triggered | not_evaluable
     cer_observability: str = "T1"   # T1 | T2 | T3
     assurance_tier: int = 1         # Registry tier (1|2|3) for assurance-level gating
     severity: str = "none"          # critical | major | minor | action_required | info | none

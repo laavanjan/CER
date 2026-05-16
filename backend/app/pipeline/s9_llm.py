@@ -226,11 +226,11 @@ def run(
 ) -> list[LLMAnnotation]:
     """Generate structured LLM annotations for every evidence result.
 
-    Only annotates controls with actionable outcomes (pass/partial/missing).
+    Only annotates controls with actionable outcomes (evidence_found/partial/missing).
     Skips not_triggered and not_evaluable (T3 supplement handles those).
     """
     # Skip controls with no actionable LLM content needed
-    annotatable = [r for r in evidence_results if r.outcome in ("pass", "partial", "missing")]
+    annotatable = [r for r in evidence_results if r.outcome in ("evidence_found", "partial", "missing")]
 
     if not anthropic_api_key and not ollama_api_key and not gemini_api_key:
         return [

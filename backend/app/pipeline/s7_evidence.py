@@ -7,7 +7,7 @@ Decision tree (first matching rule wins):
   Step 4  partial       — T1/T2: all plugins timed out (inconclusive)
   Step 5  missing       — files in scope, no expected evidence artefacts found
   Step 6  partial       — some expected evidence exists but not all required
-  Step 7  pass          — all expected evidence present with sufficient confidence
+  Step 7  evidence_found — all expected evidence present with sufficient confidence
 
 `not_evaluable` is EXCLUSIVELY for T3 controls. T1/T2 controls with no
 files in scope → missing. Timed-out T1/T2 → partial (inconclusive).
@@ -62,7 +62,7 @@ def _score_findings(findings: list[RawFinding]) -> str:
     )
 
     if has_pass:
-        return "pass"
+        return "evidence_found"
     if has_partial:
         return "partial"
     return "missing"
@@ -81,7 +81,7 @@ def _compute_severity(
     if outcome == "not_evaluable":
         # Only T3 controls reach here — supplement pending
         return "action_required"
-    if outcome == "pass":
+    if outcome == "evidence_found":
         return "none"
     # missing or partial
     is_high_tier = assurance_tier >= 2
@@ -142,7 +142,7 @@ def run(
             outcome, cer_obs, assurance_tier, profile_user_facing, bool(overlay_relevance)
         )
 
-        recommended = _RECOMMENDED_ARTIFACTS.get(cer_obs, []) if outcome != "pass" else []
+        recommended = _RECOMMENDED_ARTIFACTS.get(cer_obs, []) if outcome != "evidence_found" else []
 
         results.append(
             EvidenceResult(
