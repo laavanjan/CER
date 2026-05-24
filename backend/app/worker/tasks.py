@@ -115,6 +115,11 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         t = time.perf_counter()
         all_controls = registry_loader.load(db)
         active_controls, t3_queue, supplement_entries = s4_filter.run(profile, all_controls)
+        artefact_type_by_control = {
+            c.get("id", c.get("control_id", "")): c.get("artefact_type_expected", "")
+            for c in all_controls
+            if c.get("artefact_type_expected")
+        }
         d = round(time.perf_counter() - t, 2)
 
         # Persist T3 supplement entries to DB
@@ -216,7 +221,8 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         t = time.perf_counter()
         output_packages = s10_assemble.run(
             profile, evidence_results, escalation_hints, annotations,
-            supplement_entries, workspace_hash=workspace_hash, commit_sha=commit_sha,
+            supplement_entries, artefact_type_by_control=artefact_type_by_control,
+            workspace_hash=workspace_hash, commit_sha=commit_sha,
         )
         d = round(time.perf_counter() - t, 2)
 

@@ -15,7 +15,7 @@ from app.models.handoff_export import HandoffExport
 from app.models.metadata_supplement import MetadataSupplement
 from app.models.project import Project
 from app.models.scan import Scan
-from app.schemas.scan import ScanCreate, ScanRead, SupplementPatch, SupplementRead
+from app.schemas.scan import ScanCreate, ScanRead, ScanSummary, SupplementPatch, SupplementRead
 
 router = APIRouter()
 
@@ -34,6 +34,13 @@ def _get_scan_or_404(scan_id: uuid.UUID, db: Session) -> Scan:
 def _get_control_results(scan_id: uuid.UUID, db: Session) -> list:
     from app.models.control_result import ControlResult
     return db.query(ControlResult).filter(ControlResult.scan_id == scan_id).all()
+
+
+def _get_latest_scan_or_404(db: Session) -> Scan:
+    scan = db.query(Scan).order_by(Scan.created_at.desc()).first()
+    if not scan:
+        raise HTTPException(status_code=404, detail="No scans found")
+    return scan
 
 
 # ---------------------------------------------------------------------------
@@ -92,6 +99,33 @@ def create_scan(request: Request, payload: ScanCreate, db: Session = Depends(get
     db.commit()
     db.refresh(scan)
     return ScanRead.model_validate(scan)
+
+
+@router.get("/summaries", response_model=list[ScanSummary])
+def list_scan_summaries(db: Session = Depends(get_db)) -> list[ScanSummary]:
+    rows = (
+        db.query(Scan, Project)
+        .join(Project, Project.id == Scan.project_id)
+        .order_by(Scan.created_at.desc())
+        .all()
+    )
+    return [
+        ScanSummary(scan_id=scan.id, github_url=project.github_url, name=project.name)
+        for scan, project in rows
+    ]
+
+
+@router.get("/latest/handoff/certifier")
+def get_latest_certifier_handoff(db: Session = Depends(get_db)) -> Any:
+    scan = _get_latest_scan_or_404(db)
+    handoff = (
+        db.query(HandoffExport)
+        .filter(HandoffExport.scan_id == scan.id, HandoffExport.target == "certifier")
+        .first()
+    )
+    if not handoff:
+        raise HTTPException(status_code=404, detail="Certifier handoff not yet assembled")
+    return handoff.payload
 
 
 @router.get("/{scan_id}", response_model=ScanRead)

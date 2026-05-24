@@ -25,6 +25,12 @@ class ScanRead(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ScanSummary(BaseModel):
+    scan_id: uuid.UUID
+    github_url: str | None
+    name: str
+
+
 class SupplementRead(BaseModel):
     id: uuid.UUID
     scan_id: uuid.UUID

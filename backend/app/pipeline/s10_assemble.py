@@ -98,6 +98,7 @@ def run(
     escalation_hints: list[EscalationHint],
     annotations: list[LLMAnnotation],
     supplement_entries: list[SupplementEntry],
+    artefact_type_by_control: dict[str, str] | None = None,
     workspace_hash: str = "",
     commit_sha: str = "",
 ) -> dict[str, Any]:
@@ -258,13 +259,15 @@ def run(
 
     p8_artefacts = []
     for r in evidence_results:
+        expected_type = (artefact_type_by_control or {}).get(r.control_id)
+        e_type_candidates = [expected_type] if expected_type else r.recommended_next_artifact
         for path in r.evidence_paths:
             p8_artefacts.append({
                 "control_id": r.control_id,
                 "file_path": path,
                 "sha256": "",  # populated from manifest by caller if needed
                 "artifact_type": _artifact_type(path),
-                "e_type_candidates": r.recommended_next_artifact,
+                "e_type_candidates": e_type_candidates,
             })
 
     severity_counts: dict[str, int] = {"critical": 0, "major": 0, "minor": 0, "action_required": 0}
