@@ -138,3 +138,20 @@ class LLMAnnotation:
     remediation_steps: list[dict] = field(default_factory=list)  # structured steps
     doc_classification: str = "NEEDS_IMPROVEMENT"  # ADEQUATE | NEEDS_IMPROVEMENT | ABSENT
     issue_detail: str = ""
+
+
+@dataclass
+class LLMFinding:
+    """Output of the LLM-based scanner for a single control (produced by S5-LLM).
+
+    Unlike RawFinding (keyword-based), this is produced by a two-step LLM process:
+    1. Haiku selects relevant files from the manifest.
+    2. Sonnet evaluates the file contents against the control criteria.
+    """
+
+    control_id: str
+    outcome: str                              # evidence_found | partial | missing | error
+    confidence: float = 0.0
+    selected_files: list[str] = field(default_factory=list)   # files chosen by Haiku
+    reasoning: str = ""                       # Sonnet's explanation
+    quoted_evidence: list[str] = field(default_factory=list)  # verbatim excerpts

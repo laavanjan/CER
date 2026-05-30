@@ -21,6 +21,10 @@ class ControlResultRead(BaseModel):
     what_is_present: str | None = None
     what_is_missing: str | None = None
     deterministic_explanation: str | None = None
+    llm_outcome: str | None = None
+    llm_confidence: float | None = None
+    llm_evidence: dict[str, Any] | None = None
+    llm_reasoning: str | None = None
 
     created_at: datetime
 

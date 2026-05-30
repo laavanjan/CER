@@ -30,6 +30,7 @@ from app.pipeline import (
     s3_ai_detect,
     s4_filter,
     s5_runner,
+    s5_llm_runner,
     s6_tag,
     s7_evidence,
     s8_honesty,
@@ -159,6 +160,24 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         _log_stage("S5_RUNNER", f"{len(raw_findings)} raw findings ({timed_out} timed out)",
                {"duration_s": d})
 
+        # S5-LLM — LLM-based file selector + content evaluator (parallel analysis path)
+        scan.status = "S5_LLM"
+        db.commit()
+        t = time.perf_counter()
+        llm_findings = s5_llm_runner.run(
+            active_controls,
+            manifest,
+            str(repo_root),
+            anthropic_api_key=settings.anthropic_api_key,
+            ollama_api_key=getattr(settings, "ollama_api_key", ""),
+            gemini_api_key=getattr(settings, "gemini_api_key", ""),
+        )
+        d = round(time.perf_counter() - t, 2)
+        s11_audit.record(db, scan_uuid, "S5_LLM",
+                         f"{len(llm_findings)} LLM findings",
+                         payload={"duration_s": d})
+        _log_stage("S5_LLM", f"{len(llm_findings)} LLM findings", {"duration_s": d})
+
         # S6 — GEN/REL signal routing
         scan.status = "S6_TAG"
         db.commit()
@@ -231,8 +250,10 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
         from app.models.control_result import ControlResult
         from app.pipeline.s10_assemble import build_deterministic_explanation
         ann_map = {a.control_id: a for a in annotations}
+        llm_map = {f.control_id: f for f in llm_findings}
         for result in evidence_results:
             a = ann_map.get(result.control_id)
+            lf = llm_map.get(result.control_id)
             db.add(ControlResult(
                 scan_id=scan_uuid,
                 control_id=result.control_id,
@@ -245,6 +266,13 @@ def run_scan(self: Any, scan_id: str, project_data: dict[str, Any]) -> dict[str,
                 what_is_missing=a.what_is_missing if a else None,
                 doc_classification=a.doc_classification if a else None,
                 deterministic_explanation=build_deterministic_explanation(result),
+                llm_outcome=lf.outcome if lf else None,
+                llm_confidence=lf.confidence if lf else None,
+                llm_evidence={
+                    "selected_files": lf.selected_files,
+                    "quotes": lf.quoted_evidence,
+                } if lf else None,
+                llm_reasoning=lf.reasoning if lf else None,
             ))
 
         # Persist handoff exports

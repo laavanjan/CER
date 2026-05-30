@@ -7,15 +7,17 @@ import { apiClient, type ControlResultRead } from "@/lib/api";
 
 // Outcome styles — lowercase values from the new pipeline
 const OUTCOME_CONFIG: Record<string, { label: string; badge: string; row: string }> = {
-  pass:          { label: "Pass",          badge: "bg-emerald-100 text-emerald-700 border-emerald-200", row: "" },
-  partial:       { label: "Partial",       badge: "bg-amber-100 text-amber-700 border-amber-200",      row: "" },
-  missing:       { label: "Missing",       badge: "bg-red-100 text-red-700 border-red-200",            row: "bg-red-50/30" },
-  not_evaluable: { label: "Supplement",    badge: "bg-purple-100 text-purple-700 border-purple-200",   row: "bg-purple-50/20" },
-  not_triggered: { label: "Not triggered", badge: "bg-gray-100 text-gray-500 border-gray-200",         row: "" },
+  evidence_found: { label: "Pass",          badge: "bg-emerald-100 text-emerald-700 border-emerald-200", row: "" },
+  pass:           { label: "Pass",          badge: "bg-emerald-100 text-emerald-700 border-emerald-200", row: "" },
+  partial:        { label: "Partial",       badge: "bg-amber-100 text-amber-700 border-amber-200",      row: "" },
+  missing:        { label: "Missing",       badge: "bg-red-100 text-red-700 border-red-200",            row: "bg-red-50/30" },
+  not_evaluable:  { label: "Supplement",    badge: "bg-purple-100 text-purple-700 border-purple-200",   row: "bg-purple-50/20" },
+  not_triggered:  { label: "Not triggered", badge: "bg-gray-100 text-gray-500 border-gray-200",         row: "" },
+  error:          { label: "Error",         badge: "bg-orange-100 text-orange-700 border-orange-200",   row: "" },
   // Legacy uppercase fallbacks
-  PASS:          { label: "Pass",          badge: "bg-emerald-100 text-emerald-700 border-emerald-200", row: "" },
-  PARTIAL:       { label: "Partial",       badge: "bg-amber-100 text-amber-700 border-amber-200",      row: "" },
-  MISSING:       { label: "Missing",       badge: "bg-red-100 text-red-700 border-red-200",            row: "bg-red-50/30" },
+  PASS:           { label: "Pass",          badge: "bg-emerald-100 text-emerald-700 border-emerald-200", row: "" },
+  PARTIAL:        { label: "Partial",       badge: "bg-amber-100 text-amber-700 border-amber-200",      row: "" },
+  MISSING:        { label: "Missing",       badge: "bg-red-100 text-red-700 border-red-200",            row: "bg-red-50/30" },
 };
 
 const PILLAR_MAP: Record<string, string> = {
@@ -42,6 +44,8 @@ function getPillar(controlId: string): string {
   const prefix = controlId.split("-")[0];
   return PILLAR_MAP[prefix] ?? prefix;
 }
+
+const isPass = (o: string) => o === "pass" || o === "evidence_found";
 
 type RemediationStep = {
   step_number?: number;
@@ -106,6 +110,14 @@ function FindingCard({ finding, scanId }: { finding: ControlResultRead; scanId: 
   const evidencePaths: string[] = (finding.evidence as { paths?: string[] } | null)?.paths ?? [];
   const isNotEvaluable = outcome === "not_evaluable";
   const hasDetExp = !!finding.deterministic_explanation;
+
+  // LLM scanner data
+  const llmOutcome = finding.llm_outcome ?? null;
+  const llmCfg = llmOutcome ? (OUTCOME_CONFIG[llmOutcome] ?? { label: llmOutcome, badge: "bg-gray-100 text-gray-600 border-gray-200", row: "" }) : null;
+  const llmSelectedFiles: string[] = (finding.llm_evidence as { selected_files?: string[] } | null)?.selected_files ?? [];
+  const llmQuotes: string[] = (finding.llm_evidence as { quotes?: string[] } | null)?.quotes ?? [];
+  const llmConfidencePct = finding.llm_confidence != null ? Math.round(finding.llm_confidence * 100) : null;
+  const llmDisagrees = llmOutcome && llmOutcome !== "error" && llmOutcome !== outcome && llmOutcome !== finding.outcome;
 
   return (
     <div className={`rounded-xl border border-gray-200 overflow-hidden transition-shadow hover:shadow-md ${cfg.row}`}>
@@ -199,7 +211,7 @@ function FindingCard({ finding, scanId }: { finding: ControlResultRead; scanId: 
           )}
 
           {/* Remediation steps */}
-          {steps && steps.length > 0 && outcome !== "pass" && (
+          {steps && steps.length > 0 && !isPass(outcome) && (
             <div>
               <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Remediation Steps</h4>
               <ol className="space-y-3">
@@ -231,7 +243,7 @@ function FindingCard({ finding, scanId }: { finding: ControlResultRead; scanId: 
           )}
 
           {/* Raw remediation fallback (if not parseable) */}
-          {!steps && finding.remediation && outcome !== "pass" && (
+          {!steps && finding.remediation && !isPass(outcome) && (
             <div>
               <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Remediation</h4>
               <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{finding.remediation}</p>
@@ -251,6 +263,88 @@ function FindingCard({ finding, scanId }: { finding: ControlResultRead; scanId: 
               </div>
             </div>
           )}
+
+          {/* Scanner comparison panel */}
+          <div>
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Scanner Comparison</h4>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Keyword scanner column */}
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-gray-500">Keyword</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full border font-semibold ${cfg.badge}`}>
+                    {cfg.label}
+                  </span>
+                </div>
+                {evidencePaths.length > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {evidencePaths.map((p) => (
+                      <span key={p} className="text-xs font-mono bg-white border border-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
+                        {p.split("/").pop()}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 italic">No matching files found</p>
+                )}
+              </div>
+
+              {/* LLM scanner column */}
+              <div className="rounded-lg border border-blue-200 bg-blue-50/40 p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-blue-600">LLM</span>
+                  {llmCfg ? (
+                    <div className="flex items-center gap-1.5">
+                      <span className={`text-xs px-2 py-0.5 rounded-full border font-semibold ${llmCfg.badge}`}>
+                        {llmCfg.label}
+                      </span>
+                      {llmConfidencePct != null && (
+                        <span className="text-xs text-blue-500 font-mono">{llmConfidencePct}%</span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-gray-400">Not run</span>
+                  )}
+                </div>
+                {finding.llm_reasoning && (
+                  <p className="text-xs text-gray-700 leading-relaxed mb-2">{finding.llm_reasoning}</p>
+                )}
+                {llmSelectedFiles.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {llmSelectedFiles.map((p) => (
+                      <span key={p} className="text-xs font-mono bg-white border border-blue-200 text-blue-700 px-1.5 py-0.5 rounded">
+                        {p.split("/").pop()}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {llmQuotes.length > 0 && (
+                  <div className="space-y-1">
+                    {llmQuotes.map((q, i) => (
+                      <blockquote key={i} className="text-xs text-blue-800 bg-white border-l-2 border-blue-300 pl-2 py-0.5 italic leading-relaxed">
+                        &ldquo;{q}&rdquo;
+                      </blockquote>
+                    ))}
+                  </div>
+                )}
+                {!llmCfg && (
+                  <p className="text-xs text-gray-400 italic">Configure an API key to enable LLM scanning</p>
+                )}
+              </div>
+            </div>
+
+            {/* Disagreement banner */}
+            {llmDisagrees && llmCfg && (
+              <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+                <span>
+                  Keyword scanner: <strong>{cfg.label}</strong> — LLM: <strong>{llmCfg.label}</strong>. Review both results manually.
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -283,7 +377,7 @@ export default function ReportPageClient() {
 
   const counts = {
     all:          findings.length,
-    pass:         findings.filter((f) => normalise(f.outcome) === "pass").length,
+    pass:         findings.filter((f) => isPass(normalise(f.outcome))).length,
     partial:      findings.filter((f) => normalise(f.outcome) === "partial").length,
     missing:      findings.filter((f) => normalise(f.outcome) === "missing").length,
     not_evaluable:findings.filter((f) => normalise(f.outcome) === "not_evaluable").length,
@@ -291,7 +385,9 @@ export default function ReportPageClient() {
 
   const filtered = filter === "all"
     ? findings
-    : findings.filter((f) => normalise(f.outcome) === filter);
+    : filter === "pass"
+      ? findings.filter((f) => isPass(normalise(f.outcome)))
+      : findings.filter((f) => normalise(f.outcome) === filter);
 
   const grouped = filtered.reduce<Record<string, ControlResultRead[]>>((acc, f) => {
     const p = getPillar(f.control_id);

@@ -95,7 +95,7 @@ export interface ControlResultRead {
   id: string;
   scan_id: string;
   control_id: string;
-  outcome: "PASS" | "PARTIAL" | "MISSING";
+  outcome: string;
   evidence: Record<string, unknown> | null;
   explanation: string | null;
   remediation: string | null;
@@ -103,6 +103,10 @@ export interface ControlResultRead {
   what_is_present: string | null;
   what_is_missing: string | null;
   deterministic_explanation: string | null;
+  llm_outcome: string | null;
+  llm_confidence: number | null;
+  llm_evidence: Record<string, unknown> | null;
+  llm_reasoning: string | null;
   created_at: string;
 }
 

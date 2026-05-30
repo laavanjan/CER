@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, func
+from sqlalchemy import DateTime, Float, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -40,6 +40,11 @@ class ControlResult(Base):
     doc_classification: Mapped[str | None] = mapped_column(String(30), nullable=True)
     # Deterministic scanner-based explanation (T1 controls only, no LLM)
     deterministic_explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # LLM-based scanner results (S5-LLM path — parallel to keyword scanner)
+    llm_outcome: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    llm_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    llm_evidence: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # {selected_files, quotes}
+    llm_reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
