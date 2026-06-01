@@ -18,8 +18,11 @@ Governing invariants respected:
   I-14: Every non-evidence_found finding carries recommended_next_artifact.
 """
 
+import json
+from pathlib import Path
 from typing import Any
 
+from app.core.config import settings
 from app.pipeline.models import (
     EscalationHint,
     EvidenceResult,
@@ -90,6 +93,35 @@ _SARIF_LEVEL = {
 
 def _annotation_map(annotations: list[LLMAnnotation]) -> dict[str, LLMAnnotation]:
     return {a.control_id: a for a in annotations}
+
+
+_ETYPE_CACHE: dict[str, dict[str, list[str]]] | None = None
+
+
+def _load_etype_map() -> dict[str, dict[str, list[str]]]:
+    global _ETYPE_CACHE
+    if _ETYPE_CACHE is not None:
+        return _ETYPE_CACHE
+
+    path = Path(settings.etype_map_path)
+    if not path.exists():
+        _ETYPE_CACHE = {}
+        return _ETYPE_CACHE
+
+    try:
+        _ETYPE_CACHE = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        _ETYPE_CACHE = {}
+    return _ETYPE_CACHE
+
+
+def _e_type_candidates(control_id: str, fallback: list[str]) -> list[str]:
+    entry = _load_etype_map().get(control_id) or {}
+    for key in ("available", "partial", "required_union"):
+        values = entry.get(key) or []
+        if values:
+            return values
+    return fallback
 
 
 def run(
@@ -260,7 +292,8 @@ def run(
     p8_artefacts = []
     for r in evidence_results:
         expected_type = (artefact_type_by_control or {}).get(r.control_id)
-        e_type_candidates = [expected_type] if expected_type else r.recommended_next_artifact
+        fallback_candidates = [expected_type] if expected_type else r.recommended_next_artifact
+        e_type_candidates = _e_type_candidates(r.control_id, fallback_candidates)
         for path in r.evidence_paths:
             p8_artefacts.append({
                 "control_id": r.control_id,

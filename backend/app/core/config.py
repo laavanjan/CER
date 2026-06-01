@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     # Registry
     registry_path: str = "/registry/controls_v2.json"
     registry_version: str = "v2"
+    etype_map_path: str = "/registry/etype_coverage_map.json"
 
     # CORS — comma-separated string (e.g. "http://localhost:3000,https://app.vercel.app")
     cors_origins: str = "http://localhost:3000"

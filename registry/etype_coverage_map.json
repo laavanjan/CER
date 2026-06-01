@@ -1,0 +1,957 @@
+{
+  "GOV-01": {
+    "required_union": [
+      "E1",
+      "E3",
+      "E8"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": [
+      "E8"
+    ]
+  },
+  "GOV-02": {
+    "required_union": [
+      "E1",
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "GOV-03": {
+    "required_union": [
+      "E4"
+    ],
+    "available": [],
+    "partial": [
+      "E4"
+    ],
+    "unavailable": []
+  },
+  "GOV-04": {
+    "required_union": [
+      "E4"
+    ],
+    "available": [],
+    "partial": [
+      "E4"
+    ],
+    "unavailable": []
+  },
+  "GOV-05": {
+    "required_union": [
+      "E1",
+      "E2",
+      "E6"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": [
+      "E6"
+    ]
+  },
+  "GOV-06": {
+    "required_union": [
+      "E1",
+      "E3",
+      "E8"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": [
+      "E8"
+    ]
+  },
+  "GOV-07": {
+    "required_union": [
+      "E3"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "GOV-08": {
+    "required_union": [
+      "E3",
+      "E6"
+    ],
+    "available": [],
+    "partial": [
+      "E3"
+    ],
+    "unavailable": [
+      "E6"
+    ]
+  },
+  "GOV-09": {
+    "required_union": [
+      "E3",
+      "E6"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [],
+    "unavailable": [
+      "E6"
+    ]
+  },
+  "GOV-10": {
+    "required_union": [
+      "E1",
+      "E4",
+      "E9"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": [
+      "E9"
+    ]
+  },
+  "RISK-01": {
+    "required_union": [
+      "E1"
+    ],
+    "available": [],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "RISK-02": {
+    "required_union": [
+      "E1"
+    ],
+    "available": [],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "RISK-03": {
+    "required_union": [
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "RISK-04": {
+    "required_union": [
+      "E1",
+      "E3"
+    ],
+    "available": [],
+    "partial": [
+      "E1",
+      "E3"
+    ],
+    "unavailable": []
+  },
+  "RISK-05": {
+    "required_union": [
+      "E8"
+    ],
+    "available": [],
+    "partial": [
+      "E8"
+    ],
+    "unavailable": []
+  },
+  "RISK-06": {
+    "required_union": [
+      "E3"
+    ],
+    "available": [],
+    "partial": [
+      "E3"
+    ],
+    "unavailable": []
+  },
+  "HUMO-01": {
+    "required_union": [
+      "E1",
+      "E2"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "HUMO-02": {
+    "required_union": [
+      "E1",
+      "E2"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "HUMO-03": {
+    "required_union": [
+      "E1",
+      "E3",
+      "E8"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": [
+      "E8"
+    ]
+  },
+  "HUMO-04": {
+    "required_union": [
+      "E2"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "HUMO-05": {
+    "required_union": [
+      "E3"
+    ],
+    "available": [],
+    "partial": [
+      "E3"
+    ],
+    "unavailable": []
+  },
+  "HUMO-06": {
+    "required_union": [
+      "E3",
+      "E6"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [],
+    "unavailable": [
+      "E6"
+    ]
+  },
+  "HUMO-07": {
+    "required_union": [
+      "E2",
+      "E6"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [],
+    "unavailable": [
+      "E6"
+    ]
+  },
+  "PRIV-01": {
+    "required_union": [
+      "E1",
+      "E3"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "PRIV-02": {
+    "required_union": [
+      "E1",
+      "E3",
+      "E9"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": [
+      "E9"
+    ]
+  },
+  "PRIV-03": {
+    "required_union": [
+      "E1",
+      "E2"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "PRIV-04": {
+    "required_union": [
+      "E1",
+      "E3"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "PRIV-05": {
+    "required_union": [
+      "E3"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "PRIV-06": {
+    "required_union": [
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "PRIV-07": {
+    "required_union": [
+      "E9"
+    ],
+    "available": [],
+    "partial": [
+      "E9"
+    ],
+    "unavailable": []
+  },
+  "PRIV-08": {
+    "required_union": [
+      "E5"
+    ],
+    "available": [
+      "E5"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "PRIV-09": {
+    "required_union": [
+      "E4",
+      "E5"
+    ],
+    "available": [
+      "E4",
+      "E5"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "FAIR-01": {
+    "required_union": [
+      "E1",
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "FAIR-02": {
+    "required_union": [
+      "E1",
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "FAIR-03": {
+    "required_union": [
+      "E5",
+      "E7"
+    ],
+    "available": [
+      "E5",
+      "E7"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "FAIR-04": {
+    "required_union": [
+      "E7"
+    ],
+    "available": [
+      "E7"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "FAIR-05": {
+    "required_union": [
+      "E3"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "FAIR-06": {
+    "required_union": [
+      "E8"
+    ],
+    "available": [],
+    "partial": [
+      "E8"
+    ],
+    "unavailable": []
+  },
+  "FAIR-07": {
+    "required_union": [
+      "E1",
+      "E3",
+      "E8"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": [
+      "E8"
+    ]
+  },
+  "TRAN-01": {
+    "required_union": [
+      "E1",
+      "E2"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "TRAN-02": {
+    "required_union": [
+      "E1",
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "TRAN-03": {
+    "required_union": [
+      "E1",
+      "E2",
+      "E5"
+    ],
+    "available": [
+      "E2",
+      "E5"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "TRAN-04": {
+    "required_union": [
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "TRAN-05": {
+    "required_union": [
+      "E6"
+    ],
+    "available": [],
+    "partial": [
+      "E6"
+    ],
+    "unavailable": []
+  },
+  "TRAN-06": {
+    "required_union": [
+      "E6"
+    ],
+    "available": [],
+    "partial": [
+      "E6"
+    ],
+    "unavailable": []
+  },
+  "TRAN-07": {
+    "required_union": [
+      "E1",
+      "E2"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "TRAN-08": {
+    "required_union": [
+      "E1",
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "SAFE-01": {
+    "required_union": [
+      "E1",
+      "E5"
+    ],
+    "available": [
+      "E5"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "SAFE-02": {
+    "required_union": [
+      "E5"
+    ],
+    "available": [
+      "E5"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "SAFE-03": {
+    "required_union": [
+      "E5"
+    ],
+    "available": [
+      "E5"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "SAFE-04": {
+    "required_union": [
+      "E2"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "SAFE-05": {
+    "required_union": [
+      "E5"
+    ],
+    "available": [
+      "E5"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "SAFE-06": {
+    "required_union": [
+      "E8"
+    ],
+    "available": [],
+    "partial": [
+      "E8"
+    ],
+    "unavailable": []
+  },
+  "SEC-01": {
+    "required_union": [
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "SEC-02": {
+    "required_union": [
+      "E5"
+    ],
+    "available": [
+      "E5"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "SEC-03": {
+    "required_union": [
+      "E3"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "SEC-04": {
+    "required_union": [
+      "E8"
+    ],
+    "available": [],
+    "partial": [
+      "E8"
+    ],
+    "unavailable": []
+  },
+  "SEC-05": {
+    "required_union": [
+      "E3"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "SEC-06": {
+    "required_union": [
+      "E4",
+      "E9"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [],
+    "unavailable": [
+      "E9"
+    ]
+  },
+  "SEC-07": {
+    "required_union": [
+      "E5"
+    ],
+    "available": [
+      "E5"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "DOC-01": {
+    "required_union": [
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "DOC-02": {
+    "required_union": [
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "DOC-03": {
+    "required_union": [
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "DOC-04": {
+    "required_union": [
+      "E4",
+      "E6"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [],
+    "unavailable": [
+      "E6"
+    ]
+  },
+  "DOC-05": {
+    "required_union": [
+      "E6"
+    ],
+    "available": [
+      "E6"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "DOC-06": {
+    "required_union": [
+      "E3"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "DOC-07": {
+    "required_union": [
+      "E6"
+    ],
+    "available": [],
+    "partial": [
+      "E6"
+    ],
+    "unavailable": []
+  },
+  "DOC-08": {
+    "required_union": [
+      "E8"
+    ],
+    "available": [],
+    "partial": [
+      "E8"
+    ],
+    "unavailable": []
+  },
+  "ACC-01": {
+    "required_union": [
+      "E1",
+      "E2"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "ACC-02": {
+    "required_union": [
+      "E5"
+    ],
+    "available": [],
+    "partial": [
+      "E5"
+    ],
+    "unavailable": []
+  },
+  "ACC-03": {
+    "required_union": [
+      "E1"
+    ],
+    "available": [],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "ACC-04": {
+    "required_union": [
+      "E5"
+    ],
+    "available": [],
+    "partial": [
+      "E5"
+    ],
+    "unavailable": []
+  },
+  "ACC-05": {
+    "required_union": [
+      "E3"
+    ],
+    "available": [
+      "E3"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "ACC-06": {
+    "required_union": [
+      "E2"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "ACC-07": {
+    "required_union": [
+      "E2"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "ACC-08": {
+    "required_union": [
+      "E8"
+    ],
+    "available": [],
+    "partial": [
+      "E8"
+    ],
+    "unavailable": []
+  },
+  "SOC-01": {
+    "required_union": [
+      "E1"
+    ],
+    "available": [],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "SOC-02": {
+    "required_union": [
+      "E1",
+      "E4"
+    ],
+    "available": [],
+    "partial": [
+      "E1",
+      "E4"
+    ],
+    "unavailable": []
+  },
+  "SOC-03": {
+    "required_union": [
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "SOC-04": {
+    "required_union": [
+      "E1"
+    ],
+    "available": [],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "SOC-05": {
+    "required_union": [
+      "E1"
+    ],
+    "available": [],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  },
+  "SOC-06": {
+    "required_union": [
+      "E4"
+    ],
+    "available": [
+      "E4"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "SOC-07": {
+    "required_union": [
+      "E2"
+    ],
+    "available": [
+      "E2"
+    ],
+    "partial": [],
+    "unavailable": []
+  },
+  "SOC-08": {
+    "required_union": [
+      "E1"
+    ],
+    "available": [],
+    "partial": [
+      "E1"
+    ],
+    "unavailable": []
+  }
+}
